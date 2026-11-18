@@ -184,19 +184,35 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
         <p class="eyebrow">Experience</p>
         <h2>Where I've supported real users</h2>
       </div>
-      <ol class="timeline" role="list">
-        {experience.map((e) => (
-          <li>
-            <div class="timeline__when mono">{e.when}</div>
-            <div>
-              <h3>{e.role} <span class="muted">· {e.org}</span></h3>
-              <p class="timeline__where">{e.where}</p>
-              <ul>{e.points.map((pt) => <li>{pt}</li>)}</ul>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <p class="after"><a class="link" href="/resume/">Full resume, education and languages</a></p>
+      <div class="exp">
+        <div>
+          <ol class="timeline" role="list">
+            {experience.map((e) => (
+              <li>
+                <div class="timeline__when mono">{e.when}</div>
+                <div>
+                  <h3>{e.role}</h3>
+                  <p class="timeline__org">{e.org}</p>
+                  <p class="timeline__where">{e.where}</p>
+                  <ul>{e.points.map((pt) => <li>{pt}</li>)}</ul>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <p class="after"><a class="link" href="/resume/">Full resume, education and languages</a></p>
+        </div>
+        <aside class="glance" aria-labelledby="glance-title">
+          <h3 id="glance-title">At a glance</h3>
+          <dl>
+            <div><dt>Support channels</dt><dd>Phone · Email · Chat</dd></div>
+            <div><dt>Typical tickets</dt><dd>Password resets, account lockouts, MFA, desktop and app issues, VPN and Wi-Fi</dd></div>
+            <div><dt>Platforms</dt><dd>Windows 10/11 · Active Directory · Entra ID · Intune · Microsoft 365</dd></div>
+            <div><dt>Languages</dt><dd>{profile.languages}</dd></div>
+            <div><dt>Work permit</dt><dd>{profile.workAuth}</dd></div>
+          </dl>
+          <a class="btn btn--primary" href={profile.resumePdf} download><Icon name="download" /> Download resume</a>
+        </aside>
+      </div>
     </div>
   </section>
 
@@ -450,7 +466,15 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   .timeline > li:last-child { border-bottom: 1px solid var(--color-divider); }
   .timeline__when { font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); padding-top: 4px; font-family: var(--font-body); }
   .timeline h3 { font-size: var(--text-lg); font-weight: 700; }
+  .timeline__org { font-size: var(--text-base); color: var(--color-text-muted); }
   .timeline__where { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  .exp { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: clamp(var(--space-8), 4vw, var(--space-16)); align-items: start; }
+  .glance { position: sticky; top: 6rem; display: grid; gap: var(--space-5); padding: var(--space-6); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .glance h3 { font-size: var(--text-lg); font-weight: 700; }
+  .glance dl { display: grid; gap: var(--space-4); }
+  .glance dt { font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); }
+  .glance dd { font-size: var(--text-sm); margin-top: 2px; }
+  .glance .btn { justify-content: center; }
   .timeline ul { padding-left: 1.1em; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
 
   /* GitHub */
@@ -495,6 +519,8 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     .training li:nth-child(2) { border-top: 1px solid var(--color-divider); }
     .training li:nth-child(even) { border-left: 0; }
     .timeline > li { grid-template-columns: 1fr; gap: var(--space-2); }
+    .exp { grid-template-columns: 1fr; }
+    .glance { position: static; }
   }
   @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {

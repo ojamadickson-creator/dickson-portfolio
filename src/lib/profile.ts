@@ -27,10 +27,11 @@ export const experience = [
   {
     role: "Technical Support Specialist",
     org: "Intelcia",
-    where: "Lisbon · Onsite",
-    when: "Nov 2026 – Present",
+    where: "Lisbon · Onsite · Seasonal contract",
+    when: "Nov 2026",
     points: [
       "Real-time phone support in English for candidates taking online assessments on an EU platform.",
+      "99% first-contact resolution: escalated a single case across the whole contract.",
       "Troubleshoot browser, camera and audio settings while keeping anxious candidates calm.",
       "Document recurring errors to feed knowledge-base and process improvements.",
     ],

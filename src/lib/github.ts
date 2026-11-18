@@ -11,7 +11,7 @@ export interface Repo {
 }
 
 /** Repos hidden from the "latest on GitHub" list (duplicates or old drafts). Edit freely. */
-export const HIDDEN_REPOS = new Set(["Resume", "My-Resume", "cysa-test", "Comptia-acore1.0", "Comptia-a-b", "SOC-Analyst-Professional-Portfolio"]);
+export const HIDDEN_REPOS = new Set(["ojamadickson-creator", "Resume", "My-Resume", "cysa-test", "Comptia-acore1.0", "Comptia-a-b", "SOC-Analyst-Professional-Portfolio"]);
 
 /** Fetched once at build time. The page also refreshes the list in the browser, so new repos appear without a rebuild. */
 export async function getRepos(): Promise<Repo[]> {

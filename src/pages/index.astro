@@ -3,13 +3,16 @@ import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import TicketCard from "../components/TicketCard.astro";
 import Icon from "../components/Icon.astro";
-import { profile, stats, experience, certifications, skills, tools } from "../lib/profile";
+import { profile, stats, experience, credentials, inProgress, skills, tools } from "../lib/profile";
 import { getRepos, HIDDEN_REPOS } from "../lib/github";
 
 const all = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 const itProjects = all.filter((p) => p.data.track === "it");
 const secProjects = all.filter((p) => p.data.track === "security");
 const repos = (await getRepos()).slice(0, 6);
+const certs = credentials.filter((c) => c.kind === "cert");
+const training = credentials.filter((c) => c.kind === "training");
+const initials = (s: string) => s.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
@@ -23,26 +26,36 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   <section class="hero">
     <div class="wrap hero__grid">
       <div class="hero__copy">
-        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Open to IT support roles · {profile.location}</p>
-        <h1>I solve the ticket, then write the runbook so it stays solved.</h1>
-        <p class="hero__lead">{profile.summary}</p>
+        <p class="hero__status"><span class="dot" aria-hidden="true"></span>Open to IT support roles<span class="hero__loc"> · {profile.location}</span></p>
+        <h1>IT support that gets people back to work, and keeps them there.</h1>
+        <p class="hero__lead">IT Support Technician (L1/L2) with three years of paid technical support, CompTIA A+, Network+ and Security+ certified. I resolve desktop, account-access and connectivity issues, then document the fix so it stays fixed. My home lab runs a hybrid Active Directory, Entra ID and Intune environment.</p>
         <div class="hero__cta">
           <a class="btn btn--primary" href={profile.resumePdf} download><Icon name="download" /> Download resume</a>
-          <a class="btn btn--ghost" href="#work">See my lab work <Icon name="arrow" /></a>
+          <a class="btn btn--ghost" href={profile.linkedin} target="_blank" rel="me noopener"><Icon name="linkedin" /> LinkedIn profile</a>
+          <a class="btn btn--text" href="#work">View projects <Icon name="arrow" /></a>
+        </div>
+        <div class="verified">
+          <p class="verified__label"><Icon name="shield" /> Verified credentials</p>
+          <ul class="verified__list" role="list">
+            {certs.map((c) => (
+              <li><a href={c.verify} target="_blank" rel="noopener" title={`Verify ${c.name} on ${c.verifyLabel}`}><img src={c.badge} alt={`${c.name} badge`} width="64" height="64" loading="eager" /></a></li>
+            ))}
+          </ul>
         </div>
       </div>
-      <aside class="status" aria-label="Candidate summary">
-        <div class="status__head">
-          <span class="mono">PROFILE · {profile.githubUser}</span>
-          <span class="pill">Available</span>
+      <aside class="snapshot" aria-label="Candidate summary">
+        <div class="snapshot__head">
+          <span>Candidate snapshot</span>
+          <span class="pill">Available now</span>
         </div>
         <dl>
           <div><dt>Role</dt><dd>{profile.role}, {profile.focus}</dd></div>
           <div><dt>Looking for</dt><dd>{profile.lookingFor.join(" · ")}</dd></div>
-          <div><dt>Certified</dt><dd>CompTIA A+, Network+, Security+ <span class="muted">· MD-102 in progress</span></dd></div>
+          <div><dt>Certified</dt><dd>CompTIA Security+, Network+, A+, CSIS, CIOS <span class="muted">· MD-102 in progress</span></dd></div>
           <div><dt>Languages</dt><dd>{profile.languages}</dd></div>
           <div><dt>Work permit</dt><dd>{profile.workAuth}</dd></div>
         </dl>
+        <a class="snapshot__foot" href={`mailto:${profile.email}`}><Icon name="mail" /> {profile.email}</a>
       </aside>
     </div>
     <div class="wrap">
@@ -72,7 +85,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Track 1 · IT support &amp; Microsoft 365</p>
-        <h2>Resolved tickets from my lab</h2>
+        <h2>Microsoft 365 and identity case studies</h2>
         <p>Each project is written up like a ticket: what I was asked to do, what I built, what broke and how I fixed and verified it.</p>
       </div>
       <div class="grid">
@@ -95,36 +108,71 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     </div>
   </section>
 
-  <!-- Skills & certs -->
-  <section class="section" id="skills">
-    <div class="wrap skills">
-      <div>
-        <div class="section-head">
-          <p class="eyebrow">Toolbox</p>
-          <h2>Skills I use</h2>
-        </div>
-        <div class="skills__groups">
-          {skills.map((g) => (
-            <div class="skills__group">
-              <h3>{g.group}</h3>
-              <ul role="list">{g.items.map((i) => <li>{i}</li>)}</ul>
-            </div>
-          ))}
-        </div>
-      </div>
-      <div>
-        <div class="section-head">
+  <!-- Certifications -->
+  <section class="section section--tint" id="certifications">
+    <div class="wrap">
+      <div class="section-head section-head--row">
+        <div>
           <p class="eyebrow">Credentials</p>
-          <h2>Certifications</h2>
+          <h2>Certifications you can verify</h2>
+          <p>Every credential links to its official verification page, so you can confirm it in one click.</p>
         </div>
-        <ul class="certs" role="list">
-          {certifications.map((c) => (
-            <li>
-              <div><strong>{c.name}</strong><span>{c.note}</span></div>
-              <span class={c.status === "done" ? "pill" : "pill pill--progress"}>{c.status === "done" ? "Certified" : "In progress"}</span>
-            </li>
-          ))}
-        </ul>
+        <a class="btn btn--ghost" href={profile.linkedin} target="_blank" rel="me noopener"><Icon name="linkedin" /> See them on LinkedIn</a>
+      </div>
+      <h3 class="group-title">Industry certifications</h3>
+      <ul class="certs" role="list">
+        {certs.map((c) => (
+          <li class="cert">
+            <img src={c.badge} alt="" width="88" height="88" loading="lazy" />
+            <div class="cert__body">
+              <p class="cert__issuer">{c.issuer}</p>
+              <h4>{c.name}</h4>
+              <p class="cert__dates">Issued {c.issued}{c.expires && <><br />Valid until {c.expires}</>}</p>
+              <a class="cert__verify" href={c.verify} target="_blank" rel="noopener">Verify on {c.verifyLabel} <Icon name="external" /><span class="sr-only"> (opens in a new tab)</span></a>
+            </div>
+          </li>
+        ))}
+        {inProgress.map((c) => (
+          <li class="cert cert--progress">
+            <span class="cert__tile cert__tile--progress" aria-hidden="true">MS</span>
+            <div class="cert__body">
+              <p class="cert__issuer">Microsoft</p>
+              <h4>{c.name}: {c.note}</h4>
+              <p class="cert__dates"><span class="pill pill--progress">In progress</span></p>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <h3 class="group-title">Training and courses</h3>
+      <ul class="training" role="list">
+        {training.map((c) => (
+          <li>
+            {c.badge ? <img src={c.badge} alt="" width="48" height="48" loading="lazy" /> : <span class="cert__tile" aria-hidden="true">{c.mono ?? initials(c.issuer)}</span>}
+            <div>
+              <strong>{c.name}</strong>
+              <span>{c.issuer}{c.issued && ` · ${c.issued}`}</span>
+            </div>
+            <a href={c.verify} target="_blank" rel="noopener" aria-label={`Verify ${c.name} (opens in a new tab)`}>Verify <Icon name="external" /></a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="section" id="skills">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Toolbox</p>
+        <h2>Skills I use day to day</h2>
+      </div>
+      <div class="skills__groups">
+        {skills.map((g) => (
+          <div class="skills__group">
+            <h3>{g.group}</h3>
+            <ul role="list">{g.items.map((i) => <li>{i}</li>)}</ul>
+          </div>
+        ))}
       </div>
     </div>
   </section>
@@ -193,7 +241,11 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       <div class="section-head">
         <p class="eyebrow">Contact</p>
         <h2>Hiring for IT support? Let's talk.</h2>
-        <p>Send a message here, email me at <a href={`mailto:${profile.email}`}>{profile.email}</a> or connect on <a href={profile.linkedin}>LinkedIn</a>. I usually reply within one working day.</p>
+        <p>Send a message here, email me at <a href={`mailto:${profile.email}`}>{profile.email}</a> or connect on <a href={profile.linkedin} target="_blank" rel="me noopener">LinkedIn</a>. I usually reply within one working day.</p>
+        <ul class="contact__facts" role="list">
+          <li><Icon name="pin" /> {profile.location} · onsite, hybrid or remote</li>
+          <li><Icon name="shield" /> {profile.workAuth}</li>
+        </ul>
       </div>
       <form class="form" id="contact-form" novalidate data-url={SUPABASE_URL} data-key={SUPABASE_KEY} data-email={profile.email}>
         <div class="form__row">
@@ -279,51 +331,88 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   .after { margin-top: var(--space-8); font-weight: 600; font-size: var(--text-sm); }
 
   /* Hero */
-  .hero { padding-block: clamp(var(--space-12), 9vw, var(--space-24)) var(--space-12); }
-  .hero__grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: center; }
+  .hero { padding-block: clamp(var(--space-12), 8vw, var(--space-20)) var(--space-12); background: radial-gradient(1200px 500px at 85% -10%, var(--color-primary-highlight), transparent 70%); }
+  .hero__grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: center; }
   .hero__copy { display: grid; gap: var(--space-6); }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 0 4px var(--color-primary-highlight); }
-  h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--text-2xl); letter-spacing: -0.02em; max-width: 18ch; }
-  .hero__lead { color: var(--color-text-muted); font-size: var(--text-base); max-width: 60ch; }
-  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-  .status { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
-  .status__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); background: var(--color-surface); font-size: var(--text-xs); color: var(--color-text-muted); }
-  .status dl { display: grid; }
-  .status dl > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px dashed var(--color-divider); font-size: var(--text-sm); }
-  .status dl > div:last-child { border-bottom: 0; }
-  .status dt { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-muted); padding-top: 2px; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: clamp(var(--space-10), 6vw, var(--space-16)); border-top: 1px solid var(--color-border); }
-  .stats li { display: grid; gap: var(--space-1); padding: var(--space-5) var(--space-4) 0 0; }
-  .stats li + li { padding-left: var(--space-4); border-left: 1px solid var(--color-divider); }
-  .stats strong { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--color-primary); line-height: 1; }
+  .hero__status { display: inline-flex; align-items: center; gap: var(--space-2); width: fit-content; font-size: var(--text-sm); font-weight: 600; color: var(--color-success); background: var(--color-success-highlight); padding: var(--space-1) var(--space-4); border-radius: var(--radius-full); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 0 3px color-mix(in oklab, currentColor 25%, transparent); }
+  h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-2xl); letter-spacing: -0.03em; line-height: 1.06; max-width: 17ch; }
+  .hero__lead { color: var(--color-text-muted); font-size: var(--text-base); max-width: 58ch; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+  .btn--text { color: var(--color-primary); padding-inline: var(--space-3); }
+  .btn--text:hover { color: var(--color-primary-hover); }
+  .verified { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-divider); }
+  .verified__label { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted); }
+  .verified__label :global(svg) { width: 1.2em; height: 1.2em; color: var(--color-success); }
+  .verified__list { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .verified__list a { display: block; border-radius: 50%; transition: transform var(--transition-interactive); }
+  .verified__list a:hover { transform: translateY(-2px); }
+  .verified__list img { width: 56px; height: 56px; border-radius: var(--radius-md); background: #fff; }
+  .snapshot { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .snapshot__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider); font-family: var(--font-display); font-weight: 600; }
+  .snapshot dl { display: grid; }
+  .snapshot dl > div { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); font-size: var(--text-sm); }
+  .snapshot dt { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); padding-top: 3px; }
+  .snapshot__foot { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); background: var(--color-surface); font-size: var(--text-sm); font-weight: 600; color: var(--color-primary); text-decoration: none; overflow-wrap: anywhere; }
+  .snapshot__foot:hover { color: var(--color-primary-hover); }
+  .snapshot__foot :global(svg) { width: 1.1em; height: 1.1em; flex: none; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: clamp(var(--space-10), 6vw, var(--space-16)); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+  .stats li { display: grid; gap: var(--space-2); padding: var(--space-6); }
+  .stats li + li { border-left: 1px solid var(--color-divider); }
+  .stats strong { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; color: var(--color-text); line-height: 1; }
   .stats span { font-size: var(--text-sm); color: var(--color-text-muted); }
 
   /* Lab */
   .lab__figure { background: #fff; border-radius: var(--radius-lg); padding: clamp(var(--space-3), 2vw, var(--space-6)); }
   .lab__figure figcaption { max-width: none; color: var(--color-text-muted); font-size: var(--text-sm); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); margin-top: var(--space-3); }
-  .section--ink a { color: #8fe0b7; }
+  .section--ink a { color: var(--color-ink-accent); }
+  .contact__facts { display: grid; gap: var(--space-2); margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-ink-text); }
+  .contact__facts li { display: flex; align-items: center; gap: var(--space-2); }
+  .contact__facts :global(svg) { width: 1.1em; height: 1.1em; color: var(--color-ink-accent); flex: none; }
 
   /* Grids */
   .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
 
+  /* Certifications */
+  .section--tint { background: var(--color-surface-2); }
+  .section-head--row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: var(--space-6); max-width: none; }
+  .section-head--row > div { display: grid; gap: var(--space-3); max-width: 62ch; }
+  .group-title { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted); margin: 0 0 var(--space-4); }
+  .certs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-bottom: var(--space-12); }
+  .cert { display: grid; grid-template-columns: 88px 1fr; gap: var(--space-5); align-items: center; padding: var(--space-5); background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive); }
+  .cert:hover { border-color: var(--color-text-faint); box-shadow: var(--shadow-md); }
+  .cert img { width: 88px; height: 88px; border-radius: var(--radius-md); background: #fff; }
+  .cert__body { display: grid; gap: 2px; min-width: 0; }
+  .cert__issuer { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); }
+  .cert h4 { font-size: var(--text-base); font-weight: 700; line-height: 1.3; }
+  .cert__dates { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-2); }
+  .cert__verify, .training a { display: inline-flex; align-items: center; gap: var(--space-1); width: fit-content; font-size: var(--text-sm); font-weight: 600; color: var(--color-primary); text-decoration: none; }
+  .cert__verify:hover, .training a:hover { color: var(--color-primary-hover); text-decoration: underline; text-underline-offset: 0.2em; }
+  .cert__verify :global(svg), .training a :global(svg) { width: 0.95em; height: 0.95em; }
+  .cert--progress { border-style: dashed; }
+  .cert__tile { display: grid; place-items: center; width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--color-ink); color: #fff; font-family: var(--font-display); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.04em; }
+  .cert__tile--progress { width: 88px; height: 88px; border-radius: 50%; background: var(--color-progress-highlight); color: var(--color-progress); font-size: 1.25rem; }
+  .training { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; background: var(--color-bg); }
+  .training li { display: grid; grid-template-columns: 48px 1fr auto; gap: var(--space-4); align-items: center; padding: var(--space-4) var(--space-5); border-top: 1px solid var(--color-divider); }
+  .training li:nth-child(-n+2) { border-top: 0; }
+  .training li:nth-child(even) { border-left: 1px solid var(--color-divider); }
+  .training img { width: 48px; height: 48px; border-radius: var(--radius-md); }
+  .training li > div { display: grid; min-width: 0; }
+  .training strong { font-size: var(--text-sm); }
+  .training span:not(.cert__tile) { font-size: var(--text-sm); color: var(--color-text-muted); }
+
   /* Skills */
-  .skills { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(var(--space-10), 5vw, var(--space-16)); }
-  .skills__groups { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-8) var(--space-6); }
-  .skills__group h3 { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); font-weight: 500; margin-bottom: var(--space-3); }
+  .skills__groups { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-8) var(--space-6); }
+  .skills__group h3 { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted); font-weight: 700; margin-bottom: var(--space-3); }
   .skills__group ul { display: flex; flex-wrap: wrap; gap: var(--space-2); }
-  .skills__group li { font-size: var(--text-sm); padding: var(--space-1) var(--space-3); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-full); }
-  .certs { display: grid; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); overflow: hidden; }
-  .certs li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); }
-  .certs li + li { border-top: 1px solid var(--color-divider); }
-  .certs li > div { display: grid; }
-  .certs span:not(.pill) { font-size: var(--text-sm); color: var(--color-text-muted); }
+  .skills__group li { font-size: var(--text-sm); padding: var(--space-1) var(--space-3); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
 
   /* Timeline */
   .timeline { display: grid; }
   .timeline > li { display: grid; grid-template-columns: 12rem 1fr; gap: var(--space-6); padding-block: var(--space-6); border-top: 1px solid var(--color-divider); }
   .timeline > li:last-child { border-bottom: 1px solid var(--color-divider); }
-  .timeline__when { font-size: var(--text-xs); color: var(--color-text-muted); padding-top: 4px; }
-  .timeline h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; }
+  .timeline__when { font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); padding-top: 4px; font-family: var(--font-body); }
+  .timeline h3 { font-size: var(--text-lg); font-weight: 700; }
   .timeline__where { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-3); }
   .timeline ul { padding-left: 1.1em; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
 
@@ -348,25 +437,38 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   .form .muted { color: var(--color-ink-muted); }
   .form input, .form textarea { width: 100%; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-ink-border); background: var(--color-ink); color: var(--color-ink-text); min-height: 44px; }
   .form textarea { resize: vertical; }
-  .form input:focus, .form textarea:focus { outline: none; border-color: #8fe0b7; box-shadow: 0 0 0 3px color-mix(in oklab, #8fe0b7 25%, transparent); }
+  .form input:focus, .form textarea:focus { outline: none; border-color: var(--color-ink-accent); box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ink-accent) 25%, transparent); }
   .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
-  .form__foot .btn--primary { background: #8fe0b7; color: var(--color-ink); }
-  .form__foot .btn--primary:hover { background: #b0ebcd; }
+  .form__foot .btn--primary { background: var(--color-ink-accent); color: var(--color-ink); }
+  .form__foot .btn--primary:hover { background: #b5ceff; }
   .form__foot .btn--primary:disabled { opacity: 0.6; cursor: progress; }
   .form__status { font-size: var(--text-sm); }
-  .form__status[data-kind="ok"] { color: #8fe0b7; }
+  .form__status[data-kind="ok"] { color: var(--color-ink-accent); }
   .form__status[data-kind="err"] { color: #ffb4a8; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   @media (max-width: 900px) {
-    .hero__grid, .skills, .gh, .contact { grid-template-columns: 1fr; }
+    .hero__grid, .gh, .contact { grid-template-columns: 1fr; }
     .stats { grid-template-columns: repeat(2, 1fr); }
-    .stats li:nth-child(3) { padding-left: 0; border-left: 0; }
+    .stats li:nth-child(3) { border-left: 0; }
+    .stats li:nth-child(n+3) { border-top: 1px solid var(--color-divider); }
+    .certs { grid-template-columns: repeat(2, 1fr); }
+    .skills__groups { grid-template-columns: repeat(2, 1fr); }
+    .training { grid-template-columns: 1fr; }
+    .training li:nth-child(2) { border-top: 1px solid var(--color-divider); }
+    .training li:nth-child(even) { border-left: 0; }
     .timeline > li { grid-template-columns: 1fr; gap: var(--space-2); }
   }
   @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
   @media (max-width: 560px) {
-    .skills__groups, .form__row { grid-template-columns: 1fr; }
-    .status dl > div { grid-template-columns: 1fr; gap: 2px; }
+    .hero__loc { display: none; }
+    .skills__groups, .form__row, .certs { grid-template-columns: 1fr; }
+    .snapshot dl > div { grid-template-columns: 1fr; gap: 2px; }
+    .cert { grid-template-columns: 64px 1fr; gap: var(--space-4); }
+    .cert img, .cert__tile--progress { width: 64px; height: 64px; }
+    .training li { grid-template-columns: 40px 1fr; }
+    .training li > a { grid-column: 2; }
+    .training img, .training .cert__tile { width: 40px; height: 40px; }
+    .stats li { padding: var(--space-4); }
   }
 </style>

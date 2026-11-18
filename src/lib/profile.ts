@@ -65,12 +65,35 @@ export const experience = [
   },
 ];
 
-export const certifications = [
-  { name: "CompTIA Security+", note: "Valid 2023–2029", status: "done" },
-  { name: "CompTIA Network+", note: "Networking & infrastructure", status: "done" },
-  { name: "CompTIA A+", note: "IT support foundations", status: "done" },
-  { name: "Microsoft MD-102", note: "Endpoint Administrator", status: "progress" },
-] as const;
+// Verified credentials. Each `verify` link opens the official verification page.
+// `badge` is an image in /public/badges (Credly badges); items without one show an issuer tile.
+export type Credential = {
+  name: string;
+  short: string;
+  issuer: string;
+  issued?: string;
+  expires?: string;
+  verify: string;
+  verifyLabel: string;
+  badge?: string;
+  mono?: string;
+  kind: "cert" | "training";
+};
+
+export const credentials: Credential[] = [
+  { kind: "cert", name: "CompTIA Security+ ce", short: "Security+", issuer: "CompTIA", issued: "Mar 2023", expires: "Mar 2029", verify: "https://www.credly.com/badges/1ebf4041-f4b2-4075-b608-bb4676b5bbba/linked_in_profile", verifyLabel: "Credly", badge: "/badges/secplus.webp" },
+  { kind: "cert", name: "CompTIA Network+ ce", short: "Network+", issuer: "CompTIA", issued: "Jan 2023", expires: "Mar 2029", verify: "https://www.credly.com/badges/2b6eca48-8334-4dab-854a-81d059e929f5/linked_in_profile", verifyLabel: "Credly", badge: "/badges/netplus.webp" },
+  { kind: "cert", name: "CompTIA A+ ce", short: "A+", issuer: "CompTIA", issued: "Dec 2022", expires: "Mar 2029", verify: "https://www.credly.com/badges/1090519b-64b6-43cc-b06d-50a8b468865b/linked_in_profile", verifyLabel: "Credly", badge: "/badges/aplus.webp" },
+  { kind: "cert", name: "CompTIA Secure Infrastructure Specialist (CSIS)", short: "CSIS", issuer: "CompTIA · Stackable", issued: "Mar 2023", expires: "Mar 2029", verify: "https://www.credly.com/badges/3bce1fbe-2f12-48ad-93b1-ebbcb46d48c1/linked_in_profile", verifyLabel: "Credly", badge: "/badges/csis.webp" },
+  { kind: "cert", name: "CompTIA IT Operations Specialist (CIOS)", short: "CIOS", issuer: "CompTIA · Stackable", issued: "Jan 2023", expires: "Mar 2029", verify: "https://www.credly.com/badges/127adfdb-f2c4-4bc7-83ef-e031e0c1eba2/linked_in_profile", verifyLabel: "Credly", badge: "/badges/cios.webp" },
+  { kind: "training", name: "Jr Penetration Tester", short: "Jr Pen Tester", issuer: "TryHackMe", mono: "THM", issued: "Jan 2026", verify: "https://tryhackme.com/certificate/THM-YDN6IXFNPE", verifyLabel: "TryHackMe" },
+  { kind: "training", name: "SOC Analyst Level 1", short: "SOC L1", issuer: "Tech Made Simple", mono: "TMS", issued: "Jul 2026", verify: "https://techmadesimple.net/certificate/c205fbcd-8396-40e9-b32d-e83faa52f051", verifyLabel: "Tech Made Simple" },
+  { kind: "training", name: "Cybersecurity Fundamentals", short: "Cyber Fundamentals", issuer: "IBM SkillsBuild", issued: "Aug 2022", verify: "https://www.credly.com/badges/e12083ea-741e-4433-a9e0-5d42c4b0c7b6/linked_in_profile", verifyLabel: "Credly", badge: "/badges/ibm.webp" },
+  { kind: "training", name: "Intro to Splunk", short: "Splunk", issuer: "Splunk", mono: "SPL", verify: "https://drive.google.com/file/d/1fKwquHGxTn96YEoRPeyVmno-wCEHzf99/view?usp=drive_link", verifyLabel: "certificate" },
+  { kind: "training", name: "Excel Fundamentals for Data Analysis", short: "Excel", issuer: "Coursera", mono: "XLS", verify: "https://www.coursera.org/account/accomplishments/certificate/SQJR886LFSTA", verifyLabel: "Coursera" },
+];
+
+export const inProgress = [{ name: "Microsoft MD-102", note: "Endpoint Administrator" }];
 
 export const skills = [
   { group: "Service desk", items: ["Windows 10/11", "Remote support", "ServiceNow", "JIRA Service Desk", "SLA & escalation", "Runbooks & KB articles"] },

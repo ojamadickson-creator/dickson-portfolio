@@ -1,0 +1,110 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+
+export async function getStaticPaths() {
+  const all = (await getCollection("projects")).sort((a, b) =>
+    a.data.track === b.data.track ? a.data.order - b.data.order : a.data.track === "it" ? -1 : 1,
+  );
+  return all.map((project, i) => ({ params: { slug: project.id }, props: { project, next: all[(i + 1) % all.length] } }));
+}
+const { project, next } = Astro.props;
+const d = project.data;
+const { Content } = await render(project);
+const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security labs";
+---
+<Base title={`${d.title} · Dickson Ojama`} description={d.summary} path={`/projects/${project.id}/`}>
+  <article class="case">
+    <header class="wrap case__head">
+      <a class="back" href={d.track === "it" ? "/#work" : "/#security"}>← {d.track === "it" ? "All IT support projects" : "All security labs"}</a>
+      <div class="case__meta">
+        <span class="mono">{d.code}</span>
+        <span class="pill">Resolved</span>
+        <span class="mono muted">{trackLabel}</span>
+      </div>
+      <h1>{d.title}</h1>
+      <p class="case__summary">{d.summary}</p>
+      <div class="case__cta">
+        <a class="btn btn--primary" href={d.repo}><Icon name="github" /> View the repository</a>
+        {d.video && <a class="btn btn--ghost" href={d.video}><Icon name="play" /> Watch the walkthrough</a>}
+      </div>
+    </header>
+
+    <div class="wrap case__grid">
+      <aside class="ticket">
+        <div class="ticket__row"><span class="k">Request</span><p>{d.brief}</p></div>
+        <div class="ticket__row">
+          <span class="k">Stack</span>
+          <ul role="list" class="chips">{d.stack.map((s) => <li>{s}</li>)}</ul>
+        </div>
+        <div class="ticket__row">
+          <span class="k">What this shows for the job</span>
+          <ul role="list" class="fit">{d.jobFit.map((j) => <li><Icon name="check" />{j}</li>)}</ul>
+        </div>
+      </aside>
+
+      <div class="prose">
+        <figure>
+          <img src={d.evidence.src} alt={d.evidence.alt} width="1200" height="750" decoding="async" />
+          <figcaption>{d.evidence.caption}</figcaption>
+        </figure>
+        <Content />
+      </div>
+    </div>
+
+    <nav class="wrap next" aria-label="Next project">
+      <a href={`/projects/${next.id}/`}>
+        <span class="mono muted">Next · {next.data.code}</span>
+        <strong>{next.data.title} →</strong>
+      </a>
+    </nav>
+  </article>
+</Base>
+
+<style>
+  .mono { font-family: var(--font-mono); font-size: var(--text-xs); }
+  .muted { color: var(--color-text-muted); }
+  .case { padding-block: clamp(var(--space-10), 6vw, var(--space-20)); }
+  .case__head { display: grid; gap: var(--space-5); margin-bottom: clamp(var(--space-10), 6vw, var(--space-16)); }
+  .back { font-size: var(--text-sm); color: var(--color-text-muted); text-decoration: none; width: fit-content; }
+  .back:hover { color: var(--color-text); }
+  .case__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--text-2xl); letter-spacing: -0.02em; max-width: 22ch; }
+  .case__summary { color: var(--color-text-muted); font-size: var(--text-lg); max-width: 62ch; line-height: 1.5; }
+  .case__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .case__grid { display: grid; grid-template-columns: 320px 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: start; }
+  .ticket { position: sticky; top: 88px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
+  .ticket__row { display: grid; gap: var(--space-2); padding: var(--space-5); font-size: var(--text-sm); }
+  .ticket__row + .ticket__row { border-top: 1px dashed var(--color-divider); }
+  .k { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .chips li { font-family: var(--font-mono); font-size: 0.75rem; padding: 2px var(--space-2); border: 1px solid var(--color-divider); border-radius: var(--radius-sm); color: var(--color-text-muted); }
+  .fit { display: grid; gap: var(--space-2); }
+  .fit li { display: grid; grid-template-columns: 1.1em 1fr; gap: var(--space-2); align-items: start; }
+  .fit :global(svg) { color: var(--color-primary); width: 1.1em; height: 1.1em; margin-top: 0.2em; }
+
+  .prose { max-width: 72ch; min-width: 0; }
+  .prose figure { margin-bottom: var(--space-10); }
+  .prose figure img { border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-offset); width: 100%; }
+  .prose figcaption { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-3); }
+  .prose :global(h2) { font-family: var(--font-display); font-weight: 800; font-size: var(--text-xl); margin: var(--space-12) 0 var(--space-4); }
+  .prose :global(h2:first-of-type) { margin-top: 0; }
+  .prose :global(h3) { font-family: var(--font-display); font-weight: 700; font-size: var(--text-lg); margin: var(--space-8) 0 var(--space-3); }
+  .prose :global(p), .prose :global(ul), .prose :global(ol) { margin-bottom: var(--space-4); }
+  .prose :global(ul), .prose :global(ol) { padding-left: 1.2em; display: grid; gap: var(--space-2); }
+  .prose :global(a) { color: var(--color-primary); text-underline-offset: 0.2em; }
+  .prose :global(strong) { font-weight: 700; }
+  .prose :global(pre) { background: var(--color-ink); color: var(--color-ink-text); padding: var(--space-4); border-radius: var(--radius-md); overflow-x: auto; margin-bottom: var(--space-4); font-size: var(--text-sm); }
+  .prose :global(pre code) { background: none; padding: 0; }
+
+  .next { margin-top: clamp(var(--space-12), 8vw, var(--space-20)); }
+  .next a { display: grid; gap: var(--space-1); padding: var(--space-6); border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); text-decoration: none; }
+  .next a:hover { border-color: var(--color-text); }
+  .next strong { font-family: var(--font-display); font-size: var(--text-lg); }
+
+  @media (max-width: 900px) {
+    .case__grid { grid-template-columns: 1fr; }
+    .ticket { position: static; }
+  }
+</style>

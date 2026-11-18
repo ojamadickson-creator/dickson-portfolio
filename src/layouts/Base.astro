@@ -1,0 +1,79 @@
+---
+import "../styles/global.css";
+import { profile } from "../lib/profile";
+import Icon from "../components/Icon.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  path?: string;
+}
+const { title, description, path = "/" } = Astro.props;
+const site = Astro.site ?? new URL("https://example.vercel.app");
+const canonical = new URL(path, site).toString();
+const ogImage = new URL("/og.png", site).toString();
+const current = Astro.url.pathname;
+const personLd = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: profile.role,
+  email: `mailto:${profile.email}`,
+  address: { "@type": "PostalAddress", addressLocality: "Almada", addressCountry: "PT" },
+  sameAs: [profile.linkedin, profile.github],
+  url: site.toString(),
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#f3f4f1" />
+    <link rel="preconnect" href="https://api.fontshare.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@700,800&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
+  </head>
+  <body>
+    <a class="sr-only" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">{profile.name}<span>// IT support</span></a>
+        <nav class="nav" aria-label="Main">
+          <a href="/#work" class="text-link--hide-sm">Work</a>
+          <a href="/resume/" aria-current={current.startsWith("/resume") ? "page" : undefined}>Resume</a>
+          <a href="/#contact">Contact</a>
+          <a class="icon-link" href={profile.github} aria-label="GitHub profile" rel="me"><Icon name="github" /></a>
+          <a class="icon-link" href={profile.linkedin} aria-label="LinkedIn profile" rel="me"><Icon name="linkedin" /></a>
+        </nav>
+      </div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <p>© {new Date().getFullYear()} {profile.name} · {profile.location}</p>
+        <nav aria-label="Footer">
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          <a href={profile.github}>GitHub</a>
+          <a href={profile.linkedin}>LinkedIn</a>
+          <a href={profile.resumePdf} download>Resume (PDF)</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>

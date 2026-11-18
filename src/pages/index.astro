@@ -1,0 +1,372 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import TicketCard from "../components/TicketCard.astro";
+import Icon from "../components/Icon.astro";
+import { profile, stats, experience, certifications, skills, tools } from "../lib/profile";
+import { getRepos, HIDDEN_REPOS } from "../lib/github";
+
+const all = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const itProjects = all.filter((p) => p.data.track === "it");
+const secProjects = all.filter((p) => p.data.track === "security");
+const repos = (await getRepos()).slice(0, 6);
+const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
+const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_PWZ56gXJZkvteEYxwKJsDQ_PeCDGZMc";
+---
+<Base
+  title={`${profile.name} · IT Support Technician (L1/L2) · Lisbon`}
+  description="IT support technician in Lisbon with CompTIA A+, Network+ and Security+. Hands-on labs in Active Directory, Entra ID, Intune and Microsoft 365, plus security detection labs."
+>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Open to IT support roles · {profile.location}</p>
+        <h1>I solve the ticket, then write the runbook so it stays solved.</h1>
+        <p class="hero__lead">{profile.summary}</p>
+        <div class="hero__cta">
+          <a class="btn btn--primary" href={profile.resumePdf} download><Icon name="download" /> Download resume</a>
+          <a class="btn btn--ghost" href="#work">See my lab work <Icon name="arrow" /></a>
+        </div>
+      </div>
+      <aside class="status" aria-label="Candidate summary">
+        <div class="status__head">
+          <span class="mono">PROFILE · {profile.githubUser}</span>
+          <span class="pill">Available</span>
+        </div>
+        <dl>
+          <div><dt>Role</dt><dd>{profile.role}, {profile.focus}</dd></div>
+          <div><dt>Looking for</dt><dd>{profile.lookingFor.join(" · ")}</dd></div>
+          <div><dt>Certified</dt><dd>CompTIA A+, Network+, Security+ <span class="muted">· MD-102 in progress</span></dd></div>
+          <div><dt>Languages</dt><dd>{profile.languages}</dd></div>
+          <div><dt>Work permit</dt><dd>{profile.workAuth}</dd></div>
+        </dl>
+      </aside>
+    </div>
+    <div class="wrap">
+      <ul class="stats" role="list">
+        {stats.map((s) => <li><strong>{s.value}</strong><span>{s.label}</span></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Home lab -->
+  <section class="section section--ink" id="lab">
+    <div class="wrap lab">
+      <div class="section-head">
+        <p class="eyebrow">The environment behind the case studies</p>
+        <h2>A hybrid Microsoft lab I built and run myself</h2>
+        <p>Two Windows Server 2025 domain controllers on an isolated network, synced to Microsoft Entra ID, with devices enrolled in Intune. It's where I practise the work a service desk does every day: joining machines, resetting access, pushing policy and fixing what breaks.</p>
+      </div>
+      <figure class="lab__figure">
+        <img src="/evidence/home-lab.svg" alt="Diagram of the home lab: on-premises Active Directory forest with two domain controllers and client machines, connected through Entra Connect sync to Microsoft Entra ID, Intune and Microsoft 365." width="1500" height="1010" loading="lazy" />
+        <figcaption>My lab topology: on-premises AD DS → Entra Connect → Entra ID, Intune and Microsoft 365.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Work: IT track -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Track 1 · IT support &amp; Microsoft 365</p>
+        <h2>Resolved tickets from my lab</h2>
+        <p>Each project is written up like a ticket: what I was asked to do, what I built, what broke and how I fixed and verified it.</p>
+      </div>
+      <div class="grid">
+        {itProjects.map((p) => <TicketCard project={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Work: Security track -->
+  <section class="section" id="security">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Track 2 · Security labs</p>
+        <h2>Where I'm heading: security operations</h2>
+        <p>I want to grow from IT support into cybersecurity. These labs show I can read logs, spot attacks and contain them, which also makes me a more careful support technician today.</p>
+      </div>
+      <div class="grid">
+        {secProjects.map((p) => <TicketCard project={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills & certs -->
+  <section class="section" id="skills">
+    <div class="wrap skills">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Toolbox</p>
+          <h2>Skills I use</h2>
+        </div>
+        <div class="skills__groups">
+          {skills.map((g) => (
+            <div class="skills__group">
+              <h3>{g.group}</h3>
+              <ul role="list">{g.items.map((i) => <li>{i}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Credentials</p>
+          <h2>Certifications</h2>
+        </div>
+        <ul class="certs" role="list">
+          {certifications.map((c) => (
+            <li>
+              <div><strong>{c.name}</strong><span>{c.note}</span></div>
+              <span class={c.status === "done" ? "pill" : "pill pill--progress"}>{c.status === "done" ? "Certified" : "In progress"}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Experience -->
+  <section class="section" id="experience">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Experience</p>
+        <h2>Where I've supported real users</h2>
+      </div>
+      <ol class="timeline" role="list">
+        {experience.map((e) => (
+          <li>
+            <div class="timeline__when mono">{e.when}</div>
+            <div>
+              <h3>{e.role} <span class="muted">· {e.org}</span></h3>
+              <p class="timeline__where">{e.where}</p>
+              <ul>{e.points.map((pt) => <li>{pt}</li>)}</ul>
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p class="after"><a class="link" href="/resume/">Full resume, education and languages</a></p>
+    </div>
+  </section>
+
+  <!-- GitHub -->
+  <section class="section" id="github">
+    <div class="wrap gh">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Study tools I built</p>
+          <h2>Small apps I built to study for my exams</h2>
+        </div>
+        <ul class="tools" role="list">
+          {tools.map((t) => (
+            <li><a href={`${profile.github}/${t.repo}`}><strong>{t.name}</strong><span>{t.note}</span></a></li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Live from GitHub</p>
+          <h2>Latest activity</h2>
+        </div>
+        <ul class="repos" role="list" id="repo-list" data-user={profile.githubUser} data-hidden={[...HIDDEN_REPOS].join(",")}>
+          {repos.length === 0 && <li class="repos__empty">See all repositories on <a class="link" href={profile.github}>GitHub</a>.</li>}
+          {repos.map((r) => (
+            <li>
+              <a href={r.html_url}>
+                <span class="repos__name">{r.name}</span>
+                <span class="repos__meta mono">{r.language ?? "Docs"} · updated {fmt(r.pushed_at)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="after"><a class="link" href={profile.github}>All repositories on GitHub</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section section--ink" id="contact">
+    <div class="wrap contact">
+      <div class="section-head">
+        <p class="eyebrow">Contact</p>
+        <h2>Hiring for IT support? Let's talk.</h2>
+        <p>Send a message here, email me at <a href={`mailto:${profile.email}`}>{profile.email}</a> or connect on <a href={profile.linkedin}>LinkedIn</a>. I usually reply within one working day.</p>
+      </div>
+      <form class="form" id="contact-form" novalidate data-url={SUPABASE_URL} data-key={SUPABASE_KEY} data-email={profile.email}>
+        <div class="form__row">
+          <label>Name<input name="name" autocomplete="name" required maxlength="120" /></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
+        </div>
+        <label>Company <span class="muted">(optional)</span><input name="company" autocomplete="organization" maxlength="160" /></label>
+        <label>Message<textarea name="message" rows="5" required minlength="10" maxlength="4000"></textarea></label>
+        <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <div class="form__foot">
+          <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
+          <p class="form__status" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  // ---------- Contact form → Supabase (insert-only table, RLS enforced) ----------
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  if (form) {
+    const status = form.querySelector(".form__status") as HTMLElement;
+    const btn = form.querySelector("button") as HTMLButtonElement;
+    const setStatus = (msg: string, kind: "ok" | "err" | "") => { status.textContent = msg; status.dataset.kind = kind; };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      if (String(fd.get("website") || "")) { setStatus("Thanks, your message was sent.", "ok"); form.reset(); return; }
+      const payload = {
+        name: String(fd.get("name") || "").trim(),
+        email: String(fd.get("email") || "").trim(),
+        company: String(fd.get("company") || "").trim() || null,
+        message: String(fd.get("message") || "").trim(),
+      };
+      if (!payload.name) return setStatus("Please add your name.", "err");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
+      if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
+      btn.disabled = true; setStatus("Sending…", "");
+      try {
+        const res = await fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
+          method: "POST",
+          headers: { apikey: form.dataset.key!, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+      } catch {
+        status.dataset.kind = "err";
+        status.innerHTML = `Sorry, the form isn't working right now. Please email <a href="mailto:${form.dataset.email}">${form.dataset.email}</a>.`;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+
+  // ---------- Refresh the GitHub list in the browser so new repos show up without a rebuild ----------
+  const list = document.getElementById("repo-list");
+  if (list) {
+    const hidden = new Set((list.dataset.hidden || "").split(","));
+    fetch(`https://api.github.com/users/${list.dataset.user}/repos?per_page=100&sort=pushed`)
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((repos: any[]) => {
+        const items = repos.filter((r) => !r.fork && !r.archived && !hidden.has(r.name)).slice(0, 6);
+        if (!items.length) return;
+        list.replaceChildren(...items.map((r) => {
+          const li = document.createElement("li");
+          const a = document.createElement("a"); a.href = r.html_url;
+          const n = document.createElement("span"); n.className = "repos__name"; n.textContent = r.name;
+          const m = document.createElement("span"); m.className = "repos__meta mono";
+          m.textContent = `${r.language ?? "Docs"} · updated ${new Date(r.pushed_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+          a.append(n, m); li.append(a); return li;
+        }));
+      })
+      .catch(() => {});
+  }
+</script>
+
+<style>
+  .mono, .repos :global(.mono) { font-family: var(--font-mono); }
+  .muted { color: var(--color-text-muted); font-weight: 400; }
+  .after { margin-top: var(--space-8); font-weight: 600; font-size: var(--text-sm); }
+
+  /* Hero */
+  .hero { padding-block: clamp(var(--space-12), 9vw, var(--space-24)) var(--space-12); }
+  .hero__grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: center; }
+  .hero__copy { display: grid; gap: var(--space-6); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-primary); box-shadow: 0 0 0 4px var(--color-primary-highlight); }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: var(--text-2xl); letter-spacing: -0.02em; max-width: 18ch; }
+  .hero__lead { color: var(--color-text-muted); font-size: var(--text-base); max-width: 60ch; }
+  .hero__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .status { background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+  .status__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); background: var(--color-surface); font-size: var(--text-xs); color: var(--color-text-muted); }
+  .status dl { display: grid; }
+  .status dl > div { display: grid; grid-template-columns: 7.5rem 1fr; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px dashed var(--color-divider); font-size: var(--text-sm); }
+  .status dl > div:last-child { border-bottom: 0; }
+  .status dt { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-muted); padding-top: 2px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: clamp(var(--space-10), 6vw, var(--space-16)); border-top: 1px solid var(--color-border); }
+  .stats li { display: grid; gap: var(--space-1); padding: var(--space-5) var(--space-4) 0 0; }
+  .stats li + li { padding-left: var(--space-4); border-left: 1px solid var(--color-divider); }
+  .stats strong { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 800; font-variant-numeric: tabular-nums; color: var(--color-primary); line-height: 1; }
+  .stats span { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+  /* Lab */
+  .lab__figure { background: #fff; border-radius: var(--radius-lg); padding: clamp(var(--space-3), 2vw, var(--space-6)); }
+  .lab__figure figcaption { max-width: none; color: var(--color-text-muted); font-size: var(--text-sm); padding-top: var(--space-3); border-top: 1px solid var(--color-divider); margin-top: var(--space-3); }
+  .section--ink a { color: #8fe0b7; }
+
+  /* Grids */
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+
+  /* Skills */
+  .skills { display: grid; grid-template-columns: 1.5fr 1fr; gap: clamp(var(--space-10), 5vw, var(--space-16)); }
+  .skills__groups { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-8) var(--space-6); }
+  .skills__group h3 { font-family: var(--font-mono); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); font-weight: 500; margin-bottom: var(--space-3); }
+  .skills__group ul { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .skills__group li { font-size: var(--text-sm); padding: var(--space-1) var(--space-3); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-full); }
+  .certs { display: grid; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); overflow: hidden; }
+  .certs li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); }
+  .certs li + li { border-top: 1px solid var(--color-divider); }
+  .certs li > div { display: grid; }
+  .certs span:not(.pill) { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+  /* Timeline */
+  .timeline { display: grid; }
+  .timeline > li { display: grid; grid-template-columns: 12rem 1fr; gap: var(--space-6); padding-block: var(--space-6); border-top: 1px solid var(--color-divider); }
+  .timeline > li:last-child { border-bottom: 1px solid var(--color-divider); }
+  .timeline__when { font-size: var(--text-xs); color: var(--color-text-muted); padding-top: 4px; }
+  .timeline h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 800; }
+  .timeline__where { font-size: var(--text-sm); color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  .timeline ul { padding-left: 1.1em; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
+
+  /* GitHub */
+  .gh { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(var(--space-10), 5vw, var(--space-16)); }
+  .tools, .repos { display: grid; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); overflow: hidden; }
+  .tools li + li, .repos :global(li + li) { border-top: 1px solid var(--color-divider); }
+  .tools a, .repos :global(a) { display: grid; gap: 2px; padding: var(--space-4) var(--space-5); text-decoration: none; }
+  .tools a:hover, .repos :global(a:hover) { background: var(--color-surface); }
+  .tools a:hover strong, .repos :global(a:hover .repos__name) { color: var(--color-primary); }
+  .tools span { font-size: var(--text-sm); color: var(--color-text-muted); }
+  .repos :global(.repos__name) { font-weight: 600; overflow-wrap: anywhere; }
+  .repos :global(.repos__meta) { font-size: 0.75rem; color: var(--color-text-muted); }
+  .repos__empty { padding: var(--space-5); font-size: var(--text-sm); }
+
+  /* Contact */
+  .contact { display: grid; grid-template-columns: 1fr 1.2fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: start; }
+  .contact .section-head { margin-bottom: 0; }
+  .form { display: grid; gap: var(--space-4); background: var(--color-ink-2); border: 1px solid var(--color-ink-border); border-radius: var(--radius-lg); padding: clamp(var(--space-5), 3vw, var(--space-8)); }
+  .form__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+  .form label { display: grid; gap: var(--space-2); font-size: var(--text-sm); font-weight: 500; }
+  .form .muted { color: var(--color-ink-muted); }
+  .form input, .form textarea { width: 100%; padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-ink-border); background: var(--color-ink); color: var(--color-ink-text); min-height: 44px; }
+  .form textarea { resize: vertical; }
+  .form input:focus, .form textarea:focus { outline: none; border-color: #8fe0b7; box-shadow: 0 0 0 3px color-mix(in oklab, #8fe0b7 25%, transparent); }
+  .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4); }
+  .form__foot .btn--primary { background: #8fe0b7; color: var(--color-ink); }
+  .form__foot .btn--primary:hover { background: #b0ebcd; }
+  .form__foot .btn--primary:disabled { opacity: 0.6; cursor: progress; }
+  .form__status { font-size: var(--text-sm); }
+  .form__status[data-kind="ok"] { color: #8fe0b7; }
+  .form__status[data-kind="err"] { color: #ffb4a8; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  @media (max-width: 900px) {
+    .hero__grid, .skills, .gh, .contact { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stats li:nth-child(3) { padding-left: 0; border-left: 0; }
+    .timeline > li { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) {
+    .skills__groups, .form__row { grid-template-columns: 1fr; }
+    .status dl > div { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>

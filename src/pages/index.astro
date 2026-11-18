@@ -247,14 +247,18 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
           <li><Icon name="shield" /> {profile.workAuth}</li>
         </ul>
       </div>
-      <form class="form" id="contact-form" novalidate data-url={SUPABASE_URL} data-key={SUPABASE_KEY} data-email={profile.email}>
+      <form class="form" id="contact-form" novalidate method="POST" action={`https://formsubmit.co/${profile.email}`} data-url={SUPABASE_URL} data-key={SUPABASE_KEY} data-email={profile.email}>
+        <input type="hidden" name="_subject" value="Portfolio contact" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_captcha" value="false" />
+        <input type="hidden" name="_next" value="" />
         <div class="form__row">
           <label>Name<input name="name" autocomplete="name" required maxlength="120" /></label>
           <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
         </div>
         <label>Company <span class="muted">(optional)</span><input name="company" autocomplete="organization" maxlength="160" /></label>
         <label>Message<textarea name="message" rows="5" required minlength="10" maxlength="4000"></textarea></label>
-        <label class="hp" aria-hidden="true">Leave this empty<input name="website" tabindex="-1" autocomplete="off" /></label>
+        <label class="hp" aria-hidden="true">Leave this empty<input name="_honey" tabindex="-1" autocomplete="off" /></label>
         <div class="form__foot">
           <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
           <p class="form__status" role="status" aria-live="polite"></p>
@@ -271,10 +275,22 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     const status = form.querySelector(".form__status") as HTMLElement;
     const btn = form.querySelector("button") as HTMLButtonElement;
     const setStatus = (msg: string, kind: "ok" | "err" | "") => { status.textContent = msg; status.dataset.kind = kind; };
+    const params = new URLSearchParams(location.search);
+    if (params.get("sent") === "1") {
+      setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+      history.replaceState(null, "", location.pathname + "#contact");
+    }
+    // Plain form POST to FormSubmit: lets the browser pass Cloudflare's check when the AJAX call is refused.
+    const submitNatively = () => {
+      (form.elements.namedItem("_next") as HTMLInputElement).value = `${location.origin}${location.pathname}?sent=1#contact`;
+      (form.elements.namedItem("_subject") as HTMLInputElement).value = `Portfolio contact from ${String(new FormData(form).get("name") || "").trim()}`;
+      if (window.self !== window.top) form.target = "_blank";
+      HTMLFormElement.prototype.submit.call(form);
+    };
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
-      if (String(fd.get("website") || "")) { setStatus("Thanks, your message was sent.", "ok"); form.reset(); return; }
+      if (String(fd.get("_honey") || "")) { setStatus("Thanks, your message was sent.", "ok"); form.reset(); return; }
       const payload = {
         name: String(fd.get("name") || "").trim(),
         email: String(fd.get("email") || "").trim(),
@@ -308,12 +324,16 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
           }),
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || String(data.success) !== "true") throw new Error(data.message || String(res.status));
-        form.reset();
-        setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+        if (res.ok && String(data.success) === "true") {
+          form.reset();
+          setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+        } else if (/activat/i.test(String(data.message || ""))) {
+          setStatus("Almost there: this form is awaiting a one-time activation by the site owner. Please try again shortly.", "err");
+        } else {
+          submitNatively();
+        }
       } catch {
-        status.dataset.kind = "err";
-        status.innerHTML = `Sorry, the form isn't working right now. Please email <a href="mailto:${form.dataset.email}">${form.dataset.email}</a>.`;
+        submitNatively();
       } finally {
         btn.disabled = false;
       }

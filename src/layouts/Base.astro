@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
+import { inject } from "@vercel/analytics";
 
 interface Props {
   title: string;
@@ -23,6 +24,7 @@ const personLd = {
   sameAs: [profile.linkedin, profile.github],
   url: site.toString(),
 };
+inject();
 ---
 <!doctype html>
 <html lang="en">

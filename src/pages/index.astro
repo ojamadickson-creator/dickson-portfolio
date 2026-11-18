@@ -286,12 +286,29 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
       btn.disabled = true; setStatus("Sending…", "");
       try {
-        const res = await fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
+        // Best-effort archive copy; email delivery below decides success.
+        fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
           method: "POST",
           headers: { apikey: form.dataset.key!, "Content-Type": "application/json", Prefer: "return=minimal" },
           body: JSON.stringify(payload),
+        }).catch(() => {});
+
+        const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            company: payload.company ?? "—",
+            message: payload.message,
+            _subject: `Portfolio contact from ${payload.name}`,
+            _replyto: payload.email,
+            _template: "table",
+            _captcha: "false",
+          }),
         });
-        if (!res.ok) throw new Error(String(res.status));
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || String(data.success) !== "true") throw new Error(data.message || String(res.status));
         form.reset();
         setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
       } catch {

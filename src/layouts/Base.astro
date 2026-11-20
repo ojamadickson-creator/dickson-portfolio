@@ -3,6 +3,7 @@ import "../styles/global.css";
 import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
+import Analytics from "@vercel/analytics/astro";
 
 interface Props {
   title: string;
@@ -100,6 +101,7 @@ const personLd = {
     <script>
       document.querySelectorAll<HTMLAnchorElement>(".menu__panel a").forEach((a) => a.addEventListener("click", () => a.closest("details")?.removeAttribute("open")));
     </script>
+    <Analytics />
     <SpeedInsights />
   </body>
 </html>

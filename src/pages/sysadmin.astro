@@ -1,0 +1,45 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import Topology from "../components/Topology.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import ShippedStrip from "../components/ShippedStrip.astro";
+import RoleContact from "../components/RoleContact.astro";
+import { profile, resumes } from "../lib/profile";
+
+const itProjects = (await getCollection("projects", (p) => p.data.track === "it")).sort((a, b) => a.data.order - b.data.order);
+---
+<Base
+  title={`Junior Microsoft 365 and identity admin · ${profile.name}`}
+  description="Hybrid Active Directory, Entra ID and Intune lab I built and run: an interactive topology, the admin case studies behind it, and a resume to download."
+  path="/sysadmin/"
+>
+  <Hero
+    status="Open to junior Microsoft 365 / identity admin roles"
+    title="A hybrid Microsoft lab I built and run myself."
+    lead="Two Windows Server 2025 domain controllers on an isolated network, synced to Microsoft Entra ID, with devices enrolled in Intune. I automate it with PowerShell and Microsoft Graph, and every fault I hit is written up as symptom, root cause, fix and verification."
+    resume={resumes.sysadmin}
+    cta={{ href: "#topology", label: "Explore the topology" }}
+  />
+  <section class="section" id="topology">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Lab topology</p>
+        <h2>On-premises AD to Entra Connect to Entra ID and Intune</h2>
+        <p>Click a machine or service, or Tab to it and press Enter, to see what it does and which case study covers it.</p>
+      </div>
+      <Topology />
+    </div>
+  </section>
+  <ProjectGrid
+    id="work"
+    eyebrow="Admin case studies"
+    heading="What I built on top of it"
+    intro="Each project is written up like a ticket: what I was asked to do, what I built, what broke and how I fixed and verified it."
+    projects={itProjects}
+  >
+    <ShippedStrip tracks={["it"]} />
+  </ProjectGrid>
+  <RoleContact heading="Hiring a junior admin? Let's talk." resume={resumes.sysadmin} />
+</Base>

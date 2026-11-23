@@ -16,6 +16,15 @@ export const profile = {
     "CompTIA A+, Network+ and Security+ certified support professional with three years of paid technical support and more than seven years of customer support. I resolve desktop, application, account-access and connectivity issues by phone, email and chat, and explain them in plain language. In my home lab I run a two-domain-controller Windows Server 2025 forest extended into Microsoft Entra ID and Intune, automated with PowerShell and Microsoft Graph.",
 };
 
+// Resume offered on each role landing page (/support, /soc, /sysadmin).
+// Tailored PDFs go in public/ (no phone number on public copies). /support and /sysadmin have
+// their own resumes; /soc uses the general resume above until its tailored copy is confirmed.
+export const resumes = {
+  support: "/Dickson-Ojama-Resume-Support.pdf",
+  soc: profile.resumePdf,
+  sysadmin: "/Dickson-Ojama-Resume-Sysadmin.pdf",
+} as const;
+
 export const stats = [
   { value: "99%", label: "first-contact resolution at Intelcia" },
   { value: "85%+", label: "first-contact resolution at Teleperformance" },
@@ -27,10 +36,11 @@ export const experience = [
   {
     role: "Technical Support Specialist",
     org: "Intelcia",
-    where: "Lisbon · Onsite",
-    when: "Nov 2026 – Present",
+    where: "Lisbon · Onsite · Seasonal contract",
+    when: "Nov 2026",
     points: [
       "Real-time phone support in English for candidates taking online assessments on an EU platform.",
+      "99% first-contact resolution: escalated a single case across the whole contract.",
       "Troubleshoot browser, camera and audio settings while keeping anxious candidates calm.",
       "Document recurring errors to feed knowledge-base and process improvements.",
     ],
@@ -110,3 +120,12 @@ export const tools = [
   { name: "AWS Cloud Practitioner practice", repo: "aws-practitioner-cert", note: "160 practice questions" },
   { name: "CySA+ study tracker", repo: "cysa-studytracker", note: "Progress tracker for exam prep" },
 ];
+
+// AI-usage disclosure on /support. Left empty on purpose: fill it in with your own words,
+// and link the project that shows it. The section stays hidden while this is null.
+export const aiUsage: {
+  useFor: string[];
+  never: string[];
+  check: string[];
+  evidence?: { label: string; href: string };
+} | null = null;

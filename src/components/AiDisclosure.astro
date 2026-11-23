@@ -1,0 +1,37 @@
+---
+import { aiUsage } from "../lib/profile";
+// Renders nothing until the owner fills in aiUsage in src/lib/profile.ts.
+---
+{aiUsage && (
+  <section class="section" id="ai" aria-labelledby="ai-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">AI at work</p>
+        <h2 id="ai-title">How I use AI, and where I stop it</h2>
+      </div>
+      <div class="ai">
+        <div>
+          <h3>What I use it for</h3>
+          <ul>{aiUsage.useFor.map((t) => <li>{t}</li>)}</ul>
+        </div>
+        <div>
+          <h3>What I never let it do</h3>
+          <ul>{aiUsage.never.map((t) => <li>{t}</li>)}</ul>
+        </div>
+        <div>
+          <h3>How I check the output</h3>
+          <ul>{aiUsage.check.map((t) => <li>{t}</li>)}</ul>
+        </div>
+      </div>
+      {aiUsage.evidence && <p class="ai__evidence"><a class="link" href={aiUsage.evidence.href}>{aiUsage.evidence.label}</a></p>}
+    </div>
+  </section>
+)}
+<style>
+  .ai { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+  .ai > div { padding: var(--space-5); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  h3 { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-primary); margin-bottom: var(--space-3); }
+  ul { padding-left: 1.1em; display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); }
+  .ai__evidence { margin-top: var(--space-6); font-size: var(--text-sm); font-weight: 600; }
+  @media (max-width: 900px) { .ai { grid-template-columns: 1fr; } }
+</style>

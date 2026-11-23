@@ -6,6 +6,10 @@ order: 1
 summary: A segmented home SOC lab where fake PII is stolen over SMB, detected through Windows file auditing, Suricata and firewall logs in Splunk, then contained with a targeted firewall rule.
 brief: Detect a quiet, low-volume data theft that crosses the network boundary, and stop it without cutting off my own management access.
 stack: [OPNsense, Suricata, Splunk Enterprise, Windows audit policy (Event ID 4663), PowerShell, Kali Linux, tcpdump]
+outcome: "Fake PII read over SMB, detected from file auditing plus Suricata and firewall logs, then contained by one rule."
+techniques:
+  - id: T1039
+    name: Data from Network Shared Drive
 repo: https://github.com/ojamadickson-creator/Data-Exfiltration-DLP-Detection
 video: https://youtu.be/Z6pmFaNt-tQ
 evidence:

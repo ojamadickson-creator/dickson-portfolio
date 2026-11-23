@@ -7,6 +7,24 @@ summary: Hydra sprays 100 passwords at a domain controller over SMB. Splunk catc
 brief: Build the attack and the detection myself, so I understand what a brute force looks like in the logs and not just in a blog post.
 stack: [Splunk Enterprise, SPL, Universal Forwarder, OPNsense, Windows Server, Hydra, REMnux, VirtualBox]
 repo: https://github.com/ojamadickson-creator/purple-team-smb-detection-lab
+outcome: "99 failed logons from one source, caught three ways: threshold, one-minute spike, cross-source correlation."
+techniques:
+  - id: T1110
+    name: Brute Force
+trace:
+  note: Excerpt of the 99 sprayed attempts. Times are relative to the first connection, and only the rows a search matched are marked.
+  rows:
+    - { t: "+0.0s", src: OPNsense, event: "SMB pass 192.168.56.1 → DC01:445", hit: false }
+    - { t: "+0.4s", src: DC01, event: "4625 failed logon · user svc_backup", hit: false }
+    - { t: "+0.6s", src: DC01, event: "4625 failed logon · user svc_backup", hit: false }
+    - { t: "+1.1s", src: DC01, event: "4625 failed logon · user administrator", hit: true }
+    - { t: "+1.4s", src: DC01, event: "4625 failed logon · user administrator", hit: true }
+    - { t: "+1.8s", src: DC01, event: "4625 failed logon · user administrator", hit: true }
+    - { t: "+2.0s", src: DC01, event: "4625 failed logon · user administrator", hit: true }
+    - { t: "+2.3s", src: DC01, event: "4625 failed logon · user administrator", hit: true }
+    - { t: "+2.5s", src: Splunk, event: "threshold search fired: >5 failures / 60s", hit: true }
+    - { t: "+2.6s", src: Splunk, event: "timechart spike · 1-minute bucket", hit: false }
+    - { t: "+2.7s", src: Splunk, event: "correlation: firewall pass + 4625 from same source", hit: false }
 video: https://www.youtube.com/watch?v=wYPfKIGx95Y
 evidence:
   src: /evidence/smb.webp

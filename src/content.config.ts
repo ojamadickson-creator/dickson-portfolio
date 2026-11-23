@@ -16,6 +16,19 @@ const projects = defineCollection({
     video: z.string().url().optional(),
     evidence: z.object({ src: z.string(), alt: z.string(), caption: z.string() }),
     jobFit: z.array(z.string()).min(1),
+    // One line a hiring manager can skim: the outcome, then the technique.
+    outcome: z.string().max(180).optional(),
+    techniques: z
+      .array(z.object({ id: z.string().regex(/^T\d{4}(\.\d{3})?$/), name: z.string() }))
+      .default([]),
+    trace: z
+      .object({
+        note: z.string(),
+        rows: z.array(
+          z.object({ t: z.string(), src: z.string(), event: z.string(), hit: z.boolean().default(false) }),
+        ),
+      })
+      .optional(),
   }),
 });
 

@@ -1,0 +1,93 @@
+---
+// Decorative background layer: faint security glyphs and lab strings drifting up and down.
+// Sits behind everything (z-index -1, no pointer events, hidden from assistive tech and print).
+// Strings are taken from the case studies; do not add IDs that are not in src/content.
+type Item = { kind: "icon" | "text"; v: string; side: "l" | "r"; o: number; y: number; d: number; dl: number; amp: number; m?: boolean };
+
+// side: which margin; o: nudge in px away from the centre of that margin; y: % of viewport height.
+const items: Item[] = [
+  { kind: "icon", v: "shield", side: "l", o: 0, y: 12, d: 14, dl: 0, amp: -28, m: true },
+  { kind: "text", v: "T1110.003", side: "l", o: 20, y: 30, d: 18, dl: -6, amp: 22 },
+  { kind: "icon", v: "lock", side: "l", o: -10, y: 48, d: 16, dl: -3, amp: -24, m: true },
+  { kind: "text", v: "4625 failed logon", side: "l", o: 10, y: 66, d: 20, dl: -11, amp: 26 },
+  { kind: "icon", v: "fingerprint", side: "l", o: 0, y: 84, d: 15, dl: -8, amp: -20 },
+  { kind: "text", v: "T1046", side: "r", o: 10, y: 9, d: 17, dl: -4, amp: 24 },
+  { kind: "icon", v: "radar", side: "r", o: -10, y: 26, d: 19, dl: -9, amp: -26, m: true },
+  { kind: "text", v: "src_ip", side: "r", o: 20, y: 44, d: 13, dl: -2, amp: 20 },
+  { kind: "icon", v: "key", side: "r", o: 0, y: 60, d: 16, dl: -12, amp: -22 },
+  { kind: "text", v: "T1071.001", side: "r", o: 0, y: 76, d: 21, dl: -7, amp: 24 },
+  { kind: "icon", v: "network", side: "r", o: 10, y: 90, d: 18, dl: -5, amp: -24, m: true },
+  { kind: "text", v: "T1039", side: "l", o: -20, y: 94, d: 15, dl: -10, amp: -18 },
+];
+
+const paths: Record<string, string> = {
+  shield: '<path d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
+  fingerprint: '<path d="M8 10a4 4 0 0 1 8 0v2M5 12a7 7 0 0 1 14 0v1.5M12 11v3a6 6 0 0 1-1.5 4M16 15c0 2-.4 3.6-1.2 5M8.5 14.5c0 1.8-.6 3.3-1.6 4.5"/>',
+  radar: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12l6-6"/>',
+  network: '<circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8.5M18 8l-5 8.5"/>',
+};
+---
+<div class="wm" aria-hidden="true">
+  <div class="wm__scan"></div>
+  {items.map((it) => (
+    <span
+      class:list={["wm__item", `wm__item--${it.kind}`, `wm__item--${it.side}`, { "wm__item--keep": it.m }]}
+      style={`--o:${it.o}px;--y:${it.y}%;--d:${it.d}s;--dl:${it.dl}s;--amp:${it.amp}px`}
+    >
+      {it.kind === "icon"
+        ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" set:html={paths[it.v]} />
+        : it.v}
+    </span>
+  ))}
+</div>
+
+<style>
+  .wm {
+    /* Centre of each side margin outside the 1200px content column; on narrow screens the
+       glyphs sit half off the edge so they never sit behind the text. */
+    --gutter: max(0px, (100vw - var(--content-wide)) / 2);
+    --mid: clamp(4px, calc(var(--gutter) / 2), 360px);
+    position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
+    color: var(--color-primary); opacity: 0.1; contain: strict;
+  }
+  .wm__item {
+    position: absolute; top: var(--y); translate: -50% -50%; width: max-content;
+    animation: wm-float var(--d) ease-in-out var(--dl) infinite; will-change: transform;
+  }
+  .wm__item--l { left: calc(var(--mid) + var(--o)); }
+  .wm__item--r { left: calc(100% - var(--mid) - var(--o)); }
+  .wm__item--icon svg { width: 56px; max-width: none; height: auto; }
+  .wm__item--text {
+    display: none; font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.08em;
+    white-space: nowrap; color: var(--color-text); opacity: 0.8;
+  }
+  .wm__scan {
+    position: absolute; top: 0; height: 140px; width: var(--gutter);
+    background: linear-gradient(to bottom, transparent, currentColor 50%, transparent);
+    opacity: 0.35; animation: wm-scan 16s linear infinite; will-change: transform;
+  }
+  .wm__scan, .wm__scan::after { left: 0; }
+  .wm__scan::after { content: ""; position: absolute; top: 0; height: 100%; width: 100%; left: calc(100vw - var(--gutter)); background: inherit; }
+  /* Labels only where the margin is wide enough to hold them. */
+  @media (min-width: 1520px) { .wm__item--text { display: block; } }
+  @keyframes wm-float {
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50% { transform: translate3d(0, var(--amp), 0); }
+  }
+  @keyframes wm-scan {
+    from { transform: translate3d(0, -160px, 0); }
+    to { transform: translate3d(0, 100vh, 0); }
+  }
+  @media (max-width: 720px) {
+    .wm { opacity: 0.08; }
+    .wm__item:not(.wm__item--keep) { display: none; }
+    .wm__item--icon svg { width: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wm__item { animation: none; }
+    .wm__scan { display: none; }
+  }
+  @media print { .wm { display: none; } }
+</style>

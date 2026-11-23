@@ -4,6 +4,7 @@ import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 import Analytics from "@vercel/analytics/astro";
+import SecurityWatermark from "../components/SecurityWatermark.astro";
 import { getCollection } from "astro:content";
 
 interface Props {
@@ -70,6 +71,7 @@ const personLd = {
   </head>
   <body>
     <a class="sr-only" href="#main">Skip to content</a>
+    <SecurityWatermark />
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/" aria-label={`${profile.name}, home`}>

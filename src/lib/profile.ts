@@ -17,12 +17,12 @@ export const profile = {
 };
 
 // Resume offered on each role landing page (/support, /soc, /sysadmin).
-// Tailored PDFs go in public/. /support uses the 2026 IT support resume (no phone number);
-// /soc and /sysadmin use the general resume above until tailored copies exist.
+// Tailored PDFs go in public/ (no phone number on public copies). /support and /sysadmin have
+// their own resumes; /soc uses the general resume above until its tailored copy is confirmed.
 export const resumes = {
   support: "/Dickson-Ojama-Resume-Support.pdf",
   soc: profile.resumePdf,
-  sysadmin: profile.resumePdf,
+  sysadmin: "/Dickson-Ojama-Resume-Sysadmin.pdf",
 } as const;
 
 export const stats = [

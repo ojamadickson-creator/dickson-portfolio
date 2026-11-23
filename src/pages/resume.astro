@@ -84,4 +84,22 @@ import { profile, experience, credentials, inProgress, skills } from "../lib/pro
   .verify:hover { text-decoration: underline; }
   .verify :global(svg) { width: 0.95em; height: 0.95em; }
   @media (max-width: 560px) { .skills div { grid-template-columns: 1fr; gap: 0; } }
+
+  /* Ctrl+P: one clean A4 document, black on white, no site chrome. */
+  @media print {
+    @page { size: A4; margin: 14mm 16mm; }
+    :global(.site-header), :global(.site-footer), :global(.palette), :global(a.sr-only), .cta { display: none !important; }
+    :global(html), :global(body) { background: #fff !important; color: #000 !important; font-size: 10.5pt; }
+    .resume { width: auto; padding: 0; gap: 14pt; }
+    h1 { font-size: 22pt; }
+    h2 { color: #000; border-bottom-color: #000; margin-bottom: 6pt; padding-bottom: 3pt; }
+    h3, p, li, dt, dd, strong, .lead, .muted, .mono { color: #000 !important; }
+    .item, .creds li, .skills div { break-inside: avoid; }
+    .creds { border-color: #000; background: none; }
+    .creds li + li { border-top-color: #999; }
+    .verify { color: #000; }
+    .verify :global(svg) { display: none; }
+    section { break-inside: auto; }
+    h2 { break-after: avoid; }
+  }
 </style>

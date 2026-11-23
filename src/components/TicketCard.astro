@@ -5,7 +5,7 @@ interface Props { project: CollectionEntry<"projects"> }
 const { project } = Astro.props;
 const d = project.data;
 ---
-<article class="ticket">
+<article class="ticket" data-track={d.track}>
   <a class="ticket__media" href={`/projects/${project.id}/`} tabindex="-1" aria-hidden="true">
     <img src={d.evidence.src} alt="" width="800" height="500" loading="lazy" decoding="async" />
   </a>
@@ -16,6 +16,19 @@ const d = project.data;
     </div>
     <h3><a href={`/projects/${project.id}/`}>{d.title}</a></h3>
     <p>{d.summary}</p>
+    {d.outcome && <p class="ticket__outcome">{d.outcome}</p>}
+    {d.techniques.length > 0 && (
+      <ul class="ticket__attack" role="list" aria-label="MITRE ATT&amp;CK techniques">
+        {d.techniques.map((t) => (
+          <li>
+            <a href={`https://attack.mitre.org/techniques/${t.id.replace(".", "/")}/`} target="_blank" rel="noopener">
+              <span class="mono">{t.id}</span>
+              {t.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
     <ul class="ticket__stack" role="list">
       {d.stack.slice(0, 4).map((s) => <li>{s}</li>)}
       {d.stack.length > 4 && <li>+{d.stack.length - 4}</li>}
@@ -27,6 +40,10 @@ const d = project.data;
   </div>
 </article>
 <style>
+  .ticket { border-top: 3px solid var(--color-primary); }
+  .ticket[data-track="security"] { border-top-color: var(--color-accent); }
+  .ticket[data-track="security"] .ticket__tag { color: var(--color-accent); background: var(--color-accent-highlight); }
+  .ticket:hover { box-shadow: var(--shadow-md); }
   .ticket { display: grid; grid-template-rows: auto 1fr; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive); }
   .ticket:hover { border-color: var(--color-text-faint); box-shadow: var(--shadow-md); }
   .ticket__media { display: block; aspect-ratio: 16 / 10; background: var(--color-surface-offset); border-bottom: 1px solid var(--color-divider); overflow: hidden; }
@@ -41,6 +58,32 @@ const d = project.data;
   p { color: var(--color-text-muted); font-size: var(--text-sm); }
   .ticket__stack { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: auto; padding-top: var(--space-2); }
   .ticket__stack li { font-size: 0.75rem; padding: 2px var(--space-2); border: 1px solid var(--color-divider); border-radius: var(--radius-sm); color: var(--color-text-muted); }
+  .ticket__outcome {
+    margin-top: var(--space-3);
+    padding-left: var(--space-3);
+    border-left: 2px solid var(--color-primary);
+    font-size: var(--text-sm);
+    color: var(--color-text);
+  }
+  .ticket__attack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+  }
+  .ticket__attack li a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 2px var(--space-2);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .ticket__attack li a:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .ticket__attack .mono { font-size: 0.72rem; color: var(--color-primary); }
   .ticket__links { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); font-size: var(--text-sm); font-weight: 600; padding-top: var(--space-2); border-top: 1px dashed var(--color-divider); }
   .ticket__video { display: inline-flex; align-items: center; gap: var(--space-1); text-decoration: none; color: var(--color-text-muted); }
   .ticket__video:hover { color: var(--color-text); }

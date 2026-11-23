@@ -1,0 +1,86 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import ShippedStrip from "../components/ShippedStrip.astro";
+import DetectionTrace from "../components/DetectionTrace.astro";
+import RoleContact from "../components/RoleContact.astro";
+import { profile, resumes } from "../lib/profile";
+
+const byOrder = (a: { data: { order: number } }, b: { data: { order: number } }) => a.data.order - b.data.order;
+const secProjects = (await getCollection("projects", (p) => p.data.track === "security")).sort(byOrder);
+const itProjects = (await getCollection("projects", (p) => p.data.track === "it")).sort(byOrder);
+// Every technique mapped in a lab's frontmatter, with the labs that cover it.
+const techniques = [...new Map(secProjects.flatMap((p) => p.data.techniques.map((t) => [t.id, t] as const))).values()]
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((t) => ({ ...t, labs: secProjects.filter((p) => p.data.techniques.some((x) => x.id === t.id)) }));
+const traced = secProjects.find((p) => p.data.trace);
+---
+<Base
+  title={`SOC analyst (L1) · security labs · ${profile.name}`}
+  description="Security labs with Splunk detections mapped to MITRE ATT&CK: SMB brute force, AD reconnaissance, data exfiltration and STRRAT PCAP forensics."
+  path="/soc/"
+>
+  <Hero
+    status="Open to SOC analyst roles"
+    title="I read logs, spot attacks and contain them."
+    lead="Four security labs: an SMB brute force, a multi-stage Active Directory reconnaissance, a data exfiltration and a STRRAT malware capture. I built the detections in Splunk and Wireshark and mapped each lab to MITRE ATT&CK. Security+, Network+ and A+ certified, with three years of paid technical support behind it."
+    resume={resumes.soc}
+    cta={{ href: "#detection", label: "See the detection work" }}
+  />
+  <ProjectGrid
+    id="detection"
+    eyebrow="Detection work"
+    heading="Security labs, mapped to ATT&CK"
+    intro="Each lab shows the attack, the logs it left and the search that caught it."
+    projects={secProjects}
+  >
+    <div class="attack">
+      <h3>Techniques covered in these labs</h3>
+      <ul role="list">
+        {techniques.map((t) => (
+          <li>
+            <a href={`https://attack.mitre.org/techniques/${t.id.replace(".", "/")}/`} target="_blank" rel="noopener"><span class="mono">{t.id}</span> {t.name}</a>
+            <span class="attack__labs">{t.labs.map((p) => <a href={`/projects/${p.id}/`}>{p.data.code}</a>)}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+    <ShippedStrip tracks={["security"]} />
+  </ProjectGrid>
+  {traced?.data.trace && (
+    <section class="section" id="trace">
+      <div class="wrap trace-wrap">
+        <div class="section-head">
+          <p class="eyebrow">{traced.data.code} · Detection replay</p>
+          <h2>Watch the brute-force search fire</h2>
+          <p>Press play to step through the logs. <a class="link" href={`/projects/${traced.id}/`}>Read the full case study</a></p>
+        </div>
+        <DetectionTrace note={traced.data.trace.note} rows={traced.data.trace.rows} />
+      </div>
+    </section>
+  )}
+  <ProjectGrid
+    id="work"
+    eyebrow="The IT support side"
+    heading="Microsoft 365 and identity case studies"
+    intro="The same lab environment from the admin side: the directory, identities and devices the detections watch."
+    projects={itProjects}
+  />
+  <RoleContact heading="Hiring for a SOC team? Let's talk." resume={resumes.soc} />
+</Base>
+<style>
+  .mono { font-family: var(--font-mono); font-size: 0.72rem; color: var(--color-primary); }
+  .attack { margin-top: var(--space-8); }
+  .attack h3 { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--color-text-muted); margin-bottom: var(--space-3); }
+  .attack ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); gap: var(--space-2); }
+  .attack li { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--color-divider); border-radius: var(--radius-sm); background: var(--color-surface-2); font-size: var(--text-sm); }
+  .attack li > a { text-decoration: none; color: var(--color-text); }
+  .attack li > a:hover { color: var(--color-primary); }
+  .attack__labs { display: flex; gap: var(--space-2); }
+  .attack__labs a { font-family: var(--font-mono); font-size: 0.7rem; color: var(--color-text-muted); }
+  .attack__labs a:hover { color: var(--color-primary); }
+  .trace-wrap { max-width: 72ch; }
+  .trace-wrap .section-head { margin-bottom: 0; }
+</style>

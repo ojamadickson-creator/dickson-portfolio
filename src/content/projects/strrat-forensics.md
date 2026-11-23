@@ -6,6 +6,10 @@ order: 4
 summary: Network forensic investigation of a STRRAT infection across 11,562 packets, using NetworkMiner triage, a Wireshark decode of the C2 traffic, IOC extraction, OSINT checks and MITRE ATT&CK mapping.
 brief: Given only a packet capture, work out which machine is infected, who the attacker talks to and what was sent, then hand over indicators others can block.
 stack: [Wireshark, NetworkMiner, CyberChef, AbuseIPDB, VirusTotal, YARA, Splunk SPL, MITRE ATT&CK]
+outcome: "C2 pulled out of 11,562 packets: NetworkMiner triage, then a Wireshark decode and IOC extraction."
+techniques:
+  - id: T1071.001
+    name: Web Protocols
 repo: https://github.com/ojamadickson-creator/strrat-pcap-forensics
 evidence:
   src: /evidence/strrat.webp

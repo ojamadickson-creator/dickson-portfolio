@@ -1,0 +1,32 @@
+---
+import Icon from "./Icon.astro";
+import { profile } from "../lib/profile";
+---
+<aside class="snapshot" aria-label="Candidate summary">
+  <div class="snapshot__head">
+    <span>Candidate snapshot</span>
+    <span class="pill">Available now</span>
+  </div>
+  <dl>
+    <div><dt>Role</dt><dd>{profile.role}, {profile.focus}</dd></div>
+    <div><dt>Looking for</dt><dd>{profile.lookingFor.join(" · ")}</dd></div>
+    <div><dt>Certified</dt><dd>CompTIA Security+, Network+, A+, CSIS, CIOS <span class="muted">· MD-102 in progress</span></dd></div>
+    <div><dt>Languages</dt><dd>{profile.languages}</dd></div>
+    <div><dt>Work permit</dt><dd>{profile.workAuth}</dd></div>
+  </dl>
+  <a class="snapshot__foot" href={`mailto:${profile.email}`}><Icon name="mail" /> {profile.email}</a>
+</aside>
+<style>
+  .muted { color: var(--color-text-muted); font-weight: 400; }
+  .snapshot { color: var(--color-text); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); overflow: hidden; }
+  .snapshot__head { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--color-divider); font-family: var(--font-display); font-weight: 600; }
+  .snapshot dl { display: grid; }
+  .snapshot dl > div { display: grid; grid-template-columns: 7rem 1fr; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--color-divider); font-size: var(--text-sm); }
+  .snapshot dt { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--color-text-faint); padding-top: 3px; }
+  .snapshot__foot { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-4) var(--space-5); background: var(--color-surface); font-size: var(--text-sm); font-weight: 600; color: var(--color-primary); text-decoration: none; overflow-wrap: anywhere; }
+  .snapshot__foot:hover { color: var(--color-primary-hover); }
+  .snapshot__foot :global(svg) { width: 1.1em; height: 1.1em; flex: none; }
+  @media (max-width: 560px) {
+    .snapshot dl > div { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>

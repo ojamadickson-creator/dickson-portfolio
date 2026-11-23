@@ -4,6 +4,8 @@ import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 import Analytics from "@vercel/analytics/astro";
+import SecurityWatermark from "../components/SecurityWatermark.astro";
+import { getCollection } from "astro:content";
 
 interface Props {
   title: string;
@@ -15,6 +17,24 @@ const site = Astro.site ?? new URL("https://example.vercel.app");
 const canonical = new URL(path, site).toString();
 const ogImage = new URL("/og.png", site).toString();
 const current = Astro.url.pathname;
+const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
+const paletteItems = [
+  { group: "Jump to", label: "Projects", hint: "section", href: "/#work" },
+  { group: "Jump to", label: "Security labs", hint: "section", href: "/#security" },
+  { group: "Jump to", label: "Certifications", hint: "section", href: "/#certifications" },
+  { group: "Jump to", label: "Experience", hint: "section", href: "/#experience" },
+  { group: "Jump to", label: "Resume", hint: "page", href: "/resume/" },
+  { group: "Jump to", label: "Contact", hint: "section", href: "/#contact" },
+  { group: "Role pages", label: "IT support", hint: "/support", href: "/support/" },
+  { group: "Role pages", label: "SOC analyst", hint: "/soc", href: "/soc/" },
+  { group: "Role pages", label: "Systems admin", hint: "/sysadmin", href: "/sysadmin/" },
+  ...projects.map((p) => ({
+    group: p.data.track === "security" ? "Security labs" : "IT support projects",
+    label: p.data.title,
+    hint: p.data.code,
+    href: `/projects/${p.id}/`,
+  })),
+];
 const personLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -51,6 +71,7 @@ const personLd = {
   </head>
   <body>
     <a class="sr-only" href="#main">Skip to content</a>
+    <SecurityWatermark />
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/" aria-label={`${profile.name}, home`}>
@@ -59,9 +80,14 @@ const personLd = {
         </a>
         <nav class="nav" aria-label="Main">
           <a class="nav__link" href="/#work">Projects</a>
+          <a class="nav__link" href="/#security">Security</a>
           <a class="nav__link" href="/#certifications">Certifications</a>
           <a class="nav__link" href="/#experience">Experience</a>
           <a href="/resume/" aria-current={current.startsWith("/resume") ? "page" : undefined}>Resume</a>
+          <button class="nav__search" type="button" data-palette-open aria-label="Search this site">
+            <Icon name="search" />
+            <kbd>⌘K</kbd>
+          </button>
           <span class="nav__sep" aria-hidden="true"></span>
           <a class="icon-link" href={profile.github} aria-label="GitHub profile" rel="me noopener" target="_blank"><Icon name="github" /></a>
           <a class="icon-link" href={profile.linkedin} aria-label="LinkedIn profile" rel="me noopener" target="_blank"><Icon name="linkedin" /></a>
@@ -71,6 +97,7 @@ const personLd = {
           <summary aria-label="Open menu"><Icon name="menu" /></summary>
           <div class="menu__panel">
             <a href="/#work">Projects</a>
+            <a href="/#security">Security</a>
             <a href="/#certifications">Certifications</a>
             <a href="/#experience">Experience</a>
             <a href="/resume/">Resume</a>
@@ -95,9 +122,87 @@ const personLd = {
             <a href={profile.resumePdf} download>Resume (PDF)</a>
           </nav>
         </div>
+        <p class="site-footer__roles">Tailored for your team: <a href="/support/">IT support</a> · <a href="/soc/">SOC analyst</a> · <a href="/sysadmin/">Systems admin</a></p>
         <p>© {new Date().getFullYear()} {profile.name}. Credentials can be verified via the links on this site.</p>
       </div>
     </footer>
+    <dialog class="palette" data-palette aria-label="Search this site">
+      <div class="palette__field">
+        <Icon name="search" />
+        <input type="search" placeholder="Jump to a project, section or page…" autocomplete="off" aria-label="Search" data-palette-input />
+        <kbd>esc</kbd>
+      </div>
+      <ul class="palette__list" role="listbox" aria-label="Results" data-palette-list></ul>
+      <p class="palette__hint"><kbd>↑</kbd><kbd>↓</kbd> to move <kbd>↵</kbd> to open</p>
+    </dialog>
+    <script type="application/json" id="palette-data" set:html={JSON.stringify(paletteItems)}></script>
+    <script>
+      const dialog = document.querySelector<HTMLDialogElement>("[data-palette]");
+      const input = document.querySelector<HTMLInputElement>("[data-palette-input]");
+      const list = document.querySelector<HTMLUListElement>("[data-palette-list]");
+      const dataEl = document.getElementById("palette-data");
+      type Item = { group: string; label: string; hint: string; href: string };
+      const items: Item[] = dataEl ? JSON.parse(dataEl.textContent || "[]") : [];
+      let active = 0;
+      let shown: Item[] = [];
+
+      const render = () => {
+        const q = (input?.value || "").trim().toLowerCase();
+        shown = q
+          ? items.filter((it) => (it.label + " " + it.hint + " " + it.group).toLowerCase().includes(q))
+          : items;
+        if (!list) return;
+        active = Math.min(active, Math.max(0, shown.length - 1));
+        list.innerHTML = shown
+          .map((it, i) => {
+            const on = i === active;
+            return '<li role="option" aria-selected="' + on + '" data-i="' + i + '"' + (on ? ' data-active="1"' : "") +
+              '><a href="' + it.href + '"><span>' + it.label + '</span><em>' + (it.hint || it.group) + '</em></a></li>';
+          })
+          .join("");
+      };
+
+      const openPalette = () => {
+        if (!dialog) return;
+        dialog.showModal();
+        render();
+        input?.focus();
+        input?.select();
+      };
+      const go = (i: number) => {
+        const target = shown[i];
+        if (target) window.location.href = target.href;
+      };
+
+      document.querySelectorAll("[data-palette-open]").forEach((b) => b.addEventListener("click", openPalette));
+      document.addEventListener("keydown", (e) => {
+        const k = e.key.toLowerCase();
+        if ((e.metaKey || e.ctrlKey) && k === "k") {
+          e.preventDefault();
+          if (dialog?.open) { dialog.close(); } else { openPalette(); }
+          return;
+        }
+        if (!dialog?.open) return;
+        if (k === "escape") { dialog.close(); return; }
+        if (k === "arrowdown" || k === "arrowup") {
+          e.preventDefault();
+          if (!shown.length) return;
+          active = k === "arrowdown" ? (active + 1) % shown.length : (active - 1 + shown.length) % shown.length;
+          render();
+          return;
+        }
+        if (k === "enter") {
+          e.preventDefault();
+          go(active);
+        }
+      });
+      input?.addEventListener("input", render);
+      list?.addEventListener("click", (e) => {
+        const li = (e.target as HTMLElement).closest("[data-i]");
+        if (li) go(Number(li.getAttribute("data-i")));
+      });
+      dialog?.addEventListener("click", (e) => { if (e.target === dialog) dialog.close(); });
+    </script>
     <script>
       document.querySelectorAll<HTMLAnchorElement>(".menu__panel a").forEach((a) => a.addEventListener("click", () => a.closest("details")?.removeAttribute("open")));
     </script>

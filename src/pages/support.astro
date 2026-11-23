@@ -1,0 +1,42 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import Hero from "../components/Hero.astro";
+import MethodBlock from "../components/MethodBlock.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import ShippedStrip from "../components/ShippedStrip.astro";
+import AiDisclosure from "../components/AiDisclosure.astro";
+import RoleContact from "../components/RoleContact.astro";
+import { profile, resumes } from "../lib/profile";
+
+const itProjects = (await getCollection("projects", (p) => p.data.track === "it")).sort((a, b) => a.data.order - b.data.order);
+---
+<Base
+  title={`IT Support Technician (L1/L2) in Lisbon · ${profile.name}`}
+  description="Service desk and IT support, L1 and L2: how I troubleshoot, the Microsoft 365 and identity labs behind it, and a resume to download."
+  path="/support/"
+>
+  <Hero
+    status="Open to IT support roles"
+    title="Fix it, explain it, then write it down."
+    lead="IT Support Technician (L1/L2) with three years of paid technical support, CompTIA A+, Network+ and Security+ certified. I resolve desktop, account-access and connectivity issues, then document the fix so it stays fixed. My home lab runs a hybrid Active Directory, Entra ID and Intune environment."
+    resume={resumes.support}
+    cta={{ href: "#method", label: "How I troubleshoot" }}
+  />
+  <MethodBlock />
+  <ProjectGrid
+    id="work"
+    eyebrow="IT support & Microsoft 365"
+    heading="Microsoft 365 and identity case studies"
+    intro="Each project is written up like a ticket: what I was asked to do, what I built, what broke and how I fixed and verified it."
+    projects={itProjects}
+  >
+    <ShippedStrip tracks={["it"]} />
+    <p class="more">Also: <a class="link" href="/soc/">security labs</a> and <a class="link" href="/sysadmin/">the lab topology</a>.</p>
+  </ProjectGrid>
+  <AiDisclosure />
+  <RoleContact heading="Hiring for IT support? Let's talk." resume={resumes.support} />
+</Base>
+<style>
+  .more { margin-top: var(--space-6); font-size: var(--text-sm); color: var(--color-text-muted); }
+</style>

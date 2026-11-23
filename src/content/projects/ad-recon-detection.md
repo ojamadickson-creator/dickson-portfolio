@@ -6,6 +6,14 @@ order: 3
 summary: A full red team chain against an AD domain controller (Nmap, password spraying, LDAP and post-compromise enumeration), each step detected in Splunk and mapped to MITRE ATT&CK.
 brief: Follow an attacker from finding a username to enumerating the domain, and make sure every stage leaves a trace the blue team can alert on.
 stack: [Kali Linux, Nmap, Hydra, ldapsearch, NetExec, Splunk Enterprise, OPNsense, MITRE ATT&CK]
+outcome: "Nmap sweep, password spraying and LDAP enumeration, each one detected in Splunk and mapped to a technique."
+techniques:
+  - id: T1046
+    name: Network Service Discovery
+  - id: T1110.003
+    name: Password Spraying
+  - id: T1087.002
+    name: Domain Account
 repo: https://github.com/ojamadickson-creator/multi-stage-recon-lab
 video: https://www.youtube.com/watch?v=NHnI9oP_xTY
 evidence:

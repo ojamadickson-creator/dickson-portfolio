@@ -3,6 +3,7 @@ import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Icon from "../../components/Icon.astro";
 import DetectionTrace from "../../components/DetectionTrace.astro";
+import AnnotatedFigure from "../../components/AnnotatedFigure.astro";
 
 export async function getStaticPaths() {
   const all = (await getCollection("projects")).sort((a, b) =>
@@ -13,6 +14,7 @@ export async function getStaticPaths() {
 const { project, next } = Astro.props;
 const d = project.data;
 const { Content } = await render(project);
+const updated = d.updated ? { iso: d.updated.toISOString().slice(0, 10), text: d.updated.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) } : null;
 const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security labs";
 ---
 <Base title={`${d.title} · Dickson Ojama`} description={d.summary} path={`/projects/${project.id}/`}>
@@ -25,6 +27,7 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
         <span class="mono muted">{trackLabel}</span>
       </div>
       <h1>{d.title}</h1>
+      {updated && <p class="case__updated">Last updated <time datetime={updated.iso}>{updated.text}</time></p>}
       <p class="case__summary">{d.summary}</p>
       {d.outcome && (
         <p class="case__outcome"><strong>Outcome</strong>{d.outcome}</p>
@@ -60,10 +63,14 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
       </aside>
 
       <div class="prose">
-        <figure>
-          <img src={d.evidence.src} alt={d.evidence.alt} width="1200" height="750" decoding="async" />
-          <figcaption>{d.evidence.caption}</figcaption>
-        </figure>
+        {d.annotations && d.annotations.length > 0 ? (
+          <AnnotatedFigure src={d.evidence.src} alt={d.evidence.alt} caption={d.evidence.caption} points={d.annotations} width={d.evidence.width} height={d.evidence.height} />
+        ) : (
+          <figure>
+            <img src={d.evidence.src} alt={d.evidence.alt} width={d.evidence.width ?? 1200} height={d.evidence.height ?? 750} decoding="async" />
+            <figcaption>{d.evidence.caption}</figcaption>
+          </figure>
+        )}
         {d.trace && <DetectionTrace note={d.trace.note} rows={d.trace.rows} />}
         <Content />
       </div>
@@ -87,6 +94,7 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
   .back:hover { color: var(--color-text); }
   .case__meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
   h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-2xl); letter-spacing: -0.02em; max-width: 22ch; }
+  .case__updated { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: calc(-1 * var(--space-3)); }
   .case__summary { color: var(--color-text-muted); font-size: var(--text-lg); max-width: 62ch; line-height: 1.5; }
   .case__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
   .case__outcome {

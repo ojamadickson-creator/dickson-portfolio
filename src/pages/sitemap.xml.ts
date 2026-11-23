@@ -7,6 +7,9 @@ export const GET: APIRoute = async ({ site }) => {
   const urls = [
     "/",
     "/resume/",
+    "/support/",
+    "/soc/",
+    "/sysadmin/",
     ...projects.map((p) => `/projects/${p.id}/`),
   ];
   const lastmod = new Date().toISOString().slice(0, 10);

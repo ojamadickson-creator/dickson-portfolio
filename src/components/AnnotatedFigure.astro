@@ -1,0 +1,69 @@
+---
+interface Point { x: number; y: number; label: string }
+interface Props {
+  src: string;
+  alt: string;
+  caption: string;
+  points: Point[];
+  width?: number;
+  height?: number;
+}
+const { src, alt, caption, points, width = 1600, height = 900 } = Astro.props;
+---
+<figure class="annot">
+  <div class="annot__media" style={`aspect-ratio: ${width} / ${height}`}>
+    <img src={src} alt={alt} width={width} height={height} decoding="async" />
+    {points.map((p, i) => (
+      <span class="annot__dot" style={`--x:${p.x}%; --y:${p.y}%`} aria-hidden="true">{i + 1}</span>
+    ))}
+  </div>
+  <figcaption>
+    <p>{caption}</p>
+    <ol class="annot__list">
+      {points.map((p) => <li>{p.label}</li>)}
+    </ol>
+  </figcaption>
+</figure>
+<style>
+  .annot { margin-bottom: var(--space-10); }
+  .annot__media { position: relative; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-offset); overflow: hidden; }
+  .annot__media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .annot__dot {
+    --size: 1.6rem;
+    position: absolute;
+    /* Clamp so a dot near the edge never spills outside the image. */
+    left: clamp(calc(var(--size) / 2), var(--x), calc(100% - var(--size) / 2));
+    top: clamp(calc(var(--size) / 2), var(--y), calc(100% - var(--size) / 2));
+    width: var(--size);
+    height: var(--size);
+    transform: translate(-50%, -50%);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 0 0 3px #fff, var(--shadow-sm);
+    pointer-events: none;
+  }
+  figcaption { font-size: var(--text-sm); color: var(--color-text-muted); margin-top: var(--space-3); display: grid; gap: var(--space-3); }
+  .annot__list { display: grid; gap: var(--space-2); padding-left: 0; margin: 0; list-style: none; counter-reset: annot; }
+  .annot__list li { display: grid; grid-template-columns: 1.6rem 1fr; gap: var(--space-2); align-items: start; counter-increment: annot; color: var(--color-text); }
+  .annot__list li::before {
+    content: counter(annot);
+    display: grid;
+    place-items: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+  @media (max-width: 480px) { .annot__dot { --size: 1rem; font-size: 0.58rem; box-shadow: 0 0 0 2px #fff; } }
+</style>

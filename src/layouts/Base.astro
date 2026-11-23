@@ -24,6 +24,9 @@ const paletteItems = [
   { group: "Jump to", label: "Experience", hint: "section", href: "/#experience" },
   { group: "Jump to", label: "Resume", hint: "page", href: "/resume/" },
   { group: "Jump to", label: "Contact", hint: "section", href: "/#contact" },
+  { group: "Role pages", label: "IT support", hint: "/support", href: "/support/" },
+  { group: "Role pages", label: "SOC analyst", hint: "/soc", href: "/soc/" },
+  { group: "Role pages", label: "Systems admin", hint: "/sysadmin", href: "/sysadmin/" },
   ...projects.map((p) => ({
     group: p.data.track === "security" ? "Security labs" : "IT support projects",
     label: p.data.title,
@@ -117,6 +120,7 @@ const personLd = {
             <a href={profile.resumePdf} download>Resume (PDF)</a>
           </nav>
         </div>
+        <p class="site-footer__roles">Tailored for your team: <a href="/support/">IT support</a> · <a href="/soc/">SOC analyst</a> · <a href="/sysadmin/">Systems admin</a></p>
         <p>© {new Date().getFullYear()} {profile.name}. Credentials can be verified via the links on this site.</p>
       </div>
     </footer>

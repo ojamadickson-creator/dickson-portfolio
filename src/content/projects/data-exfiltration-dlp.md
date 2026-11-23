@@ -16,6 +16,12 @@ evidence:
   src: /evidence/exfil.webp
   alt: Splunk Network Traffic dashboard listing OPNsense firewall events between the LAN and WAN segments.
   caption: Firewall traffic from OPNsense in Splunk, used to link host file-access events to the outbound SMB session.
+  width: 1600
+  height: 747
+annotations:
+  - { x: 16.3, y: 17.8, label: "Network Traffic from Firewall: the Splunk dashboard built on OPNsense syslog." }
+  - { x: 36.4, y: 27.7, label: "action: whether the firewall passed or blocked each connection." }
+  - { x: 63.1, y: 27.7, label: "src_ip and dest_ip: which internal host talked to which address." }
 jobFit:
   - Reading Windows Security logs and knowing which Event IDs matter
   - Firewall rule order, routing and containment

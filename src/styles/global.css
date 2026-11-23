@@ -248,3 +248,20 @@ kbd {
   font-size: 0.7rem;
   color: var(--color-text-muted);
 }
+
+/* ── Role links in the footer ─────────────────────────────────────────── */
+.site-footer__roles a { text-decoration: underline; text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+
+/* ── Keyboard focus ───────────────────────────────────────────────────── */
+.nav a:focus-visible,
+.menu__panel a:focus-visible,
+.menu summary:focus-visible,
+.nav__search:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+.site-footer a:focus-visible,
+.section--ink a:focus-visible { outline-color: var(--color-ink-accent); }
+.palette__list a:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; background: var(--color-primary-highlight); color: var(--color-primary); }
+.ticket:focus-within { border-color: var(--color-primary); }
+
+@media (prefers-reduced-motion: reduce) {
+  .palette, .palette::backdrop, .palette__list a { transition: none; animation: none; }
+}

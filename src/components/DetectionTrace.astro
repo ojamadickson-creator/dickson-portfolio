@@ -91,6 +91,8 @@ const hits = rows.filter((r) => r.hit).length;
   .trace__table tbody tr[data-lit="1"] { background: var(--color-primary-highlight); }
   .trace__table tbody tr[data-lit="1"] .trace__src { color: var(--color-primary); }
   .trace__note { margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--text-xs); color: var(--color-text-muted); background: var(--color-surface-2); }
+  .trace__play:focus-visible, .trace__only input:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  @media (prefers-reduced-motion: reduce) { .trace__table tbody tr { transition: none; } }
   @media (max-width: 640px) { .trace__table { font-size: 0.72rem; } .trace__table th:nth-child(1), .trace__table td:nth-child(1) { display: none; } }
 </style>
 
@@ -104,9 +106,17 @@ const hits = rows.filter((r) => r.hit).length;
     const reveal = () => rows.forEach((r) => (r.dataset.shown = "1"));
     const clear = () => rows.forEach((r) => { r.dataset.lit = "0"; });
 
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
     play.addEventListener("click", async () => {
       clear();
       reveal();
+      if (reduceMotion.matches) {
+        // No stepping: light every matched row at once.
+        rows.forEach((r) => (r.dataset.lit = r.dataset.hit === "1" ? "1" : "0"));
+        play.textContent = "Replay detection";
+        return;
+      }
       play.disabled = true;
       const wasOnly = only?.checked ?? false;
       if (wasOnly && only) { only.checked = false; only.dispatchEvent(new Event("change")); }

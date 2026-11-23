@@ -30,6 +30,13 @@ evidence:
   src: /evidence/smb.webp
   alt: Splunk search results correlating OPNsense SMB connections with Windows failed logon events (Event ID 4625) from the same source IP.
   caption: Perimeter and domain controller logs combined into one timeline. Each row is a failed Windows logon from the attacking source.
+  width: 1600
+  height: 769
+annotations:
+  - { x: 33.5, y: 22.9, label: "One search over both sources: OPNsense syslog passes and domain controller events with EventCode 4625." }
+  - { x: 37.5, y: 38.6, label: "99 events, the same count the dashboard showed during validation." }
+  - { x: 48.5, y: 55.1, label: "attack_phase labels each row. Every row here is Phase 3a, a failed Windows logon." }
+  - { x: 76.6, y: 55.1, label: "src_ip 192.168.56.1 on every row. Splunk recorded this instead of the attacker's real address, which I left as an open question." }
 jobFit:
   - Spotting account lockout storms and their source
   - Writing searches that cut noise instead of adding it

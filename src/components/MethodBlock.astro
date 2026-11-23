@@ -1,0 +1,61 @@
+---
+// How I troubleshoot. Each step is a real event from a case study; keep them that way.
+const steps = [
+  {
+    name: "Reproduce",
+    text: "Start from the exact error, not the summary of it. On CLIENT01, gpupdate /force failed and DC01 reported \"no time data was available\".",
+    code: "LAB-01",
+    href: "/projects/active-directory/",
+  },
+  {
+    name: "Isolate",
+    text: "Narrow it down one layer at a time. When my containment rule either blocked everything or let the transfer through, I ran tcpdump on both sides of the firewall to see where traffic stopped.",
+    code: "SEC-01",
+    href: "/projects/data-exfiltration-dlp/",
+  },
+  {
+    name: "Fix",
+    text: "Fix the cause, then check for the next one. The OPNsense deny rule sat above the pass rule, so I moved it. Windows Firewall on the DC was still blocking SMB, so I worked through that next.",
+    code: "SEC-02",
+    href: "/projects/smb-brute-force/",
+  },
+  {
+    name: "Confirm",
+    text: "Prove it with the tool that showed the fault. After fixing the clock skew I confirmed with w32tm /query /status and gpresult, and re-ran the diagnostics until they passed.",
+    code: "LAB-01",
+    href: "/projects/active-directory/",
+  },
+];
+---
+<section class="section method" id="method" aria-labelledby="method-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">How I troubleshoot</p>
+      <h2 id="method-title">Reproduce, isolate, fix, confirm</h2>
+      <p>The same four steps on every ticket. Each one below comes from a lab I wrote up.</p>
+    </div>
+    <ol class="method__steps" role="list">
+      {steps.map((s, i) => (
+        <li>
+          <span class="method__n mono" aria-hidden="true">0{i + 1}</span>
+          <h3>{s.name}</h3>
+          <p>{s.text}</p>
+          <a class="link" href={s.href}>See it in {s.code}</a>
+        </li>
+      ))}
+    </ol>
+    <p class="method__log"><strong>Then I write it down.</strong> Every incident goes in the troubleshooting log as symptom, root cause, fix and verification, so the next technician does not start from zero. <a class="link" href="/projects/active-directory/">See the LAB-01 log</a></p>
+  </div>
+</section>
+<style>
+  .mono { font-family: var(--font-mono); }
+  .method__steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+  .method__steps li { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+  .method__n { font-size: var(--text-xs); color: var(--color-primary); }
+  h3 { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 600; }
+  .method__steps p { font-size: var(--text-sm); color: var(--color-text-muted); }
+  .method__steps .link { margin-top: auto; padding-top: var(--space-2); font-size: var(--text-sm); font-weight: 600; width: fit-content; }
+  .method__log { margin-top: var(--space-6); padding: var(--space-4) var(--space-5); border-left: 2px solid var(--color-primary); background: var(--color-surface-2); border-radius: 0 var(--radius-md) var(--radius-md) 0; font-size: var(--text-sm); max-width: 80ch; }
+  @media (max-width: 960px) { .method__steps { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .method__steps { grid-template-columns: 1fr; } }
+</style>

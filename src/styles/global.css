@@ -12,13 +12,15 @@
   --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem;
   --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem; --space-32: 8rem;
 
-  /* Professional palette: cool paper, deep navy ink, one confident blue + a verified green */
-  --color-bg: #f5f6f8;
-  --color-surface: #fafbfc;
+  /* Professional palette: cool blue-grey paper, deep navy ink, one confident blue,
+     a teal "signal" accent for security work and a verified green */
+  --color-bg: #eef2f7;
+  --color-surface: #f5f7fb;
   --color-surface-2: #ffffff;
-  --color-surface-offset: #eceff3;
-  --color-divider: #e3e7ec;
-  --color-border: #d5dbe3;
+  --color-surface-offset: #e3e9f2;
+  --color-divider: #d9e0ea;
+  --color-border: #c9d3e1;
+  --color-band: #e3eaf5;
   --color-text: #0f1a2a;
   --color-text-muted: #4d5a6b;
   --color-text-faint: #8590a0;
@@ -27,6 +29,10 @@
   --color-primary-hover: #173f94;
   --color-primary-active: #112f70;
   --color-primary-highlight: #e2eaf8;
+  --color-accent: #0b7a83;
+  --color-accent-hover: #08636a;
+  --color-accent-highlight: #d5eef0;
+  --gradient-signal: linear-gradient(90deg, var(--color-primary), var(--color-accent));
   --color-success: #13744c;
   --color-success-highlight: #dcefe5;
   --color-progress: #8a5300;
@@ -46,7 +52,8 @@
 
   --content-narrow: 680px;
   --content-default: 960px;
-  --content-wide: 1200px;
+  --content-wide: 1520px;
+  --gutter-x: clamp(1.25rem, 4vw, 4.5rem);
 
   --font-display: "General Sans", "Helvetica Neue", sans-serif;
   --font-body: "Satoshi", "Helvetica Neue", sans-serif;
@@ -80,17 +87,27 @@ code { font-family: var(--font-mono); font-size: 0.88em; background: var(--color
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
 
 /* ---------- Layout helpers ---------- */
-.wrap { width: min(100% - 2 * var(--space-5), var(--content-wide)); margin-inline: auto; }
+.wrap { width: min(100% - 2 * var(--gutter-x), var(--content-wide)); margin-inline: auto; }
 .wrap--narrow { width: min(100% - 2 * var(--space-5), var(--content-narrow)); margin-inline: auto; }
 .section { padding-block: clamp(var(--space-12), 8vw, var(--space-24)); }
 .section + .section { border-top: 1px solid var(--color-divider); }
-.section--ink { background: var(--color-ink); color: var(--color-ink-text); border-top: 0 !important; }
+.section--ink {
+  background:
+    radial-gradient(900px 420px at 100% 0%, color-mix(in oklab, var(--color-primary) 38%, transparent), transparent 70%),
+    radial-gradient(700px 380px at 0% 100%, color-mix(in oklab, var(--color-accent) 30%, transparent), transparent 70%),
+    var(--color-ink);
+  color: var(--color-ink-text); border-top: 0 !important;
+}
+/* Alternate plain sections get a soft blue band so long pages have rhythm. */
+main > .section:not(.section--ink):not(.section--tint):nth-of-type(even) { background: linear-gradient(180deg, var(--color-band), var(--color-bg)); }
 .section--ink + .section { border-top: 0; }
 
 .eyebrow {
   font-family: var(--font-body); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; color: var(--color-primary); display: inline-flex; align-items: center; gap: var(--space-2);
 }
+.eyebrow::before { content: ""; width: 1.5rem; height: 2px; border-radius: 2px; background: var(--gradient-signal); flex: none; }
+.section--ink .eyebrow::before { background: linear-gradient(90deg, var(--color-ink-accent), var(--color-accent-highlight)); }
 .section--ink .eyebrow { color: var(--color-ink-accent); }
 .section-head { display: grid; gap: var(--space-3); margin-bottom: var(--space-10); max-width: 62ch; }
 .section-head h2 { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.02em; }

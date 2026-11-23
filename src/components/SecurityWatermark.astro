@@ -30,7 +30,8 @@ const paths: Record<string, string> = {
 };
 ---
 <div class="wm" aria-hidden="true">
-  <div class="wm__scan"></div>
+  <div class="wm__scan wm__scan--l"></div>
+  <div class="wm__scan wm__scan--r"></div>
   {items.map((it) => (
     <span
       class:list={["wm__item", `wm__item--${it.kind}`, `wm__item--${it.side}`, { "wm__item--keep": it.m }]}
@@ -45,12 +46,14 @@ const paths: Record<string, string> = {
 
 <style>
   .wm {
-    /* Centre of each side margin outside the 1200px content column; on narrow screens the
-       glyphs sit half off the edge so they never sit behind the text. */
-    --gutter: max(0px, (100vw - var(--content-wide)) / 2);
-    --mid: clamp(4px, calc(var(--gutter) / 2), 360px);
-    position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
-    color: var(--color-primary); opacity: 0.1; contain: strict;
+    /* Centre of each side margin outside the content column (matches .wrap); glyphs scale
+       to the margin so they never overlap the text. */
+    --gutter: max(var(--gutter-x), (100vw - var(--content-wide)) / 2);
+    --mid: clamp(0px, calc(var(--gutter) / 2), 360px);
+    /* Above section backgrounds (so it shows on bands and the navy hero) but it only ever
+       occupies the side margins, below the sticky header, and ignores the pointer. */
+    position: fixed; inset: 0; z-index: 40; pointer-events: none; overflow: hidden;
+    color: var(--color-ink-accent); opacity: 0.3; contain: strict;
   }
   .wm__item {
     position: absolute; top: var(--y); translate: -50% -50%; width: max-content;
@@ -58,20 +61,21 @@ const paths: Record<string, string> = {
   }
   .wm__item--l { left: calc(var(--mid) + var(--o)); }
   .wm__item--r { left: calc(100% - var(--mid) - var(--o)); }
-  .wm__item--icon svg { width: 56px; max-width: none; height: auto; }
+  .wm__item--icon svg { width: clamp(28px, calc(var(--gutter) * 0.8), 64px); max-width: none; height: auto; }
   .wm__item--text {
     display: none; font-family: var(--font-mono); font-size: 0.8rem; letter-spacing: 0.08em;
-    white-space: nowrap; color: var(--color-text); opacity: 0.8;
+    white-space: nowrap; color: var(--color-primary); opacity: 0.9;
   }
+  /* A scanner line with a short trailing glow, fading out towards the content. */
   .wm__scan {
-    position: absolute; top: 0; height: 140px; width: var(--gutter);
-    background: linear-gradient(to bottom, transparent, currentColor 50%, transparent);
-    opacity: 0.35; animation: wm-scan 16s linear infinite; will-change: transform;
+    position: absolute; top: 0; height: 90px; width: var(--gutter);
+    background: linear-gradient(to bottom, transparent, currentColor 96%, currentColor);
+    opacity: 0.4; animation: wm-scan 16s linear infinite; will-change: transform;
   }
-  .wm__scan, .wm__scan::after { left: 0; }
-  .wm__scan::after { content: ""; position: absolute; top: 0; height: 100%; width: 100%; left: calc(100vw - var(--gutter)); background: inherit; }
+  .wm__scan--l { left: 0; -webkit-mask-image: linear-gradient(90deg, #000 20%, transparent); mask-image: linear-gradient(90deg, #000 20%, transparent); }
+  .wm__scan--r { right: 0; -webkit-mask-image: linear-gradient(270deg, #000 20%, transparent); mask-image: linear-gradient(270deg, #000 20%, transparent); }
   /* Labels only where the margin is wide enough to hold them. */
-  @media (min-width: 1520px) { .wm__item--text { display: block; } }
+  @media (min-width: 1880px) { .wm__item--text { display: block; } }
   @keyframes wm-float {
     0%, 100% { transform: translate3d(0, 0, 0); }
     50% { transform: translate3d(0, var(--amp), 0); }
@@ -81,9 +85,9 @@ const paths: Record<string, string> = {
     to { transform: translate3d(0, 100vh, 0); }
   }
   @media (max-width: 720px) {
-    .wm { opacity: 0.08; }
+    .wm { opacity: 0.22; --mid: 0px; }
     .wm__item:not(.wm__item--keep) { display: none; }
-    .wm__item--icon svg { width: 40px; }
+    .wm__item--icon svg { width: 28px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .wm__item { animation: none; }

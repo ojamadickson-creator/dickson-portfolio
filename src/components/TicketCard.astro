@@ -5,7 +5,7 @@ interface Props { project: CollectionEntry<"projects"> }
 const { project } = Astro.props;
 const d = project.data;
 ---
-<article class="ticket">
+<article class="ticket" data-track={d.track}>
   <a class="ticket__media" href={`/projects/${project.id}/`} tabindex="-1" aria-hidden="true">
     <img src={d.evidence.src} alt="" width="800" height="500" loading="lazy" decoding="async" />
   </a>
@@ -40,6 +40,10 @@ const d = project.data;
   </div>
 </article>
 <style>
+  .ticket { border-top: 3px solid var(--color-primary); }
+  .ticket[data-track="security"] { border-top-color: var(--color-accent); }
+  .ticket[data-track="security"] .ticket__tag { color: var(--color-accent); background: var(--color-accent-highlight); }
+  .ticket:hover { box-shadow: var(--shadow-md); }
   .ticket { display: grid; grid-template-rows: auto 1fr; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color var(--transition-interactive), box-shadow var(--transition-interactive); }
   .ticket:hover { border-color: var(--color-text-faint); box-shadow: var(--shadow-md); }
   .ticket__media { display: block; aspect-ratio: 16 / 10; background: var(--color-surface-offset); border-bottom: 1px solid var(--color-divider); overflow: hidden; }

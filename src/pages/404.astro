@@ -5,12 +5,19 @@ import Base from "../layouts/Base.astro";
   <div class="wrap--narrow nf">
     <p class="eyebrow">Error 404</p>
     <h1>This ticket doesn't exist.</h1>
-    <p>The page may have moved. Head back to the homepage to see my work.</p>
+    <p>The page may have moved. Head back to the homepage to see my work, or pick the page that fits your role.</p>
     <a class="btn btn--primary" href="/">Back to the homepage</a>
+    <ul class="nf__links" role="list">
+      <li><a class="link" href="/support/">IT support</a></li>
+      <li><a class="link" href="/soc/">SOC analyst</a></li>
+      <li><a class="link" href="/sysadmin/">Systems admin</a></li>
+      <li><a class="link" href="/resume/">Resume</a></li>
+    </ul>
   </div>
 </Base>
 <style>
   .nf { padding-block: var(--space-24); display: grid; gap: var(--space-5); justify-items: start; }
   h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-2xl); }
   p:not(.eyebrow) { color: var(--color-text-muted); }
+  .nf__links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); font-weight: 600; font-size: var(--text-sm); }
 </style>

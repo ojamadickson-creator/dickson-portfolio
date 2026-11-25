@@ -1,0 +1,43 @@
+---
+import Icon from "./Icon.astro";
+import { profile } from "../lib/profile";
+interface Props {
+  heading: string;
+  resume: string;
+  /** Suggested file name for the download. */
+  filename?: string;
+}
+const { heading, resume, filename } = Astro.props;
+---
+<section class="section section--ink" id="contact">
+  <div class="wrap role-contact">
+    <div class="section-head">
+      <p class="eyebrow">Resume and contact</p>
+      <h2>{heading}</h2>
+      <p>Email me at <a href={`mailto:${profile.email}`}>{profile.email}</a> or connect on <a href={profile.linkedin} target="_blank" rel="me noopener">LinkedIn</a>. I usually reply within one working day.</p>
+      <ul class="role-contact__facts" role="list">
+        <li><Icon name="pin" /> {profile.location} · onsite, hybrid or remote</li>
+        <li><Icon name="shield" /> {profile.workAuth}</li>
+      </ul>
+    </div>
+    <div class="role-contact__cta">
+      <a class="btn btn--primary" href={resume} download={filename ?? true}><Icon name="download" /> Download resume (PDF)</a>
+      <a class="btn btn--ghost" href={`mailto:${profile.email}`}><Icon name="mail" /> Email me</a>
+      <a class="btn btn--ghost" href="/#contact">Send a message</a>
+    </div>
+  </div>
+</section>
+<style>
+  .role-contact { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: center; }
+  .role-contact .section-head { margin-bottom: 0; }
+  .section--ink a:not(.btn) { color: var(--color-ink-accent); }
+  .role-contact__facts { display: grid; gap: var(--space-2); margin-top: var(--space-4); font-size: var(--text-sm); color: var(--color-ink-text); }
+  .role-contact__facts li { display: flex; align-items: center; gap: var(--space-2); }
+  .role-contact__facts :global(svg) { width: 1.1em; height: 1.1em; color: var(--color-ink-accent); flex: none; }
+  .role-contact__cta { display: grid; gap: var(--space-3); justify-items: stretch; }
+  .role-contact__cta .btn { justify-content: center; }
+  .role-contact__cta .btn--primary { background: var(--color-ink-accent); color: var(--color-ink); }
+  .role-contact__cta .btn--ghost { background: var(--color-ink-2); border-color: var(--color-ink-border); color: var(--color-ink-text); }
+  .role-contact__cta .btn--ghost:hover { border-color: var(--color-ink-accent); }
+  @media (max-width: 900px) { .role-contact { grid-template-columns: 1fr; } }
+</style>

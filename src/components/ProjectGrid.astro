@@ -1,0 +1,31 @@
+---
+import type { CollectionEntry } from "astro:content";
+import TicketCard from "./TicketCard.astro";
+
+interface Props {
+  projects: CollectionEntry<"projects">[];
+  heading: string;
+  intro?: string;
+  eyebrow?: string;
+  /** Section id, used for in-page links such as /#work. */
+  id?: string;
+}
+const { projects, heading, intro, eyebrow, id } = Astro.props;
+---
+<section class="section" id={id}>
+  <div class="wrap">
+    <div class="section-head">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h2>{heading}</h2>
+      {intro && <p>{intro}</p>}
+    </div>
+    <div class="grid">
+      {projects.map((p) => <TicketCard project={p} />)}
+    </div>
+    <slot />
+  </div>
+</section>
+<style>
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-6); }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+</style>

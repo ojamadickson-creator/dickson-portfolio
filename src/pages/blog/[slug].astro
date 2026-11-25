@@ -1,0 +1,117 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+import { profile } from "../../lib/profile";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft || import.meta.env.DEV);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const d = post.data;
+const site = Astro.site ?? new URL("https://ojamadickson.xyz");
+
+const readingTime = Math.max(1, Math.round((post.body ?? "").split(/\s+/).length / 200));
+const fmt = (date: Date) =>
+  date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+const url = new URL(`/blog/${post.id}/`, site).toString();
+
+// Keep the SERP title inside ~62 characters without cutting mid-word.
+const suffix = " \u00b7 Dickson Ojama";
+const pageTitle =
+  (d.title + suffix).length <= 62
+    ? d.title + suffix
+    : d.title.slice(0, 62 - suffix.length - 1).replace(/\s+\S*$/, "") + "\u2026" + suffix;
+
+const articleLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: d.title,
+  description: d.description,
+  datePublished: d.date.toISOString(),
+  dateModified: (d.updated ?? d.date).toISOString(),
+  author: { "@type": "Person", name: profile.name, url: site.toString() },
+  publisher: { "@type": "Person", name: profile.name },
+  mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  url,
+  keywords: d.tags.join(", "),
+  inLanguage: "en",
+  image: new URL("/og.png", site).toString(),
+};
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", site).toString() },
+    { "@type": "ListItem", position: 2, name: "Blog", item: new URL("/blog/", site).toString() },
+    { "@type": "ListItem", position: 3, name: d.title, item: url },
+  ],
+};
+---
+
+<Base
+  title={pageTitle}
+  description={d.description}
+  path={`/blog/${post.id}/`}
+  ogType="article"
+  jsonLd={[articleLd, breadcrumbLd]}
+>
+  <article class="post">
+    <header class="wrap--narrow post__head">
+      <a class="post__back" href="/blog/">← All posts</a>
+      <p class="post__meta mono">
+        <time datetime={d.date.toISOString()}>{fmt(d.date)}</time>
+        <span aria-hidden="true">·</span>
+        <span>{readingTime} min read</span>
+        {d.tags.length > 0 && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{d.tags.join(" · ")}</span>
+          </>
+        )}
+      </p>
+      <h1>{d.title}</h1>
+      <p class="post__lede">{d.description}</p>
+    </header>
+
+    <div class="wrap--narrow post__body">
+      <Content />
+    </div>
+
+    <footer class="wrap--narrow post__foot">
+      <p>Written by {profile.name} — Level 2 IT support in Lisbon, on the tools most days.</p>
+      <a class="post__cta" href="/#contact">Hiring, or have a question? Get in touch →</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post__head { padding: clamp(32px, 5vw, 64px) 0 24px; }
+  .post__back { display: inline-block; margin-bottom: 18px; font-size: 13px; color: var(--color-text-muted); text-decoration: none; }
+  .post__back:hover { color: var(--color-primary); }
+  .post__meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 12px; }
+  .post__head h1 { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 50px); line-height: 1.06; letter-spacing: -0.02em; }
+  .post__lede { margin-top: 14px; font-size: 18px; color: var(--color-text-muted); max-width: 62ch; }
+
+  .post__body { padding-bottom: 24px; }
+  .post__body :global(h2) { font-family: var(--font-display); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; margin: 40px 0 12px; letter-spacing: -0.01em; }
+  .post__body :global(h3) { font-family: var(--font-display); font-size: clamp(18px, 2vw, 22px); margin: 28px 0 8px; }
+  .post__body :global(p) { margin: 0 0 16px; font-size: 17px; line-height: 1.72; color: var(--color-text); }
+  .post__body :global(ul), .post__body :global(ol) { margin: 0 0 18px; padding-left: 22px; display: grid; gap: 8px; }
+  .post__body :global(li) { font-size: 17px; line-height: 1.7; }
+  .post__body :global(a) { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
+  .post__body :global(strong) { font-weight: 600; }
+  .post__body :global(blockquote) { margin: 24px 0; padding: 14px 20px; border-left: 3px solid var(--color-primary); background: var(--color-surface-2); color: var(--color-text-muted); font-style: italic; }
+  .post__body :global(code) { font-family: var(--font-mono); font-size: 0.9em; background: var(--color-surface-2); padding: 2px 6px; border-radius: 6px; }
+  .post__body :global(pre) { margin: 0 0 18px; padding: 16px 18px; overflow-x: auto; background: #0b1626; color: #e6ebf2; border-radius: var(--radius-md); }
+  .post__body :global(pre code) { background: none; padding: 0; color: inherit; }
+  .post__body :global(hr) { margin: 32px 0; border: 0; border-top: 1px solid var(--color-border); }
+  .post__body :global(img) { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+
+  .post__foot { margin: clamp(32px, 5vw, 56px) auto clamp(56px, 8vw, 96px); padding-top: 22px; border-top: 1px solid var(--color-border); display: grid; gap: 10px; }
+  .post__foot p { color: var(--color-text-muted); font-size: 14px; }
+  .post__cta { font-weight: 600; color: var(--color-primary); text-decoration: none; }
+</style>

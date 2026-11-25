@@ -4,7 +4,7 @@ export const profile = {
   role: "IT Support Technician",
   focus: "Level 1 / Level 2 support · Microsoft 365 · Identity",
   location: "Lisbon / Almada, Portugal",
-  email: "ojamadickson@proton.me",
+  email: "dickson@ojamadickson.xyz",
   linkedin: "https://www.linkedin.com/in/ojama-d-28a13814a",
   github: "https://github.com/ojamadickson-creator",
   githubUser: "ojamadickson-creator",

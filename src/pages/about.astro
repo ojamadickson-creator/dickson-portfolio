@@ -124,7 +124,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       <ul class="certs" role="list">
         {certs.map((c) => (
           <li class="cert">
-            <img src={c.badge} alt="" width="88" height="88" loading="lazy" />
+            <img src={c.badge} alt={`${c.name} badge`} width="88" height="88" loading="lazy" />
             <div class="cert__body">
               <p class="cert__issuer">{c.issuer}</p>
               <h4>{c.name}</h4>
@@ -148,7 +148,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       <ul class="training" role="list">
         {training.map((c) => (
           <li>
-            {c.badge ? <img src={c.badge} alt="" width="48" height="48" loading="lazy" /> : <span class="cert__tile" aria-hidden="true">{c.mono ?? initials(c.issuer)}</span>}
+            {c.badge ? <img src={c.badge} alt={`${c.name} badge`} width="48" height="48" loading="lazy" /> : <span class="cert__tile" aria-hidden="true">{c.mono ?? initials(c.issuer)}</span>}
             <div>
               <strong>{c.name}</strong>
               <span>{c.issuer}{c.issued && ` · ${c.issued}`}</span>

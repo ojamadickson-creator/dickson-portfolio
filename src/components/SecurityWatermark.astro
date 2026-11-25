@@ -11,15 +11,9 @@ const art = [
 
 <aside class="wm" aria-hidden="true">
   {art.map((a) => (
-    <img
+    <span
       class={`wm__img ${a.cls}`}
-      src={a.src}
-      alt=""
-      width="620"
-      height="620"
-      decoding="async"
-      fetchpriority="low"
-      style={`--wm-dur:${a.dur};--wm-delay:${a.delay};--wm-lift:${a.lift};--wm-rot:${a.rot};opacity:${a.op}`}
+      style={`--wm-src:url(${a.src});--wm-dur:${a.dur};--wm-delay:${a.delay};--wm-lift:${a.lift};--wm-rot:${a.rot};opacity:${a.op}`}
     />
   ))}
 </aside>
@@ -44,7 +38,11 @@ const art = [
   .wm__img {
     position: absolute;
     width: clamp(96px, calc(var(--gutter) - 24px), 340px);
-    height: auto;
+    aspect-ratio: 1;
+    background-image: var(--wm-src);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
     animation: wm-float var(--wm-dur) ease-in-out var(--wm-delay) infinite both;
     -webkit-mask-image: linear-gradient(to right, #000 0 86%, transparent 100%);
     mask-image: linear-gradient(to right, #000 0 86%, transparent 100%);

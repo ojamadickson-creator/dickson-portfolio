@@ -15,6 +15,12 @@ const d = project.data;
 const { Content } = await render(project);
 const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security labs";
 const site = Astro.site ?? new URL("https://ojamadickson.xyz");
+// Keep the <title> short enough not to be truncated in search results.
+const titleSuffix = " \u00b7 Dickson Ojama";
+const pageTitle =
+  (d.title + titleSuffix).length <= 62
+    ? d.title + titleSuffix
+    : d.title.slice(0, 62 - titleSuffix.length - 1).replace(/\s+\S*$/, "") + "\u2026" + titleSuffix;
 const breadcrumbLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -36,7 +42,7 @@ const breadcrumbLd = {
 };
 ---
 <Base
-  title={`${d.title} · Dickson Ojama`}
+  title={pageTitle}
   description={d.summary}
   path={`/projects/${project.id}/`}
   ogType="article"
@@ -44,7 +50,7 @@ const breadcrumbLd = {
 >
   <article class="case">
     <header class="wrap case__head">
-      <a class="back" href={d.track === "it" ? "/#work" : "/#security"}>← {d.track === "it" ? "All IT support projects" : "All security labs"}</a>
+      <a class="back" href={d.track === "it" ? "/#work" : "/about/#security"}>← {d.track === "it" ? "All IT support projects" : "All security labs"}</a>
       <div class="case__meta">
         <span class="mono">{d.code}</span>
         <span class="pill">Completed lab</span>

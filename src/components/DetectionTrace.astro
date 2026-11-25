@@ -1,0 +1,127 @@
+---
+interface Row { t: string; src: string; event: string; hit: boolean }
+interface Props { note: string; rows: Row[] }
+const { note, rows } = Astro.props;
+const hits = rows.filter((r) => r.hit).length;
+---
+<figure class="trace" data-trace>
+  <figcaption class="trace__head">
+    <span class="trace__title">Detection trace</span>
+    <span class="trace__count mono">{hits} of {rows.length} rows matched</span>
+  </figcaption>
+  <div class="trace__bar">
+    <button class="trace__play" type="button" data-play>Play detection</button>
+    <label class="trace__only"><input type="checkbox" data-only /> Only matched rows</label>
+  </div>
+  <table class="trace__table">
+    <thead>
+      <tr><th scope="col">T</th><th scope="col">Source</th><th scope="col">Event</th><th scope="col" class="trace__flag-h">Match</th></tr>
+    </thead>
+    <tbody>
+      {rows.map((r, i) => (
+        <tr data-row data-hit={r.hit ? "1" : "0"} style={`--i:${i}`}>
+          <td class="mono">{r.t}</td>
+          <td class="mono trace__src">{r.src}</td>
+          <td>{r.event}</td>
+          <td class="trace__flag">{r.hit ? "●" : ""}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <p class="trace__note">{note}</p>
+</figure>
+
+<style>
+  .trace {
+    margin: var(--space-8) 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-surface-offset);
+  }
+  .trace__head {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+  }
+  .trace__title { font-weight: 700; font-size: var(--text-sm); }
+  .trace__count { color: var(--color-text-muted); font-size: var(--text-xs); }
+  .trace__bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px dashed var(--color-divider);
+  }
+  .trace__play {
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: #fff;
+    background: var(--color-primary);
+    border: 0;
+    border-radius: var(--radius-sm);
+    padding: var(--space-2) var(--space-3);
+    cursor: pointer;
+  }
+  .trace__play:hover { background: var(--color-primary-hover); }
+  .trace__play[disabled] { opacity: 0.55; cursor: default; }
+  .trace__only { font-size: var(--text-xs); color: var(--color-text-muted); display: inline-flex; gap: var(--space-2); align-items: center; }
+  .trace__table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .trace__table th {
+    text-align: left;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    padding: var(--space-2) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+  }
+  .trace__table td { padding: var(--space-2) var(--space-4); border-bottom: 1px solid var(--color-divider); vertical-align: top; }
+  .trace__table tbody tr { transition: background 0.35s ease, opacity 0.2s ease; }
+  .trace__src { color: var(--color-text-muted); white-space: nowrap; }
+  .trace__flag { color: var(--color-primary); text-align: center; font-weight: 700; }
+  .trace__flag-h { text-align: center; }
+  .trace__table tbody tr[data-shown="0"] { display: none; }
+  .trace__table tbody tr[data-lit="1"] { background: var(--color-primary-highlight); }
+  .trace__table tbody tr[data-lit="1"] .trace__src { color: var(--color-primary); }
+  .trace__note { margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--text-xs); color: var(--color-text-muted); background: var(--color-surface-2); }
+  @media (max-width: 640px) { .trace__table { font-size: 0.72rem; } .trace__table th:nth-child(1), .trace__table td:nth-child(1) { display: none; } }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-trace]").forEach((trace) => {
+    const rows = [...trace.querySelectorAll<HTMLTableRowElement>("tbody tr")];
+    const play = trace.querySelector<HTMLButtonElement>("[data-play]");
+    const only = trace.querySelector<HTMLInputElement>("[data-only]");
+    if (!play) return;
+
+    const reveal = () => rows.forEach((r) => (r.dataset.shown = "1"));
+    const clear = () => rows.forEach((r) => { r.dataset.lit = "0"; });
+
+    play.addEventListener("click", async () => {
+      clear();
+      reveal();
+      play.disabled = true;
+      const wasOnly = only?.checked ?? false;
+      if (wasOnly && only) { only.checked = false; only.dispatchEvent(new Event("change")); }
+      for (const row of rows) {
+        row.dataset.lit = "1";
+        await new Promise((r) => setTimeout(r, 260));
+        if (row.dataset.hit === "0") row.dataset.lit = "0";
+      }
+      play.disabled = false;
+      play.textContent = "Replay detection";
+      if (wasOnly && only) { only.checked = true; only.dispatchEvent(new Event("change")); }
+    });
+
+    only?.addEventListener("change", () => {
+      rows.forEach((r) => (r.dataset.shown = only.checked && r.dataset.hit === "0" ? "0" : "1"));
+    });
+  });
+</script>

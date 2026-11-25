@@ -36,6 +36,9 @@ const site = Astro.site ?? new URL("https://example.vercel.app");
 const jsonForScript = (value: unknown) => JSON.stringify(value).replace(/</g, "\\u003c");
 const canonicalPath = path ?? Astro.url.pathname;
 const canonical = new URL(canonicalPath, site).toString();
+/** Keep the description inside the ~160 character SERP window, cutting on a word boundary. */
+const metaDescription =
+  description.length > 158 ? description.slice(0, 158).replace(/\s+\S*$/, "") + "\u2026" : description;
 const ogImage = new URL("/og.png", site).toString();
 const current = Astro.url.pathname;
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
@@ -80,7 +83,7 @@ const personLd = {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
-    <meta name="description" content={description} />
+    <meta name="description" content={metaDescription} />
     <meta
       name="robots"
       content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"}
@@ -92,7 +95,7 @@ const personLd = {
     <meta property="og:site_name" content={profile.name} />
     <meta property="og:locale" content="en_GB" />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
+    <meta property="og:description" content={metaDescription} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
     <meta property="og:image:width" content="1200" />
@@ -100,7 +103,7 @@ const personLd = {
     <meta property="og:image:alt" content={ogImageAlt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
     <meta name="theme-color" content={dark ? "#070c16" : "#f5f6f8"} />
     {preload && <link rel="preload" as="image" href={preload} fetchpriority="high" />}
@@ -144,9 +147,9 @@ const personLd = {
           <summary aria-label="Open menu"><Icon name="menu" /></summary>
           <div class="menu__panel">
             <a href="/#work">Projects</a>
-            <a href="/#security">Security</a>
-            <a href="/#certifications">Certifications</a>
-            <a href="/#experience">Experience</a>
+            <a href="/about/#security">Security</a>
+            <a href="/#certs">Certifications</a>
+            <a href="/about/#experience">Experience</a>
             <a href="/resume/">Resume</a>
             <a href={profile.linkedin} target="_blank" rel="me noopener">LinkedIn</a>
             <a href={profile.github} target="_blank" rel="me noopener">GitHub</a>

@@ -2,6 +2,7 @@
 import { getCollection, render } from "astro:content";
 import Base from "../../layouts/Base.astro";
 import Icon from "../../components/Icon.astro";
+import DetectionTrace from "../../components/DetectionTrace.astro";
 
 export async function getStaticPaths() {
   const all = (await getCollection("projects")).sort((a, b) =>
@@ -13,8 +14,34 @@ const { project, next } = Astro.props;
 const d = project.data;
 const { Content } = await render(project);
 const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security labs";
+const site = Astro.site ?? new URL("https://ojamadickson.xyz");
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Home", item: new URL("/", site).toString() },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: trackLabel,
+      item: new URL(d.track === "it" ? "/#work" : "/about/#security", site).toString(),
+    },
+    {
+      "@type": "ListItem",
+      position: 3,
+      name: d.title,
+      item: new URL(`/projects/${project.id}/`, site).toString(),
+    },
+  ],
+};
 ---
-<Base title={`${d.title} · Dickson Ojama`} description={d.summary} path={`/projects/${project.id}/`}>
+<Base
+  title={`${d.title} · Dickson Ojama`}
+  description={d.summary}
+  path={`/projects/${project.id}/`}
+  ogType="article"
+  jsonLd={breadcrumbLd}
+>
   <article class="case">
     <header class="wrap case__head">
       <a class="back" href={d.track === "it" ? "/#work" : "/#security"}>← {d.track === "it" ? "All IT support projects" : "All security labs"}</a>
@@ -25,6 +52,20 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
       </div>
       <h1>{d.title}</h1>
       <p class="case__summary">{d.summary}</p>
+      {d.outcome && (
+        <p class="case__outcome"><strong>Outcome</strong>{d.outcome}</p>
+      )}
+      {d.techniques.length > 0 && (
+        <ul class="case__attack" role="list" aria-label="MITRE ATT&amp;CK techniques">
+          {d.techniques.map((t) => (
+            <li>
+              <a href={`https://attack.mitre.org/techniques/${t.id.replace(".", "/")}/`} target="_blank" rel="noopener">
+                <span class="mono">{t.id}</span> {t.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
       <div class="case__cta">
         <a class="btn btn--primary" href={d.repo}><Icon name="github" /> View the repository</a>
         {d.video && <a class="btn btn--ghost" href={d.video}><Icon name="play" /> Watch the walkthrough</a>}
@@ -49,6 +90,7 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
           <img src={d.evidence.src} alt={d.evidence.alt} width="1200" height="750" decoding="async" />
           <figcaption>{d.evidence.caption}</figcaption>
         </figure>
+        {d.trace && <DetectionTrace note={d.trace.note} rows={d.trace.rows} />}
         <Content />
       </div>
     </div>
@@ -73,6 +115,36 @@ const trackLabel = d.track === "it" ? "IT support & Microsoft 365" : "Security l
   h1 { font-family: var(--font-display); font-weight: 600; font-size: var(--text-2xl); letter-spacing: -0.02em; max-width: 22ch; }
   .case__summary { color: var(--color-text-muted); font-size: var(--text-lg); max-width: 62ch; line-height: 1.5; }
   .case__cta { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+  .case__outcome {
+    display: grid;
+    gap: var(--space-1);
+    max-width: 62ch;
+    padding: var(--space-3) var(--space-4);
+    border-left: 2px solid var(--color-primary);
+    background: var(--color-surface-2);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    font-size: var(--text-sm);
+  }
+  .case__outcome strong {
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-primary);
+  }
+  .case__attack { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .case__attack a {
+    display: inline-flex;
+    gap: 0.4em;
+    align-items: center;
+    padding: 2px var(--space-2);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .case__attack a:hover { border-color: var(--color-primary); color: var(--color-primary); }
+  .case__attack .mono { font-size: 0.72rem; color: var(--color-primary); }
   .case__grid { display: grid; grid-template-columns: 320px 1fr; gap: clamp(var(--space-8), 5vw, var(--space-16)); align-items: start; }
   .ticket { position: sticky; top: 88px; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; }
   .ticket__row { display: grid; gap: var(--space-2); padding: var(--space-5); font-size: var(--text-sm); }

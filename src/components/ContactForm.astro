@@ -74,7 +74,8 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
       btn.disabled = true;
-      setStatus("Sending…", "");
+      showFallback(false);
+      setStatus("Sending… the mail relay can take up to 30 seconds.", "");
       try {
         // Best-effort archive copy; email delivery below decides success.
         fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
@@ -83,9 +84,12 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
           body: JSON.stringify(payload),
         }).catch(() => {});
 
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
         const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             name: payload.name,
             email: payload.email,
@@ -97,17 +101,29 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
             _captcha: "false",
           }),
         });
+        window.clearTimeout(timer);
         const data = await res.json().catch(() => ({}));
         if (res.ok && String(data.success) === "true") {
           form.reset();
           setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
         } else if (/activat/i.test(String(data.message || ""))) {
           setStatus("Almost there: this form is awaiting a one-time activation by the site owner. Please try again shortly.", "err");
+          showFallback(true);
+        } else if (res.status === 403 || res.status === 429) {
+          // Cloudflare on the relay refused the request; a plain form POST usually passes.
+          setStatus("The relay blocked that request — trying a direct send…", "");
+          submitNatively();
+        } else {
+          setStatus("That did not go through. Send it as an email instead:", "err");
+          showFallback(true);
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          setStatus(`The mail relay did not answer within ${TIMEOUT_MS / 1000} seconds. Nothing was sent — use the email link below.`, "err");
+          showFallback(true);
         } else {
           submitNatively();
         }
-      } catch {
-        submitNatively();
       } finally {
         btn.disabled = false;
       }
@@ -153,6 +169,9 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   .form__status[data-kind="ok"] { color: var(--color-ink-accent, #8fb4ff); }
   .form__status[data-kind="err"] { color: #ffb4a8; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .form__fallback { margin: 0; font-size: 13.5px; color: var(--color-ink-muted, #9aa8bb); }
+  .form__fallback a { color: var(--color-ink-accent, #8fb4ff); text-decoration: underline; }
+  .form__fallback[hidden] { display: none; }
   .muted { font-weight: 400; color: var(--color-ink-muted, #9aa8bb); }
   @media (max-width: 700px) {
     .form__row { grid-template-columns: 1fr; }

@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import ContactForm from "../components/ContactForm.astro";
 ---
 
 <Base
@@ -96,10 +97,20 @@ import Base from "../layouts/Base.astro";
     </div>
   </section>
 
-  <section id="contact" style="padding-top:0">
-    <div class="wrap close">
-      <div><h2>Hiring for L2 support?</h2><p>Lisbon / Almada · onsite or hybrid · Portuguese work permit.</p></div>
-      <a class="btn btn--light" href="mailto:dickson@ojamadickson.xyz">Get in touch →</a>
+  <section id="contact">
+    <div class="wrap contact-grid">
+      <div class="contact-copy">
+        <span class="eyebrow">Contact</span>
+        <h2>Hiring for L2 support?</h2>
+        <p>Fill this in and it lands in my inbox — or email me directly at
+          <a href="mailto:dickson@ojamadickson.xyz">dickson@ojamadickson.xyz</a>.</p>
+        <ul class="contact-facts" role="list">
+          <li>Lisbon / Almada · onsite or hybrid</li>
+          <li>Portuguese work permit (Título de Residência)</li>
+          <li>Usually replies within one working day</li>
+        </ul>
+      </div>
+      <ContactForm />
     </div>
   </section>
 </Base>
@@ -216,5 +227,16 @@ import Base from "../layouts/Base.astro";
     .chip--sec{right:8px;top:8px}
     .chip--md{left:8px;top:auto;bottom:8px}
     .art__card{width:54%;left:2%;bottom:-8%}
+  }
+  /* Contact + form */
+  .contact-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: clamp(24px, 4vw, 56px); align-items: start; }
+  .contact-copy h2 { margin-top: 8px; }
+  .contact-copy p { color: #9aabc2; font-size: 15px; margin-top: 12px; max-width: 40ch; }
+  .contact-copy a { color: #8bb4ff; }
+  .contact-facts { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 9px; font-size: 13px; color: #8fa2ba; }
+  .contact-facts li { position: relative; padding-left: 16px; }
+  .contact-facts li::before { content: ""; position: absolute; left: 0; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #2dd4bf; }
+  @media (max-width: 980px) {
+    .contact-grid { grid-template-columns: 1fr; }
   }
 </style>

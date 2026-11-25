@@ -1,0 +1,160 @@
+---
+import Icon from "./Icon.astro";
+import { profile } from "../lib/profile";
+
+const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
+// Publishable key: safe in client code, the table is insert-only behind RLS.
+const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_PWZ56gXJZkvteEYxwKJsDQ_PeCDGZMc";
+---
+
+<form
+  class="form"
+  id="contact-form"
+  novalidate
+  method="POST"
+  action={`https://formsubmit.co/${profile.email}`}
+  data-url={SUPABASE_URL}
+  data-key={SUPABASE_KEY}
+  data-email={profile.email}
+>
+  <input type="hidden" name="_subject" value="Portfolio contact" />
+  <input type="hidden" name="_template" value="table" />
+  <input type="hidden" name="_captcha" value="false" />
+  <input type="hidden" name="_next" value="" />
+  <div class="form__row">
+    <label>Name<input name="name" autocomplete="name" required maxlength="120" /></label>
+    <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
+  </div>
+  <label>Company <span class="muted">(optional)</span><input name="company" autocomplete="organization" maxlength="160" /></label>
+  <label>Message<textarea name="message" rows="5" required minlength="10" maxlength="4000"></textarea></label>
+  <label class="hp" aria-hidden="true">Leave this empty<input name="_honey" tabindex="-1" autocomplete="off" /></label>
+  <div class="form__foot">
+    <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
+    <p class="form__status" role="status" aria-live="polite"></p>
+  </div>
+</form>
+
+<script>
+  // Contact form → email via FormSubmit, with a best-effort Supabase archive copy.
+  const form = document.getElementById("contact-form") as HTMLFormElement | null;
+  if (form) {
+    const status = form.querySelector(".form__status") as HTMLElement;
+    const btn = form.querySelector("button") as HTMLButtonElement;
+    const setStatus = (msg: string, kind: "ok" | "err" | "") => {
+      status.textContent = msg;
+      status.dataset.kind = kind;
+    };
+    const params = new URLSearchParams(location.search);
+    if (params.get("sent") === "1") {
+      setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+      history.replaceState(null, "", location.pathname + "#contact");
+    }
+    // Plain form POST to FormSubmit: lets the browser pass Cloudflare's check when the AJAX call is refused.
+    const submitNatively = () => {
+      (form.elements.namedItem("_next") as HTMLInputElement).value = `${location.origin}${location.pathname}?sent=1#contact`;
+      (form.elements.namedItem("_subject") as HTMLInputElement).value = `Portfolio contact from ${String(new FormData(form).get("name") || "").trim()}`;
+      if (window.self !== window.top) form.target = "_blank";
+      HTMLFormElement.prototype.submit.call(form);
+    };
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      if (String(fd.get("_honey") || "")) {
+        setStatus("Thanks, your message was sent.", "ok");
+        form.reset();
+        return;
+      }
+      const payload = {
+        name: String(fd.get("name") || "").trim(),
+        email: String(fd.get("email") || "").trim(),
+        company: String(fd.get("company") || "").trim() || null,
+        message: String(fd.get("message") || "").trim(),
+      };
+      if (!payload.name) return setStatus("Please add your name.", "err");
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
+      if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
+      btn.disabled = true;
+      setStatus("Sending…", "");
+      try {
+        // Best-effort archive copy; email delivery below decides success.
+        fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
+          method: "POST",
+          headers: { apikey: form.dataset.key!, "Content-Type": "application/json", Prefer: "return=minimal" },
+          body: JSON.stringify(payload),
+        }).catch(() => {});
+
+        const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            company: payload.company ?? "—",
+            message: payload.message,
+            _subject: `Portfolio contact from ${payload.name}`,
+            _replyto: payload.email,
+            _template: "table",
+            _captcha: "false",
+          }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && String(data.success) === "true") {
+          form.reset();
+          setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
+        } else if (/activat/i.test(String(data.message || ""))) {
+          setStatus("Almost there: this form is awaiting a one-time activation by the site owner. Please try again shortly.", "err");
+        } else {
+          submitNatively();
+        }
+      } catch {
+        submitNatively();
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .form {
+    display: grid;
+    gap: var(--space-4);
+    background: var(--color-ink-2, #111f34);
+    border: 1px solid var(--color-ink-border, #22334c);
+    border-radius: var(--radius-lg, 18px);
+    padding: clamp(var(--space-5, 1.25rem), 3vw, var(--space-8, 2rem));
+  }
+  .form__row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4, 1rem); }
+  .form label { display: grid; gap: var(--space-2, 0.5rem); font-size: var(--text-sm, 0.95rem); font-weight: 500; color: var(--color-ink-text, #e6ebf2); }
+  .form label > span { font-weight: 400; }
+  .form input,
+  .form textarea {
+    width: 100%;
+    padding: var(--space-3, 0.75rem);
+    border-radius: var(--radius-md, 12px);
+    border: 1px solid var(--color-ink-border, #22334c);
+    background: var(--color-ink, #0b1626);
+    color: var(--color-ink-text, #e6ebf2);
+    min-height: 44px;
+    font: inherit;
+  }
+  .form textarea { resize: vertical; }
+  .form input:focus,
+  .form textarea:focus {
+    outline: none;
+    border-color: var(--color-ink-accent, #8fb4ff);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ink-accent, #8fb4ff) 25%, transparent);
+  }
+  .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4, 1rem); }
+  .form__foot .btn--primary { background: var(--color-ink-accent, #8fb4ff); color: var(--color-ink, #0b1626); }
+  .form__foot .btn--primary:hover { background: #b5ceff; }
+  .form__foot .btn--primary:disabled { opacity: 0.6; cursor: progress; }
+  .form__status { font-size: var(--text-sm, 0.95rem); margin: 0; }
+  .form__status[data-kind="ok"] { color: var(--color-ink-accent, #8fb4ff); }
+  .form__status[data-kind="err"] { color: #ffb4a8; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .muted { font-weight: 400; color: var(--color-ink-muted, #9aa8bb); }
+  @media (max-width: 700px) {
+    .form__row { grid-template-columns: 1fr; }
+  }
+</style>

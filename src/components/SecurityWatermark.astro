@@ -1,0 +1,85 @@
+---
+// Decorative security artwork floating in the page gutters.
+// Pure CSS: no layout impact, no pointer events, no content in the accessibility tree.
+const art = [
+  { src: "/watermark/shield.webp", cls: "wm__img--l1", dur: "13s", delay: "-2s", lift: "26px", rot: "0.9deg", op: "0.6" },
+  { src: "/watermark/key-badge.webp", cls: "wm__img--l2", dur: "17s", delay: "-7s", lift: "20px", rot: "-1.1deg", op: "0.5" },
+  { src: "/watermark/padlock.webp", cls: "wm__img--r1", dur: "15s", delay: "-4s", lift: "30px", rot: "-0.9deg", op: "0.6" },
+  { src: "/watermark/biometric.webp", cls: "wm__img--r2", dur: "19s", delay: "-11s", lift: "22px", rot: "1deg", op: "0.46" },
+];
+---
+
+<aside class="wm" aria-hidden="true">
+  {art.map((a) => (
+    <img
+      class={`wm__img ${a.cls}`}
+      src={a.src}
+      alt=""
+      width="620"
+      height="620"
+      decoding="async"
+      fetchpriority="low"
+      style={`--wm-dur:${a.dur};--wm-delay:${a.delay};--wm-lift:${a.lift};--wm-rot:${a.rot};opacity:${a.op}`}
+    />
+  ))}
+</aside>
+
+<style>
+  .wm {
+    /* the gutter beside the 1200px content column */
+    --gutter: max(0px, (100vw - min(1200px, 100vw - 40px)) / 2);
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    display: none;
+  }
+
+  /* Only where the gutter can hold real artwork without touching the text. */
+  @media (min-width: 1480px) {
+    .wm { display: block; }
+  }
+
+  .wm__img {
+    position: absolute;
+    width: clamp(96px, calc(var(--gutter) - 24px), 340px);
+    height: auto;
+    animation: wm-float var(--wm-dur) ease-in-out var(--wm-delay) infinite both;
+    -webkit-mask-image: linear-gradient(to right, #000 0 86%, transparent 100%);
+    mask-image: linear-gradient(to right, #000 0 86%, transparent 100%);
+  }
+
+  .wm__img--l1 { top: 10%; left: 12px; }
+  .wm__img--l2 {
+    top: 57%; left: 12px;
+    width: clamp(80px, calc(var(--gutter) - 56px), 260px);
+  }
+
+  .wm__img--r1 { top: 14%; right: 12px; }
+  .wm__img--r2 {
+    top: 63%; right: 12px;
+    width: clamp(80px, calc(var(--gutter) - 56px), 260px);
+  }
+
+  .wm__img--r1,
+  .wm__img--r2 {
+    -webkit-mask-image: linear-gradient(to left, #000 0 86%, transparent 100%);
+    mask-image: linear-gradient(to left, #000 0 86%, transparent 100%);
+  }
+
+  @keyframes wm-float {
+    0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+    50% { transform: translate3d(0, var(--wm-lift), 0) rotate(var(--wm-rot)); }
+    100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  }
+
+  /* Static artwork for anyone who asks for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    .wm__img { animation: none; }
+  }
+
+  @media print {
+    .wm { display: none; }
+  }
+</style>

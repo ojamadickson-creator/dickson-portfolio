@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
+import SecurityWatermark from "../components/SecurityWatermark.astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 
 interface Props {
@@ -49,6 +50,7 @@ const personLd = {
     <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
   </head>
   <body>
+    <SecurityWatermark />
     <a class="sr-only" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="wrap">

@@ -66,6 +66,8 @@ body {
   font-size: var(--text-base); color: var(--color-text); background: var(--color-bg);
 }
 img, picture, svg { display: block; max-width: 100%; height: auto; }
+/* wm-stack: keep page content above the decorative watermark layer */
+main, .site-footer { position: relative; z-index: 1; }
 ul[role="list"], ol[role="list"] { list-style: none; }
 input, button, textarea, select { font: inherit; color: inherit; }
 h1, h2, h3, h4 { text-wrap: balance; line-height: 1.12; }

@@ -3,14 +3,16 @@ import "../styles/global.css";
 import { profile } from "../lib/profile";
 import Icon from "../components/Icon.astro";
 import SecurityWatermark from "../components/SecurityWatermark.astro";
+import IntroSplash from "../components/IntroSplash.astro";
 import SpeedInsights from "@vercel/speed-insights/astro";
 
 interface Props {
   title: string;
   description: string;
   path?: string;
+  dark?: boolean;
 }
-const { title, description, path = "/" } = Astro.props;
+const { title, description, path = "/", dark = false, intro = false } = Astro.props;
 const site = Astro.site ?? new URL("https://example.vercel.app");
 const canonical = new URL(path, site).toString();
 const ogImage = new URL("/og.png", site).toString();
@@ -47,10 +49,10 @@ const personLd = {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://api.fontshare.com/v2/css?f[]=general-sans@500,600&f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <script type="application/ld+json" set:html={JSON.stringify(personLd)} />
   </head>
-  <body>
+  <body class={dark ? "theme-dark" : undefined}>
     <SecurityWatermark />
+    {intro && <IntroSplash />}
     <a class="sr-only" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="wrap">
@@ -59,9 +61,7 @@ const personLd = {
           <span class="brand__text"><span class="brand__name">{profile.name}</span><span class="brand__role">{profile.role}</span></span>
         </a>
         <nav class="nav" aria-label="Main">
-          <a class="nav__link" href="/#work">Projects</a>
-          <a class="nav__link" href="/#certifications">Certifications</a>
-          <a class="nav__link" href="/#experience">Experience</a>
+          <a class="nav__link" href="/#what">What I do</a>
           <a href="/resume/" aria-current={current.startsWith("/resume") ? "page" : undefined}>Resume</a>
           <span class="nav__sep" aria-hidden="true"></span>
           <a class="icon-link" href={profile.github} aria-label="GitHub profile" rel="me noopener" target="_blank"><Icon name="github" /></a>

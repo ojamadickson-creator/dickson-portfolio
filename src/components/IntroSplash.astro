@@ -1,0 +1,125 @@
+---
+// One-time, skippable welcome intro. Never blocks the page for long, never repeats in a session.
+---
+
+<div class="intro" id="intro" aria-hidden="true">
+  <video
+    id="intro-video"
+    src="/intro.mp4"
+    poster="/intro-poster.jpg"
+    muted
+    autoplay
+    playsinline
+    webkit-playsinline
+    preload="auto"
+    disablepictureinpicture
+  ></video>
+  <div class="intro__bar">
+    <button class="intro__btn" type="button" data-intro-sound>Sound on</button>
+    <button class="intro__btn" type="button" data-intro-skip>Skip</button>
+  </div>
+</div>
+
+<script is:inline>
+  (() => {
+    const el = document.getElementById("intro");
+    if (!el) return;
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let seen = false;
+    try {
+      seen = sessionStorage.getItem("intro-seen") === "1";
+    } catch (e) {}
+    if (reduce || seen) {
+      el.remove();
+      return;
+    }
+
+    const video = document.getElementById("intro-video");
+    let finished = false;
+
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      try {
+        sessionStorage.setItem("intro-seen", "1");
+      } catch (e) {}
+      document.documentElement.style.overflow = "";
+      el.classList.add("is-out");
+      window.setTimeout(() => el.remove(), 450);
+    };
+
+    document.documentElement.style.overflow = "hidden";
+    video.addEventListener("ended", finish, { once: true });
+
+    // Nudge playback: some mobile browsers ignore the autoplay attribute alone.
+    const startPlayback = () => {
+      const p = video.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    };
+    startPlayback();
+    document.addEventListener("touchstart", startPlayback, { once: true, passive: true });
+    document.addEventListener("click", startPlayback, { once: true });
+
+    // If the file cannot start (data saver, autoplay blocked), keep the poster briefly then move on.
+    window.setTimeout(finish, 5200);
+
+    el.querySelector("[data-intro-skip]").addEventListener("click", finish);
+    el.querySelector("[data-intro-sound]").addEventListener("click", (event) => {
+      video.muted = !video.muted;
+      event.currentTarget.textContent = video.muted ? "Sound on" : "Sound off";
+      if (!video.muted) startPlayback();
+    });
+  })();
+</script>
+
+<style>
+  .intro {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    min-height: 100dvh;
+    background: #05090f url(/intro-poster.jpg) center / cover no-repeat;
+    display: grid;
+    place-items: center;
+    transition: opacity 0.45s ease;
+  }
+  .intro.is-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .intro video {
+    width: 100%;
+    height: 100%;
+    min-height: 100dvh;
+    object-fit: cover;
+    display: block;
+    background: #05090f;
+  }
+  .intro__bar {
+    position: absolute;
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
+    display: flex;
+    gap: 10px;
+  }
+  .intro__btn {
+    font: 500 12px/1 var(--font-body, system-ui);
+    letter-spacing: 0.02em;
+    color: #dfe8f4;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 999px;
+    padding: 10px 15px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+  }
+  .intro__btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .intro {
+      display: none;
+    }
+  }
+</style>

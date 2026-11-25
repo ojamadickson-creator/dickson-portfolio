@@ -13,14 +13,14 @@ export const profile = {
   languages: "English (native) · Portuguese (A2, conversational)",
   workAuth: "Portuguese residence permit (Título de Residência)",
   summary:
-    "CompTIA A+, Network+ and Security+ certified support professional with three years of paid technical support and more than seven years of customer support. I resolve desktop, application, account-access and connectivity issues by phone, email and chat, and explain them in plain language. In my home lab I run a two-domain-controller Windows Server 2025 forest extended into Microsoft Entra ID and Intune, automated with PowerShell and Microsoft Graph.",
+    "CompTIA A+, Network+ and Security+ certified support professional with three years of technical support and more than seven years of customer support. I resolve desktop, application, account-access and connectivity issues by phone, email and chat, and explain them in plain language. In my home lab I run a two-domain-controller Windows Server 2025 forest extended into Microsoft Entra ID and Intune, automated with PowerShell and Microsoft Graph.",
 };
 
 export const stats = [
   { value: "99%", label: "first-contact resolution at Intelcia" },
   { value: "85%+", label: "first-contact resolution at Teleperformance" },
-  { value: "3 yrs", label: "paid technical support" },
-  { value: "7+ yrs", label: "customer support across industries" },
+  { value: "3 yrs", label: "Technical Support" },
+  { value: "7+ yrs", label: "customer support" },
 ];
 
 export const experience = [

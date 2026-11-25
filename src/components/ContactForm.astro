@@ -35,27 +35,57 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
 </form>
 
 <script>
-  // Contact form → email via FormSubmit, with a best-effort Supabase archive copy.
   const form = document.getElementById("contact-form") as HTMLFormElement | null;
   if (form) {
     const status = form.querySelector(".form__status") as HTMLElement;
     const btn = form.querySelector("button") as HTMLButtonElement;
+    const fallback = form.querySelector(".form__fallback") as HTMLElement | null;
     const setStatus = (msg: string, kind: "ok" | "err" | "") => {
       status.textContent = msg;
       status.dataset.kind = kind;
     };
+    const showFallback = (show: boolean) => {
+      if (fallback) fallback.hidden = !show;
+    };
+
     const params = new URLSearchParams(location.search);
     if (params.get("sent") === "1") {
       setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
       history.replaceState(null, "", location.pathname + "#contact");
     }
-    // Plain form POST to FormSubmit: lets the browser pass Cloudflare's check when the AJAX call is refused.
+
+    // Email is a notification, not the save mechanism. It is slow and occasionally
+    // refused by Cloudflare, so it must never block the visitor.
+    const notifyByEmail = (payload: { name: string; email: string; company: string | null; message: string }) => {
+      try {
+        void fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            name: payload.name,
+            email: payload.email,
+            company: payload.company ?? "—",
+            message: payload.message,
+            _subject: `Portfolio contact from ${payload.name}`,
+            _replyto: payload.email,
+            _template: "table",
+            _captcha: "false",
+          }),
+          keepalive: true,
+        }).catch(() => {});
+      } catch {
+        /* notification is best-effort */
+      }
+    };
+
+    // Last resort when storage is unreachable: a plain form POST survives Cloudflare.
     const submitNatively = () => {
       (form.elements.namedItem("_next") as HTMLInputElement).value = `${location.origin}${location.pathname}?sent=1#contact`;
       (form.elements.namedItem("_subject") as HTMLInputElement).value = `Portfolio contact from ${String(new FormData(form).get("name") || "").trim()}`;
       if (window.self !== window.top) form.target = "_blank";
       HTMLFormElement.prototype.submit.call(form);
     };
+
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(form);
@@ -73,23 +103,46 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       if (!payload.name) return setStatus("Please add your name.", "err");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
+
       btn.disabled = true;
       showFallback(false);
-      setStatus("Sending… the mail relay can take up to 30 seconds.", "");
+      setStatus("Sending…", "");
+
+      // 1. Save it. This is fast (~1s) and is what decides success.
+      let stored = false;
       try {
-        // Best-effort archive copy; email delivery below decides success.
-        fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
+        const controller = new AbortController();
+        const timer = window.setTimeout(() => controller.abort(), 10000);
+        const res = await fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
           method: "POST",
           headers: { apikey: form.dataset.key!, "Content-Type": "application/json", Prefer: "return=minimal" },
           body: JSON.stringify(payload),
-        }).catch(() => {});
+          signal: controller.signal,
+        });
+        window.clearTimeout(timer);
+        stored = res.ok;
+      } catch {
+        stored = false;
+      }
 
+      // 2. Ask for the email copy in the background, whether or not storage worked.
+      notifyByEmail(payload);
+
+      if (stored) {
+        form.reset();
+        setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");
+        btn.disabled = false;
+        return;
+      }
+
+      // 3. Storage failed: wait for the relay so the message still leaves the browser.
+      setStatus("Saving failed — sending by email instead, this can take up to 20 seconds…", "");
+      try {
         const controller = new AbortController();
-        const timer = window.setTimeout(() => controller.abort(), TIMEOUT_MS);
+        const timer = window.setTimeout(() => controller.abort(), 20000);
         const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          signal: controller.signal,
           body: JSON.stringify({
             name: payload.name,
             email: payload.email,
@@ -100,18 +153,14 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
             _template: "table",
             _captcha: "false",
           }),
+          signal: controller.signal,
         });
         window.clearTimeout(timer);
         const data = await res.json().catch(() => ({}));
         if (res.ok && String(data.success) === "true") {
           form.reset();
           setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
-        } else if (/activat/i.test(String(data.message || ""))) {
-          setStatus("Almost there: this form is awaiting a one-time activation by the site owner. Please try again shortly.", "err");
-          showFallback(true);
         } else if (res.status === 403 || res.status === 429) {
-          // Cloudflare on the relay refused the request; a plain form POST usually passes.
-          setStatus("The relay blocked that request — trying a direct send…", "");
           submitNatively();
         } else {
           setStatus("That did not go through. Send it as an email instead:", "err");
@@ -119,7 +168,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") {
-          setStatus(`The mail relay did not answer within ${TIMEOUT_MS / 1000} seconds. Nothing was sent — use the email link below.`, "err");
+          setStatus("The email relay did not answer in time. Use the email link below — nothing was sent.", "err");
           showFallback(true);
         } else {
           submitNatively();

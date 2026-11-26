@@ -70,9 +70,6 @@
                     <button id="start-exam-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-10 rounded-xl shadow-lg hover:shadow-xl transition duration-200 text-lg w-full sm:w-auto">
                         Start Exam Simulation
                     </button>
-                    <button id="download-btn" class="bg-slate-700 hover:bg-slate-800 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition duration-200 text-lg w-full sm:w-auto flex items-center justify-center">
-                        <i class="fa-solid fa-download mr-2"></i> Download File
-                    </button>
                 </div>
             </div>
 
@@ -265,7 +262,6 @@
         const closeGridBtn = document.getElementById('close-grid-btn');
 
         document.getElementById('start-exam-btn').addEventListener('click', startExam);
-        document.getElementById('download-btn').addEventListener('click', downloadFile);
         prevBtn.addEventListener('click', () => navigateQuestion(-1));
         nextBtn.addEventListener('click', () => navigateQuestion(1));
         markReviewBtn.addEventListener('click', toggleMarkReview);
@@ -305,19 +301,6 @@
             }, 1000);
 
             loadQuestion(0);
-        }
-
-        function downloadFile() {
-            const htmlContent = document.documentElement.outerHTML;
-            const blob = new Blob([htmlContent], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'cysa_exam_simulator_173_questions.html';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
 
         function updateTimerDisplay() {

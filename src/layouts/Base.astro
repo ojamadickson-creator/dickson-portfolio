@@ -202,6 +202,11 @@ const personLd = {
       let active = 0;
       let shown: Item[] = [];
 
+      /** Escape anything that goes into innerHTML. Item text comes from content files,
+       *  but a stray "<" in a title must never become markup. */
+      const esc = (value: string) =>
+        String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
       const render = () => {
         const q = (input?.value || "").trim().toLowerCase();
         shown = q
@@ -213,7 +218,7 @@ const personLd = {
           .map((it, i) => {
             const on = i === active;
             return '<li role="option" aria-selected="' + on + '" data-i="' + i + '"' + (on ? ' data-active="1"' : "") +
-              '><a href="' + it.href + '"><span>' + it.label + '</span><em>' + (it.hint || it.group) + '</em></a></li>';
+              '><a href="' + esc(it.href) + '"><span>' + esc(it.label) + '</span><em>' + esc(it.hint || it.group) + '</em></a></li>';
           })
           .join("");
       };

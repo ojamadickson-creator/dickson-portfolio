@@ -16,8 +16,6 @@ const training = credentials.filter((c) => c.kind === "training");
 const initials = (s: string) => s.replace(/[^A-Za-z ]/g, "").split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 const fmt = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
-const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
-const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_PWZ56gXJZkvteEYxwKJsDQ_PeCDGZMc";
 ---
 <Base
   title={`About · ${profile.name} · IT Support Technician (L1/L2) · Lisbon`}

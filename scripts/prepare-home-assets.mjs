@@ -4,7 +4,7 @@ import path from "node:path";
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
 
-const WS = "C:\\Ojama";
+
 const ROOT = "C:\\Users\\Ojama\\Documents\\deepseek-harness\\default-workspace";
 const REPO = path.join(ROOT, "github", "dickson-portfolio");
 const SRC = path.join(ROOT, "mockup3", "img");

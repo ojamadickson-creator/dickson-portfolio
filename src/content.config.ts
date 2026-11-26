@@ -12,8 +12,8 @@ const projects = defineCollection({
     summary: z.string().max(220),
     brief: z.string(),
     stack: z.array(z.string()).min(1),
-    repo: z.string().url(),
-    video: z.string().url().optional(),
+    repo: z.url(),
+    video: z.url().optional(),
     evidence: z.object({ src: z.string(), alt: z.string(), caption: z.string() }),
     jobFit: z.array(z.string()).min(1),
     // One line a hiring manager can skim: the outcome, then the technique.

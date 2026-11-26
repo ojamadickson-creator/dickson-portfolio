@@ -16,6 +16,8 @@ interface Props {
   ogType?: "website" | "article";
   noindex?: boolean;
   ogImageAlt?: string;
+  /** Path to this page's 1200x630 social card. */
+  ogImage?: string;
   preload?: string;
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
 }
@@ -28,6 +30,7 @@ const {
   ogType = "website",
   noindex = false,
   ogImageAlt = `${profile.name} — ${profile.role}`,
+  ogImage: ogImagePath = "/og.png",
   preload,
   jsonLd,
 } = Astro.props;
@@ -39,7 +42,7 @@ const canonical = new URL(canonicalPath, site).toString();
 /** Keep the description inside the ~160 character SERP window, cutting on a word boundary. */
 const metaDescription =
   description.length > 158 ? description.slice(0, 158).replace(/\s+\S*$/, "") + "\u2026" : description;
-const ogImage = new URL("/og.png", site).toString();
+const ogImage = new URL(ogImagePath, site).toString();
 const current = Astro.url.pathname;
 const projects = (await getCollection("projects")).sort((a, b) => a.data.order - b.data.order);
 const paletteItems = [

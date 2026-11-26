@@ -38,7 +38,7 @@ const articleLd = {
   url,
   keywords: d.tags.join(", "),
   inLanguage: "en",
-  image: new URL("/og.png", site).toString(),
+  image: new URL(`/og/blog-${post.id}.jpg`, site).toString(),
 };
 
 const breadcrumbLd = {
@@ -56,6 +56,7 @@ const breadcrumbLd = {
   title={pageTitle}
   description={d.description}
   path={`/blog/${post.id}/`}
+  ogImage={`/og/blog-${post.id}.jpg`}
   ogType="article"
   jsonLd={[articleLd, breadcrumbLd]}
 >

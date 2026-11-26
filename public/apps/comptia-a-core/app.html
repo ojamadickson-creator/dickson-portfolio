@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CompTIA A+ Core 1 — Exam Simulator</title>
+    <style>
+        :root {
+            --primary: #1a5f9e;
+            --primary-dark: #124670;
+            --accent: #e67e22;
+            --success: #27ae60;
+            --danger: #c0392b;
+            --bg: #f4f6f8;
+            --card: #ffffff;
+            --text: #2c3e50;
+            --text-light: #7f8c8d;
+            --border: #dfe6e9;
+            --shadow: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+        /* Header */
+        .exam-header {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .exam-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+        .timer-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .timer-box.warning { color: var(--danger); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+        .progress-text { font-size: 0.9rem; color: var(--text-light); }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        /* Question Grid Navigation */
+        .q-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 6px;
+            margin-bottom: 20px;
+        }
+        .q-nav-btn {
+            height: 40px;
+            border: 2px solid var(--border);
+            background: var(--card);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .q-nav-btn:hover { border-color: var(--primary); color: var(--primary); }
+        .q-nav-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+        .q-nav-btn.answered { background: #d4edda; border-color: var(--success); color: var(--success); }
+        .q-nav-btn.flagged::after {
+            content: "★";
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.6rem;
+            color: var(--accent);
+        }
+        .q-nav-btn { position: relative; }
+
+        /* Card */
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .scenario-label {
+            display: inline-block;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 14px;
+        }
+        .question-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        /* Options */
+        .options-list { display: flex; flex-direction: column; gap: 12px; }
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafbfc;
+        }
+        .option:hover { border-color: var(--primary); background: #f0f7ff; }
+        .option.selected {
+            border-color: var(--primary);
+            background: #e8f4fd;
+            box-shadow: 0 0 0 3px rgba(26,95,158,0.1);
+        }
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .option.selected .option-letter { background: var(--primary); color: #fff; }
+        .option-text { font-size: 1rem; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--border); color: var(--text); }
+        .btn-secondary:hover { background: #cdd3d6; }
+        .btn-accent { background: var(--accent); color: #fff; }
+        .btn-accent:hover { background: #d35400; }
+        .btn-danger { background: var(--danger); color: #fff; }
+        .btn-danger:hover { background: #a93226; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .flag-btn {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: var(--accent);
+        }
+        .flag-btn.flagged { background: var(--accent); color: #fff; }
+
+        /* Start Screen */
+        .start-screen {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .start-screen h1 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+        }
+        .start-screen p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto 32px;
+        }
+        .exam-meta {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            text-align: center;
+        }
+        .meta-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .meta-label { font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Results */
+        .results-header {
+            text-align: center;
+            padding: 32px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 8px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-weight: 700;
+        }
+        .score-circle.pass { border-color: var(--success); color: var(--success); }
+        .score-circle.fail { border-color: var(--danger); color: var(--danger); }
+        .score-number { font-size: 2.2rem; }
+        .score-label { font-size: 0.85rem; text-transform: uppercase; }
+        .result-title { font-size: 1.5rem; margin-bottom: 8px; }
+        .result-subtitle { color: var(--text-light); }
+
+        .review-item {
+            border-left: 4px solid var(--border);
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            background: #fafbfc;
+            border-radius: 0 10px 10px 0;
+        }
+        .review-item.correct { border-left-color: var(--success); background: #f0fff4; }
+        .review-item.incorrect { border-left-color: var(--danger); background: #fff5f5; }
+        .review-q { font-weight: 700; margin-bottom: 8px; }
+        .review-ans { font-size: 0.95rem; margin-bottom: 6px; }
+        .review-exp { font-size: 0.9rem; color: var(--text-light); margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--border); }
+        .correct-ans { color: var(--success); font-weight: 700; }
+        .wrong-ans { color: var(--danger); font-weight: 700; }
+
+        .hidden { display: none !important; }
+
+        @media (max-width: 640px) {
+            .container { padding: 12px; }
+            .card { padding: 20px; }
+            .question-text { font-size: 1.05rem; }
+            .exam-header { padding: 14px 16px; }
+            .exam-title { font-size: 1.05rem; }
+            .q-nav { grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- START SCREEN -->
+        <div id="start-screen" class="start-screen">
+            <h1>CompTIA A+ Core 1 Exam Simulator</h1>
+            <p>Scenario-based networking and hardware questions aligned to the 220-1101 exam objectives. Based on your study guide.</p>
+            <div class="exam-meta">
+                <div class="meta-item">
+                    <div class="meta-value">50</div>
+                    <div class="meta-label">Questions</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value">70</div>
+                    <div class="meta-label">Minutes</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-value">A–D</div>
+                    <div class="meta-label">Options</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="font-size:1.2rem;padding:14px 36px;" onclick="startExam()">Start Exam</button>
+            <p style="margin-top:20px;font-size:0.85rem;color:var(--text-light);">Timer begins when you click Start. You can flag questions for review. Results and explanations display at the end.</p>
+        </div>
+
+        <!-- EXAM INTERFACE -->
+        <div id="exam-interface" class="hidden">
+            <div class="exam-header">
+                <div>
+                    <div class="exam-title">CompTIA A+ Core 1 Simulator</div>
+                    <div class="progress-text">Question <span id="current-q-num">1</span> of 50</div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-fill" style="width:2%"></div>
+                    </div>
+                </div>
+                <div class="timer-box" id="timer-box">
+                    <span>⏱</span>
+                    <span id="timer-display">70:00</span>
+                </div>
+            </div>
+
+            <div class="q-nav" id="q-nav"></div>
+
+            <div class="card">
+                <div class="scenario-label" id="scenario-label">Scenario</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options-list" id="options-list"></div>
+            </div>
+
+            <div class="controls">
+                <div style="display:flex;gap:10px;">
+                    <button class="btn btn-secondary" id="prev-btn" onclick="prevQuestion()">← Previous</button>
+                    <button class="btn btn-secondary" id="next-btn" onclick="nextQuestion()">Next →</button>
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn flag-btn" id="flag-btn" onclick="toggleFlag()">★ Flag for Review</button>
+                    <button class="btn btn-danger" onclick="confirmSubmit()">End Exam</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESULTS SCREEN -->
+        <div id="results-screen" class="hidden">
+            <div class="card">
+                <div class="results-header">
+                    <div class="score-circle" id="score-circle">
+                        <div class="score-number" id="score-number">0%</div>
+                        <div class="score-label">Score</div>
+                    </div>
+                    <div class="result-title" id="result-title">Exam Complete</div>
+                    <div class="result-subtitle" id="result-subtitle">You answered <span id="answered-count">0</span>/50 questions in <span id="time-taken">00:00</span></div>
+                </div>
+                <div style="text-align:center;margin-bottom:24px;">
+                    <button class="btn btn-primary" onclick="restartExam()">Retake Exam</button>
+                </div>
+                <h2 style="margin-bottom:16px;font-size:1.3rem;">Question Review</h2>
+                <div id="review-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                scenario: "Network Troubleshooting",
+                question: "A user reports they cannot access any websites but can successfully ping 127.0.0.1 and their default gateway. Other users on the same subnet have no issues. What is most likely misconfigured?",
+                options: ["A. Subnet mask","B. DNS server","C. DHCP server scope","D. Default gateway"],
+                answer: 1,
+                explanation: "A successful loopback ping confirms the local TCP/IP stack is functional. A successful gateway ping confirms local network and Layer 2/3 connectivity. Since other users are unaffected, the infrastructure is healthy. The inability to reach websites by name while IP connectivity works points to a name resolution failure—specifically a misconfigured DNS server."
+            },
+            {
+                id: 2,
+                scenario: "IP Configuration",
+                question: "After a power outage, a workstation receives an IP address of 169.254.45.12. No other devices on the network are affected. What should the technician check first?",
+                options: ["A. DHCP server scope exhaustion","B. Ethernet cable and port connection","C. Router NAT configuration","D. DNS suffix settings"],
+                answer: 1,
+                explanation: "169.254.x.x is an APIPA address, indicating the DHCP client failed to obtain a lease. Because other devices are unaffected, the DHCP server is operational. The first step is to check the physical layer: verify the Ethernet cable is securely connected and the switch port LEDs indicate a link. Then confirm the NIC is enabled in Device Manager."
+            },
+            {
+                id: 3,
+                scenario: "DHCP Operations",
+                question: "A company needs to assign IP addresses dynamically to 500 client workstations. Which protocol and process sequence is used?",
+                options: ["A. DNS with iterative and recursive queries","B. DHCP with the DORA process (Discover, Offer, Request, Acknowledge)","C. ARP with broadcast and unicast replies","D. SNMP with GetRequest and trap messages"],
+                answer: 1,
+                explanation: "DHCP (Dynamic Host Configuration Protocol) automatically assigns IP addresses to clients. The DORA process is the standard four-step lease process: Discover (client broadcast), Offer (server responds), Request (client accepts), and Acknowledge (server finalizes). This is the correct method for dynamic IP assignment at scale."
+            },
+            {
+                id: 4,
+                scenario: "Network Organization",
+                question: "A small office with 8 Windows computers needs to share files and a printer without purchasing a server. Which technology combination is most appropriate?",
+                options: ["A. Active Directory domain with Group Policy","B. Workgroup with SMB/CIFS sharing","C. LDAP directory with Kerberos authentication","D. Domain controller with DNS integration"],
+                answer: 1,
+                explanation: "A workgroup is a peer-to-peer architecture ideal for small networks (typically under 20 computers). Each machine manages its own local SAM database. SMB/CIFS (Server Message Block) is the Windows standard protocol for file and printer sharing over the network, using port 445. Active Directory and LDAP are overkill and require a dedicated server."
+            },
+            {
+                id: 5,
+                scenario: "Firewall Configuration",
+                question: "A security administrator is configuring a new firewall. Following best practices, the administrator sets the default action to block all traffic and then explicitly creates rules to allow necessary services. What principle is being applied?",
+                options: ["A. Default allow","B. Default deny","C. Implicit trust","D. Least privilege for users"],
+                answer: 1,
+                explanation: "Default deny (also called deny-by-default) is the security best practice of blocking all traffic except explicitly permitted flows. This minimizes the attack surface. 'Default allow' is easier to manage but significantly less secure. While least privilege is related, the specific firewall configuration described is default deny."
+            },
+            {
+                id: 6,
+                scenario: "Remote Access",
+                question: "A help desk technician needs to remotely access a Windows Server to configure a new application. Which protocol and port should be used for a secure, graphical remote session?",
+                options: ["A. Telnet on TCP 23","B. SSH on TCP 22","C. RDP on TCP 3389","D. FTP on TCP 21"],
+                answer: 2,
+                explanation: "Remote Desktop Protocol (RDP) uses TCP port 3389 and provides a full graphical desktop session to Windows hosts. It requires Windows Pro/Enterprise, firewall exceptions, and membership in the Remote Desktop Users group. Network Level Authentication (NLA) should be enabled for security. Telnet and FTP are unencrypted and insecure."
+            },
+            {
+                id: 7,
+                scenario: "NAT & Routing",
+                question: "A small business wants to allow employees to access an internal web server (192.168.1.50) from home over the internet. What should be configured on the edge router?",
+                options: ["A. Port forwarding (destination NAT)","B. Port triggering","C. MAC address filtering","D. DHCP reservation only"],
+                answer: 0,
+                explanation: "Port forwarding (destination NAT) maps an external port on the router's public IP to an internal IP and port. For example, external TCP 443 could be forwarded to 192.168.1.50:443. Port triggering is dynamic and initiated by outbound traffic, making it unsuitable for inbound server access. A DHCP reservation alone does not expose the server externally."
+            },
+            {
+                id: 8,
+                scenario: "Ethernet Troubleshooting",
+                question: "A network administrator notices that a managed switch port connected to a file server shows constant collisions. The server NIC is hardcoded to 1000 Mbps / Full Duplex. What is the most likely cause?",
+                options: ["A. Faulty Ethernet cable","B. Duplex mismatch between switch port and NIC","C. VLAN misconfiguration on the switch","D. Incorrect subnet mask on the server"],
+                answer: 1,
+                explanation: "A duplex mismatch occurs when one side is set to full-duplex and the other falls back to half-duplex. The half-duplex side expects CSMA/CD collision detection, while the full-duplex side transmits freely, causing collisions. The solution is to configure both the switch port and server NIC to auto-negotiate or hardcode both to the same settings."
+            },
+            {
+                id: 9,
+                scenario: "Wireless Standards",
+                question: "Which IEEE 802.11 wireless standard operates exclusively in the 5 GHz frequency band with a theoretical maximum speed of 54 Mbps?",
+                options: ["A. 802.11b","B. 802.11g","C. 802.11a","D. 802.11n"],
+                answer: 2,
+                explanation: "802.11a operates exclusively at 5 GHz with a maximum theoretical speed of 54 Mbps. 802.11b and 802.11g operate at 2.4 GHz. 802.11n is dual-band (2.4/5 GHz). Exam questions about interference or 5 GHz-only operation often point to 802.11a or 802.11ac."
+            },
+            {
+                id: 10,
+                scenario: "Wireless Infrastructure",
+                question: "A network administrator needs to connect two wired network segments in separate buildings over a wireless link. Which device is most appropriate for this purpose?",
+                options: ["A. Wireless bridge","B. Wireless range extender","C. Standalone access point","D. Cable modem"],
+                answer: 0,
+                explanation: "A wireless bridge connects two wired networks over a wireless link, commonly used between buildings or across campus environments. A range extender rebroadcasts an existing wireless signal to extend coverage. An access point provides wireless access to clients, and a modem modulates/demodulates ISP signals."
+            },
+            {
+                id: 11,
+                scenario: "Cabling & Distance",
+                question: "A technician needs to install an access point 100 meters from the switch in an outdoor warehouse. What is the essential hardware consideration for this run?",
+                options: ["A. Use a PoE injector at the midpoint","B. Use fiber optic cable or a media converter","C. Use a wireless range extender instead","D. Use standard Cat 5e UTP cable"],
+                answer: 1,
+                explanation: "Ethernet copper cabling (Cat 5e/6) has a maximum recommended length of 100 meters. At exactly 100 meters, signal attenuation is at the limit and performance may degrade. The robust solution is to use fiber optic cable for the long run, or place a switch/media converter at an intermediate point to regenerate the signal."
+            },
+            {
+                id: 12,
+                scenario: "Email Protocols",
+                question: "Which email protocol uses port 143 for plain text and port 993 for SSL/TLS, and is designed to synchronize mailboxes across multiple devices while leaving messages on the server?",
+                options: ["A. POP3","B. SMTP","C. IMAP","D. SNMP"],
+                answer: 2,
+                explanation: "IMAP (Internet Message Access Protocol) synchronizes folders and leaves mail on the server, making it multi-device friendly. It uses port 143 (plain) and 993 (IMAPS). POP3 downloads mail and typically removes it from the server (single-device oriented). SMTP is exclusively for sending mail."
+            },
+            {
+                id: 13,
+                scenario: "Secure File Transfer",
+                question: "A technician needs to transfer files securely between two Linux servers over the network. Which protocol should be used?",
+                options: ["A. FTP on ports 20 and 21","B. Telnet on port 23","C. SFTP on port 22","D. HTTP on port 80"],
+                answer: 2,
+                explanation: "SFTP (SSH File Transfer Protocol) runs over SSH on port 22 and provides encrypted file transfer. FTP is unencrypted and legacy. Telnet is plaintext and insecure. HTTP is unencrypted web traffic. For secure file transfer, SFTP or FTPS (FTP over SSL/TLS on ports 989/990) are the acceptable choices."
+            },
+            {
+                id: 14,
+                scenario: "Directory Services",
+                question: "In a corporate domain environment, where are user accounts, computer objects, and security policies centrally stored and enforced?",
+                options: ["A. Local SAM database on each workstation","B. Active Directory on domain controllers","C. Workgroup peer-to-peer list","D. DHCP server lease table"],
+                answer: 1,
+                explanation: "Active Directory (AD) is Microsoft's directory service for Windows domains. It stores objects (users, computers, groups) and provides authentication, authorization, and Group Policy enforcement. The local SAM database is used in workgroups. LDAP (port 389/636) is the protocol used to query AD."
+            },
+            {
+                id: 15,
+                scenario: "Network Devices",
+                question: "Which network device operates at Layer 2 of the OSI model, forwards frames based on MAC addresses, and creates separate collision domains for each port?",
+                options: ["A. Hub","B. Switch","C. Router","D. Modem"],
+                answer: 1,
+                explanation: "A switch is a Layer 2 device that learns MAC addresses and populates a CAM table. It forwards frames only to the destination port (unicast) or all ports (broadcast), creating separate collision domains per port. A hub is Layer 1 and broadcasts everywhere. A router is Layer 3 and forwards based on IP addresses."
+            },
+            {
+                id: 16,
+                scenario: "OSI Model",
+                question: "Which layer of the OSI model is responsible for logical addressing, routing, and path determination between networks?",
+                options: ["A. Layer 2 - Data Link","B. Layer 3 - Network","C. Layer 4 - Transport","D. Layer 7 - Application"],
+                answer: 1,
+                explanation: "Layer 3 (Network Layer) handles logical addressing (IP), routing, and packet forwarding. Routers and Layer 3 switches operate at this layer. The PDU at Layer 3 is the packet. Layer 2 handles MAC addressing and framing, Layer 4 handles segments and transport protocols (TCP/UDP), and Layer 7 handles application data."
+            },
+            {
+                id: 17,
+                scenario: "Wireless Management",
+                question: "A company wants to centralize management of 50 wireless access points, configure roaming policies, and enforce security settings from a single interface. Which device is required?",
+                options: ["A. Wireless range extender","B. Wireless LAN Controller (WLC)","C. PoE injector","D. Layer 2 unmanaged switch"],
+                answer: 1,
+                explanation: "A Wireless LAN Controller (WLC) centralizes management of multiple lightweight access points, handling roaming, RF optimization, security policies, and firmware updates. This is essential in enterprise deployments. Autonomous APs store their own configuration locally and do not scale efficiently for large deployments."
+            },
+            {
+                id: 18,
+                scenario: "Name Resolution",
+                question: "Which TCP/IP protocol resolves human-readable hostnames (such as www.example.com) into IP addresses that computers can route to?",
+                options: ["A. DHCP","B. DNS","C. ARP","D. SNMP"],
+                answer: 1,
+                explanation: "DNS (Domain Name System) resolves hostnames to IP addresses. Windows clients support primary, secondary, and tertiary DNS servers for redundancy. If DNS fails, IP connectivity may remain functional (e.g., ping 8.8.8.8 works, but ping google.com fails). DHCP assigns IP addresses, ARP resolves IP to MAC, and SNMP manages network devices."
+            },
+            {
+                id: 19,
+                scenario: "Email Security",
+                question: "An administrator is configuring a secure email submission server that requires TLS encryption for client authentication. Which port should be used for SMTP submission?",
+                options: ["A. 25","B. 110","C. 587","D. 995"],
+                answer: 2,
+                explanation: "Port 587 is the standard port for SMTP message submission with TLS/STARTTLS required. Port 25 is for relay (often blocked by ISPs). Port 110 is POP3 (plain). Port 995 is POP3S. Port 993 is IMAPS. Modern secure email submission uses port 587 with authentication."
+            },
+            {
+                id: 20,
+                scenario: "Network Monitoring",
+                question: "A security analyst needs to monitor all traffic on a specific switch port for IDS analysis without disrupting the production server's connection. Which switch feature should be configured?",
+                options: ["A. Port forwarding","B. Port mirroring / SPAN","C. VLAN tagging (802.1Q)","D. Power over Ethernet"],
+                answer: 1,
+                explanation: "Port mirroring (SPAN - Switched Port Analyzer) copies traffic from one or more source ports to a destination port where an IDS/IPS or packet sniffer is connected. This is passive monitoring. Port forwarding is for NAT, VLAN tagging segregates traffic, and PoE delivers power over data cables."
+            },
+            {
+                id: 21,
+                scenario: "IPv6 Fundamentals",
+                question: "Which IPv6 address represents the loopback address, used to test the local TCP/IP stack?",
+                options: ["A. 127.0.0.1","B. ::1","C. 0.0.0.0","D. FE80::1"],
+                answer: 1,
+                explanation: "In IPv6, the loopback address is ::1 (equivalent to 127.0.0.1 in IPv4). A successful ping to ::1 verifies that the local TCP/IP stack is functional. FE80::/10 addresses are link-local addresses. 0.0.0.0 is the IPv4 unspecified address."
+            },
+            {
+                id: 22,
+                scenario: "Power over Ethernet",
+                question: "A company needs to provide both data connectivity and 30 watts of power to a VoIP phone over a single Ethernet cable. Which PoE standard supports this requirement?",
+                options: ["A. 802.3af (PoE)","B. 802.3at (PoE+)","C. 802.11ac (Wi-Fi)","D. 802.1Q (VLAN)"],
+                answer: 1,
+                explanation: "802.3at (PoE+) delivers up to 30W per port. 802.3af (standard PoE) delivers up to 15.4W. 802.3bt (PoE++) delivers 60-90W. 802.11ac is a wireless standard, and 802.1Q is VLAN tagging. VoIP phones and access points typically need 802.3at or higher."
+            },
+            {
+                id: 23,
+                scenario: "Network Types",
+                question: "Which network type covers a metropolitan area, such as a city-wide municipal Wi-Fi network or campus interconnect?",
+                options: ["A. LAN","B. WAN","C. MAN","D. PAN"],
+                answer: 2,
+                explanation: "A MAN (Metropolitan Area Network) covers a city or large campus area. A LAN is local (building/campus). A WAN is wide-area (country/global, such as the Internet). A PAN is personal area (Bluetooth, NFC)."
+            },
+            {
+                id: 24,
+                scenario: "Remote Connectivity",
+                question: "A traveling employee needs to securely access the corporate network and internal resources over an untrusted public Wi-Fi network. Which technology creates an encrypted tunnel for this purpose?",
+                options: ["A. Proxy server","B. VPN (Virtual Private Network)","C. NAT (Network Address Translation)","D. DMZ (Demilitarized Zone)"],
+                answer: 1,
+                explanation: "A VPN creates an encrypted tunnel over a public network, securing data in transit. Common protocols include IPSec (Layer 3), SSL/TLS (Layer 7, browser-based), SSTP (Microsoft, uses TCP 443), and L2TP/IPSec. A proxy intermediates web requests but does not necessarily encrypt all traffic. NAT translates addresses, and a DMZ is a perimeter network segment."
+            },
+            {
+                id: 25,
+                scenario: "OSI Model & Devices",
+                question: "Which network device operates at Layer 1 of the OSI model, has no intelligence, and broadcasts incoming electrical signals to all connected ports?",
+                options: ["A. Switch","B. Router","C. Hub","D. Bridge"],
+                answer: 2,
+                explanation: "A hub is a Layer 1 device that regenerates electrical signals and broadcasts incoming data to all connected ports. It creates a single collision domain and a single broadcast domain. It is obsolete in modern networks, replaced by switches. Switches are Layer 2, routers are Layer 3, and bridges are Layer 2."
+            },
+            {
+                id: 26,
+                scenario: "Firewall Rules",
+                question: "A network administrator wants to restrict administrative access to a router's web interface so that only devices from the 10.0.0.0/24 subnet can connect. Which firewall feature accomplishes this?",
+                options: ["A. MAC filtering","B. IP filtering","C. Content filtering","D. Port forwarding"],
+                answer: 1,
+                explanation: "IP filtering blocks or permits traffic based on source/destination IP addresses. It is commonly used to restrict administrative interfaces to specific subnets or block known malicious IPs. MAC filtering uses hardware addresses (Layer 2), content filtering blocks URLs/categories, and port forwarding maps external ports to internal IPs."
+            },
+            {
+                id: 27,
+                scenario: "Cabling Standards",
+                question: "Which Ethernet cable category supports 10 Gbps speeds up to 100 meters and has a bandwidth of 500 MHz?",
+                options: ["A. Cat5e","B. Cat6","C. Cat6a","D. Cat5"],
+                answer: 2,
+                explanation: "Cat6a (Augmented Cat 6) supports 10 Gbps up to 100 meters with a bandwidth of 500 MHz. Cat5e supports 1 Gbps. Cat6 supports 1 Gbps (10 Gbps up to 55 meters). Cat5 is legacy and supports 100 Mbps. Cat7 and Cat8 support higher speeds but with different shielding and distance limitations."
+            },
+            {
+                id: 28,
+                scenario: "Cloud Concepts",
+                question: "A company is migrating from on-premise servers to a scalable model where they pay for computing resources as they consume them, reducing hardware maintenance. This describes:",
+                options: ["A. Capital expenditure on-premise model","B. Cloud computing with an OpEx model","C. Peer-to-peer workgroup networking","D. Domain controller clustering"],
+                answer: 1,
+                explanation: "Cloud computing operates on an OpEx (Operational Expenditure) model, where the organization pays for resources as they use them rather than purchasing hardware upfront (CapEx). Benefits include scalability, reduced maintenance, and a shared responsibility security model. On-premise requires capital expenditure, physical space, and cooling."
+            },
+            {
+                id: 29,
+                scenario: "Directory Protocols",
+                question: "Which protocol is used for querying and modifying directory services such as Microsoft Active Directory or other LDAP-compatible directories?",
+                options: ["A. DNS","B. DHCP","C. LDAP","D. SNMP"],
+                answer: 2,
+                explanation: "LDAP (Lightweight Directory Access Protocol) is the standard protocol for querying and modifying directory services. It uses port 389 (plain) and port 636 (LDAPS with SSL/TLS). DNS resolves hostnames, DHCP assigns IP addresses, and SNMP manages network devices."
+            },
+            {
+                id: 30,
+                scenario: "Power Infrastructure",
+                question: "A technician needs to connect a non-PoE switch to a new PoE-powered wireless access point. Which device is required to inject power onto the Ethernet cable?",
+                options: ["A. Wireless LAN controller","B. PoE injector / midspan","C. Fiber media converter","D. VPN concentrator"],
+                answer: 1,
+                explanation: "A PoE injector (midspan) sits between a non-PoE switch and a PoE-powered device (such as an AP or camera) to inject DC power onto the Ethernet pairs. A PoE switch is preferred in new deployments for cleaner topology, but an injector is the correct solution when the switch lacks PoE capability."
+            },
+            {
+                id: 31,
+                scenario: "Layer 2 Security",
+                question: "A network administrator notices unauthorized devices connecting to the wired network. Which security measure filters network access based on the burned-in hardware address of the device's NIC?",
+                options: ["A. IP filtering","B. Port filtering","C. MAC filtering","D. Content filtering"],
+                answer: 2,
+                explanation: "MAC filtering uses the burned-in MAC address (Layer 2) to permit or deny network access. A whitelist (allow list) is more secure than a blacklist because unknown devices are denied by default. However, MAC addresses can be spoofed, so this should not be a standalone security measure."
+            },
+            {
+                id: 32,
+                scenario: "Wireless Security",
+                question: "Which wireless security standard is currently the most secure and recommended for enterprise Wi-Fi deployments, providing stronger encryption and authentication than its predecessors?",
+                options: ["A. WEP","B. WPA","C. WPA2","D. WPA3"],
+                answer: 3,
+                explanation: "WPA3 is the current most secure wireless standard, offering improved encryption, protection against offline dictionary attacks, and forward secrecy. WPA2 is still widely used but less secure. WPA and WEP are legacy and should not be used. Disabling SSID broadcast is not a security measure—use WPA3 instead."
+            },
+            {
+                id: 33,
+                scenario: "High Availability",
+                question: "A company needs to distribute incoming web traffic across multiple backend servers to prevent any single server from becoming a bottleneck. Which device or service accomplishes this?",
+                options: ["A. Proxy server","B. Load balancer","C. VPN concentrator","D. IDS sensor"],
+                answer: 1,
+                explanation: "A load balancer distributes incoming traffic across multiple servers using algorithms such as round-robin, least connections, or IP hash. It also performs health checks to ensure traffic is only sent to available servers. A proxy intermediates requests, a VPN concentrator handles remote access tunnels, and an IDS detects intrusions."
+            },
+            {
+                id: 34,
+                scenario: "Name Resolution Troubleshooting",
+                question: "A user reports that websites load correctly when accessed by IP address (e.g., 8.8.8.8) but fail to load when accessed by domain name (e.g., google.com). Which service is most likely failing?",
+                options: ["A. DHCP","B. DNS","C. HTTP","D. FTP"],
+                answer: 1,
+                explanation: "If IP connectivity works (ping to 8.8.8.8 succeeds) but name-based access fails, the issue is name resolution. DNS (Domain Name System) translates domain names to IP addresses. DHCP issues would cause IP addressing problems, HTTP is the web protocol, and FTP is for file transfer."
+            },
+            {
+                id: 35,
+                scenario: "Windows Network Locations",
+                question: "A user connects their laptop to a public Wi-Fi hotspot at an airport. Which Windows network location type should be selected to apply the strictest firewall rules and disable network discovery?",
+                options: ["A. Private","B. Domain","C. Public","D. HomeGroup"],
+                answer: 2,
+                explanation: "The 'Public' network location type applies the strictest firewall profile, disabling network discovery and blocking most inbound connections. 'Private' is for trusted home/office networks with moderate rules. 'Domain' is controlled by Group Policy in Active Directory environments. HomeGroup was deprecated in Windows 10."
+            },
+            {
+                id: 36,
+                scenario: "SOHO Security",
+                question: "A gamer wants to configure their SOHO router so that one internal gaming console receives all inbound ports and is fully exposed to the internet for peer-to-peer multiplayer. This configuration is called:",
+                options: ["A. DMZ host","B. Port forwarding specific ports","C. Port triggering","D. VPN passthrough"],
+                answer: 0,
+                explanation: "A DMZ host on a SOHO router exposes one internal device to all inbound ports. This is convenient for gaming but risky from a security perspective. Enterprise DMZs use dedicated firewall segments. Port forwarding maps specific ports, port triggering is dynamic, and VPN passthrough allows VPN traffic through NAT."
+            },
+            {
+                id: 37,
+                scenario: "Secure Remote Administration",
+                question: "Which protocol should a technician use to establish a secure, encrypted remote CLI session to a Linux server, replacing the insecure legacy Telnet protocol?",
+                options: ["A. SSH","B. RDP","C. SNMP","D. SIP"],
+                answer: 0,
+                explanation: "SSH (Secure Shell) on port 22 provides strong encryption (AES) and key-based or password authentication for remote CLI access. It replaces Telnet, which transmits all data including passwords in plaintext. RDP is for Windows graphical sessions, SNMP manages devices, and SIP initiates VoIP calls."
+            },
+            {
+                id: 38,
+                scenario: "Network Devices",
+                question: "Which network device connects two network segments, filters traffic based on MAC addresses, and segments collision domains while maintaining a single broadcast domain?",
+                options: ["A. Hub","B. Switch","C. Bridge","D. Router"],
+                answer: 2,
+                explanation: "A bridge is a Layer 2 device that connects two network segments and filters traffic based on MAC addresses. It segments collision domains while maintaining a single broadcast domain. It is the predecessor to the modern switch. A hub is Layer 1 (no filtering), a switch is an advanced bridge with multiple ports, and a router is Layer 3."
+            },
+            {
+                id: 39,
+                scenario: "Common Ports",
+                question: "Which TCP port is used by HTTPS to provide encrypted, secure web traffic between a browser and a web server?",
+                options: ["A. 80","B. 443","C. 8080","D. 21"],
+                answer: 1,
+                explanation: "HTTPS (HTTP Secure) uses TCP port 443 with SSL/TLS encryption. HTTP uses port 80 (unencrypted). Port 8080 is an alternative HTTP/proxy port. Port 21 is FTP control. Port 3389 is RDP, and port 22 is SSH."
+            },
+            {
+                id: 40,
+                scenario: "Network Storage",
+                question: "A small business needs a device to store and share files over the network using RAID for redundancy, with access via SMB/CIFS for Windows clients. Which device is most appropriate?",
+                options: ["A. NAS (Network Attached Storage)","B. SAN (Storage Area Network)","C. Print server","D. VoIP phone"],
+                answer: 0,
+                explanation: "A NAS (Network Attached Storage) is a file-level storage device accessible over the network via SMB/CIFS or NFS. It supports RAID configurations (0, 1, 5, 6, 10) for redundancy and performance. A SAN provides block-level storage and is more complex/expensive. A print server manages printers, and a VoIP phone handles voice calls."
+            },
+            {
+                id: 41,
+                scenario: "Layer Troubleshooting",
+                question: "A technician is troubleshooting a network issue where a user can successfully ping the loopback address (127.0.0.1) but cannot ping the default gateway. Which OSI layer is most likely affected?",
+                options: ["A. Application layer","B. Network layer","C. Physical / Data Link layer","D. Session layer"],
+                answer: 2,
+                explanation: "A successful loopback ping verifies the local TCP/IP stack (Layer 3/4 software). Failure to reach the default gateway suggests a problem at the Physical or Data Link layer: disabled NIC, faulty cable, disconnected port, incorrect duplex/speed settings, or switch port issues. The local software is working, but the connection to the local network infrastructure is broken."
+            },
+            {
+                id: 42,
+                scenario: "Wireless Standards",
+                question: "Which IEEE 802.11 wireless standard operates at both 2.4 GHz and 5 GHz (dual-band) with a theoretical maximum speed of 600 Mbps?",
+                options: ["A. 802.11g","B. 802.11a","C. 802.11n","D. 802.11ac"],
+                answer: 2,
+                explanation: "802.11n (Wi-Fi 4) is dual-band (2.4/5 GHz) with a theoretical maximum of 600 Mbps. 802.11g is 2.4 GHz only (54 Mbps). 802.11a is 5 GHz only (54 Mbps). 802.11ac (Wi-Fi 5) is 5 GHz only (3.5 Gbps). 802.11ax (Wi-Fi 6) is also dual-band with higher speeds."
+            },
+            {
+                id: 43,
+                scenario: "Switch Configuration",
+                question: "A network administrator needs to logically segregate the accounting, HR, and engineering departments into separate broadcast domains without purchasing additional physical switches. Which technology should be implemented on a managed switch?",
+                options: ["A. Port mirroring","B. VLANs (802.1Q)","C. PoE (Power over Ethernet)","D. NAT (Network Address Translation)"],
+                answer: 1,
+                explanation: "VLANs (Virtual LANs) using 802.1Q tagging allow a managed switch to logically segregate broadcast domains without separate physical hardware. Each VLAN acts as a separate network segment. Port mirroring is for monitoring, PoE delivers power, and NAT translates IP addresses on a router."
+            },
+            {
+                id: 44,
+                scenario: "VoIP Protocols",
+                question: "In a VoIP deployment, which protocol is responsible for initiating, maintaining, and terminating voice and video call sessions?",
+                options: ["A. RTP (Real-time Transport Protocol)","B. SIP (Session Initiation Protocol)","C. SNMP (Simple Network Management Protocol)","D. LDAP (Lightweight Directory Access Protocol)"],
+                answer: 1,
+                explanation: "SIP (Session Initiation Protocol) uses port 5060 (TCP/UDP) for call setup, maintenance, and termination. RTP (Real-time Transport Protocol) carries the actual media stream (voice/video data). SNMP manages network devices, and LDAP queries directory services."
+            },
+            {
+                id: 45,
+                scenario: "Proxy & Content Filtering",
+                question: "A company wants to cache frequently accessed web content, filter URLs based on categories, and anonymize client IP addresses for outbound web requests. Which device or service should be implemented?",
+                options: ["A. Load balancer","B. Forward proxy server","C. VPN concentrator","D. IDS sensor"],
+                answer: 1,
+                explanation: "A forward proxy server sits between clients and the internet, caching content, filtering URLs by category, and anonymizing client IPs. A reverse proxy sits in front of web servers. A load balancer distributes traffic, a VPN concentrator handles remote tunnels, and an IDS detects intrusions."
+            },
+            {
+                id: 46,
+                scenario: "Fiber Connectivity",
+                question: "A technician is connecting a fiber optic line from an ISP to a customer's internal Ethernet network in a Fiber to the Home (FTTH) deployment. Which device converts the fiber optic signals to Ethernet?",
+                options: ["A. Cable modem","B. ONT / ONU (Optical Network Terminal/Unit)","C. Patch panel","D. Wireless bridge"],
+                answer: 1,
+                explanation: "An ONT (Optical Network Terminal) or ONU (Optical Network Unit) converts fiber optic signals from the ISP to standard Ethernet for the customer's internal network. A cable modem uses coaxial cable (DOCSIS). A patch panel is a cabling termination point, and a wireless bridge connects networks over Wi-Fi."
+            },
+            {
+                id: 47,
+                scenario: "Windows IP Configuration",
+                question: "Which Windows feature allows a client to fall back to a statically configured IP address if the DHCP server is unreachable, rather than automatically assigning an APIPA address?",
+                options: ["A. Alternate IP Configuration","B. DHCP reservation","C. DNS suffix search order","D. WINS resolution"],
+                answer: 0,
+                explanation: "Windows allows an Alternate Configuration tab in IPv4 properties. If DHCP fails, the client can fall back to a statically configured address rather than using APIPA (169.254.x.x). This is useful on networks that alternate between DHCP and static configurations, such as laptops moving between corporate and home networks."
+            },
+            {
+                id: 48,
+                scenario: "Firewall Inspection",
+                question: "A network administrator is configuring a firewall to track active connections and allow return traffic for established sessions while blocking unsolicited incoming packets. This describes:",
+                options: ["A. Stateless inspection","B. Stateful inspection","C. Packet filtering ACL","D. MAC address filtering"],
+                answer: 1,
+                explanation: "Stateful inspection tracks active connections in a state table and allows return traffic for established sessions. It is more secure than stateless inspection, which applies ACLs per packet without connection awareness. Packet filtering is a component, and MAC filtering operates at Layer 2."
+            },
+            {
+                id: 49,
+                scenario: "Structured Cabling",
+                question: "Which network component serves as the termination point for structured horizontal cabling, where patch cables connect the permanent infrastructure to active switches?",
+                options: ["A. Router","B. Patch panel","C. Wireless access point","D. Load balancer"],
+                answer: 1,
+                explanation: "A patch panel is a termination point for structured cabling. Horizontal cabling runs from wall jacks to the patch panel in the telecommunications room. Patch cables then connect the panel to switches. It is the demarcation point between permanent infrastructure and active equipment. Wiring follows TIA/EIA-568A or 568B standards."
+            },
+            {
+                id: 50,
+                scenario: "VPN Protocols",
+                question: "A company needs to allow remote workers to connect securely to the corporate network using a browser-based SSL VPN solution that traverses NAT easily and blends with standard HTTPS traffic. Which protocol is most appropriate?",
+                options: ["A. IPSec","B. L2TP","C. SSTP (Secure Socket Tunneling Protocol)","D. PPTP"],
+                answer: 2,
+                explanation: "SSTP (Secure Socket Tunneling Protocol) is a Microsoft proprietary VPN protocol that uses TCP port 443, blending with HTTPS traffic and traversing NAT easily. IPSec is Layer 3 and strong but can have NAT traversal issues. L2TP is often paired with IPSec. PPTP is deprecated and insecure."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = new Array(questions.length).fill(null);
+        let flagged = new Array(questions.length).fill(false);
+        let timeRemaining = 70 * 60; // 70 minutes in seconds
+        let timerInterval;
+        let examStarted = false;
+        let examEnded = false;
+        let startTime;
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = seconds % 60;
+            return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function startExam() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('exam-interface').classList.remove('hidden');
+            examStarted = true;
+            startTime = Date.now();
+            renderNav();
+            renderQuestion();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                document.getElementById('timer-display').textContent = formatTime(timeRemaining);
+                if (timeRemaining <= 300) {
+                    document.getElementById('timer-box').classList.add('warning');
+                }
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function renderNav() {
+            const nav = document.getElementById('q-nav');
+            nav.innerHTML = '';
+            questions.forEach((q, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'q-nav-btn';
+                btn.textContent = i + 1;
+                if (i === currentQuestion) btn.classList.add('active');
+                if (answers[i] !== null) btn.classList.add('answered');
+                if (flagged[i]) btn.classList.add('flagged');
+                btn.onclick = () => { currentQuestion = i; renderQuestion(); };
+                nav.appendChild(btn);
+            });
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('current-q-num').textContent = currentQuestion + 1;
+            document.getElementById('scenario-label').textContent = q.scenario;
+            document.getElementById('question-text').textContent = q.question;
+
+            const opts = document.getElementById('options-list');
+            opts.innerHTML = '';
+            q.options.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = 'option' + (answers[currentQuestion] === i ? ' selected' : '');
+                div.onclick = () => selectOption(i);
+                div.innerHTML = `<div class="option-letter">${String.fromCharCode(65+i)}</div><div class="option-text">${opt.substring(3)}</div>`;
+                opts.appendChild(div);
+            });
+
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = currentQuestion === questions.length - 1;
+
+            const flagBtn = document.getElementById('flag-btn');
+            flagBtn.classList.toggle('flagged', flagged[currentQuestion]);
+            flagBtn.textContent = flagged[currentQuestion] ? '★ Flagged' : '★ Flag for Review';
+
+            document.getElementById('progress-fill').style.width = ((currentQuestion + 1) / questions.length * 100) + '%';
+            renderNav();
+        }
+
+        function selectOption(index) {
+            answers[currentQuestion] = index;
+            renderQuestion();
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function toggleFlag() {
+            flagged[currentQuestion] = !flagged[currentQuestion];
+            renderQuestion();
+        }
+
+        function confirmSubmit() {
+            const unanswered = answers.filter(a => a === null).length;
+            let msg = unanswered > 0 
+                ? `You have ${unanswered} unanswered question(s). Are you sure you want to submit?` 
+                : "Are you sure you want to submit the exam?";
+            if (confirm(msg)) submitExam();
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+            examEnded = true;
+            document.getElementById('exam-interface').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            let correct = 0;
+            answers.forEach((a, i) => { if (a === questions[i].answer) correct++; });
+            const pct = Math.round((correct / questions.length) * 100);
+            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+
+            const circle = document.getElementById('score-circle');
+            circle.classList.remove('pass', 'fail');
+            circle.classList.add(pct >= 75 ? 'pass' : 'fail');
+            document.getElementById('score-number').textContent = pct + '%';
+            document.getElementById('result-title').textContent = pct >= 75 ? 'Congratulations — You Passed!' : 'Keep Studying — You Will Get There';
+            document.getElementById('answered-count').textContent = answers.filter(a => a !== null).length;
+            document.getElementById('time-taken').textContent = formatTime(timeTaken);
+
+            const review = document.getElementById('review-list');
+            review.innerHTML = '';
+            questions.forEach((q, i) => {
+                const isCorrect = answers[i] === q.answer;
+                const div = document.createElement('div');
+                div.className = 'review-item ' + (isCorrect ? 'correct' : 'incorrect');
+
+                let ansHtml = '';
+                if (answers[i] === null) {
+                    ansHtml = `<span class="wrong-ans">Unanswered</span>`;
+                } else if (isCorrect) {
+                    ansHtml = `<span class="correct-ans">Correct: ${q.options[q.answer]}</span>`;
+                } else {
+                    ansHtml = `<span class="wrong-ans">Your answer: ${answers[i] !== null ? q.options[answers[i]] : 'Unanswered'}</span><br><span class="correct-ans">Correct answer: ${q.options[q.answer]}</span>`;
+                }
+
+                div.innerHTML = `
+                    <div class="review-q">Q${i+1}: ${q.scenario}</div>
+                    <div class="review-ans">${ansHtml}</div>
+                    <div class="review-exp">${q.explanation}</div>
+                `;
+                review.appendChild(div);
+            });
+        }
+
+        function restartExam() {
+            currentQuestion = 0;
+            answers = new Array(questions.length).fill(null);
+            flagged = new Array(questions.length).fill(false);
+            timeRemaining = 70 * 60;
+            examStarted = false;
+            examEnded = false;
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+            document.getElementById('timer-box').classList.remove('warning');
+            document.getElementById('timer-display').textContent = '70:00';
+        }
+    </script>
+</body>
+</html>

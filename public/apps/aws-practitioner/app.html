@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Cloud Practitioner (CLF-C02) Practice Exam</title>
+    <style>
+        :root {
+            --primary-color: #232F3E;
+            --secondary-color: #FF9900;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --border-color: #ccc;
+            --success-color: #2e7d32;
+            --error-color: #c62828;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary-color);
+        }
+
+        .timer-badge {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .btn {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border: none;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: opacity 0.3s ease;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn:disabled {
+            background-color: #ddd;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        /* Question Screen */
+        .question-meta {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .option-label:hover {
+            background-color: #f9f9f9;
+        }
+
+        .option-label input {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Results Screen */
+        .results-summary {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .domain-report {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .domain-report th, .domain-report td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        .domain-report th {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        .needs-improvement {
+            background-color: #ffebee;
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        .review-item {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .review-item.correct {
+            border-left: 5px solid var(--success-color);
+            padding-left: 15px;
+        }
+
+        .review-item.incorrect {
+            border-left: 5px solid var(--error-color);
+            padding-left: 15px;
+        }
+
+        .explanation {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .flag-btn {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .flag-btn.flagged {
+            background-color: #fff3e0;
+            border-color: var(--secondary-color);
+            color: #e65100;
+        }
+
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            height: 8px;
+        }
+
+        .progress-fill {
+            height: 8px;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h2>AWS Cloud Practitioner (CLF-C02)</h2>
+            <div id="timerDisplay" class="timer-badge hidden">200:00</div>
+        </header>
+
+        <!-- Start Screen -->
+        <div id="startScreen">
+            <h3>Practice Exam Instructions</h3>
+            <ul>
+                <li><strong>Total Questions:</strong> <span id="qCount"></span></li>
+                <li><strong>Time Limit:</strong> 200 Minutes</li>
+                <li><strong>Passing Score:</strong> 70%</li>
+                <li><strong>Format:</strong> Scenario-based Multiple Choice Questions</li>
+            </ul>
+            <p>At the end of the exam, you will receive a domain-level breakdown identifying areas that need improvement.</p>
+            <button class="btn" onclick="startExam()">Start Exam</button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quizScreen" class="hidden">
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="question-meta">
+                Question <span id="currentQNum"></span> of <span id="totalQNum"></span> | 
+                Domain: <span id="currentDomain"></span>
+            </div>
+            <button id="flagBtn" class="flag-btn" onclick="toggleFlag()">Flag for Review</button>
+            <div id="questionText" class="question-text"></div>
+
+            <div id="optionsContainer" class="options-container">
+                <!-- Options injected via JS -->
+            </div>
+
+            <div class="nav-buttons">
+                <button id="prevBtn" class="btn" onclick="prevQuestion()" disabled>Previous</button>
+                <button id="nextBtn" class="btn" onclick="nextQuestion()">Next</button>
+                <button id="submitBtn" class="btn hidden" onclick="submitExam()">Submit Exam</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="hidden">
+            <h2>Exam Report</h2>
+            <div class="results-summary">
+                <h3 id="finalScore"></h3>
+                <p id="passFailStatus"></p>
+                <p id="timeRemaining"></p>
+            </div>
+
+            <h3>Domain Performance</h3>
+            <table class="domain-report">
+                <thead>
+                    <tr>
+                        <th>Domain</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="domainTableBody">
+                    <!-- Domain stats injected via JS -->
+                </tbody>
+            </table>
+
+            <h3>Question Review</h3>
+            <div id="reviewContainer">
+                <!-- Review injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A retail company wants to store sensitive customer payment data in an on-premises data center while running their public-facing e-commerce website on AWS. Which deployment model allows this combination?",
+        "options": [
+            "Public Cloud",
+            "Private Cloud",
+            "Hybrid Cloud",
+            "Multi-Cloud"
+        ],
+        "answer": 2,
+        "explanation": "Hybrid Cloud combines public and private clouds, allowing sensitive data to remain in-house while leveraging cloud scalability for public-facing applications. AWS Outposts supports this model."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to track exactly how much cloud resources each department uses and pay only for what they consume. Which cloud computing characteristic provides this pay-as-you-go billing model?",
+        "options": [
+            "Resource pooling",
+            "Broad network access",
+            "Measured service",
+            "Rapid elasticity"
+        ],
+        "answer": 2,
+        "explanation": "Measured service provides pay-as-you-go billing and usage tracking, allowing organizations to monitor and pay only for the resources they actually consume."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A research consortium of universities wants to share cloud infrastructure for a joint scientific project. They need a cloud environment shared by organizations with common goals. Which deployment model fits this scenario?",
+        "options": [
+            "Public Cloud",
+            "Private Cloud",
+            "Hybrid Cloud",
+            "Community Cloud"
+        ],
+        "answer": 3,
+        "explanation": "Community Cloud is shared by organizations with common goals, similar in concept to AWS GovCloud, making it ideal for research consortiums and collaborative projects."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company has identified several old applications that are no longer used and wants to eliminate their support costs and improve security by shutting them down. Which migration strategy should they apply?",
+        "options": [
+            "Retain",
+            "Retire",
+            "Rehost",
+            "Repurchase"
+        ],
+        "answer": 1,
+        "explanation": "Retire discontinues old applications, improving security and eliminating support costs. It is a valid migration strategy for applications that no longer provide business value."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to use serverless computing to eliminate the need for server provisioning and reduce energy consumption as part of their environmental sustainability goals. Which Well-Architected Framework pillar does this support?",
+        "options": [
+            "Cost Optimization",
+            "Performance Efficiency",
+            "Sustainability",
+            "Operational Excellence"
+        ],
+        "answer": 2,
+        "explanation": "The Sustainability pillar focuses on reducing environmental impact by encouraging efficient resource use and serverless architectures like AWS Lambda to reduce energy consumption."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "An architecture team is designing a new cloud solution and wants to ensure they follow AWS best practices for creating secure, efficient, and reliable architectures. Which framework should they use?",
+        "options": [
+            "AWS Cloud Adoption Framework (CAF)",
+            "AWS Well-Architected Framework",
+            "AWS Migration Hub",
+            "AWS Service Catalog"
+        ],
+        "answer": 1,
+        "explanation": "The AWS Well-Architected Framework uses six pillars (Operational Excellence, Security, Reliability, Performance Efficiency, Cost Optimization, Sustainability) to guide the creation of robust cloud architectures."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A media company needs to migrate 500 terabytes of video content from their on-premises storage to AWS. They have limited internet bandwidth and cannot transfer this amount of data online within their timeline. Which AWS service should they use?",
+        "options": [
+            "AWS DataSync",
+            "AWS Snowball",
+            "AWS Direct Connect",
+            "AWS Transfer Family"
+        ],
+        "answer": 1,
+        "explanation": "AWS Snowball is a physical device for large-scale offline data migration, ideal for bulk data migration when internet bandwidth is insufficient. Storage-optimized Snowball supports up to 210 terabytes."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to avoid vendor lock-in by using services from multiple cloud providers simultaneously. They believe this will enhance reliability and give them negotiating power. Which deployment strategy describes this approach?",
+        "options": [
+            "Hybrid Cloud",
+            "Community Cloud",
+            "Multi-Cloud",
+            "Private Cloud"
+        ],
+        "answer": 2,
+        "explanation": "Multi-Cloud uses services from multiple cloud providers to avoid vendor lock-in and enhance reliability. An example is combining AWS with Azure or GCP."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A small business wants to use Microsoft Office applications without installing or managing any software locally. They need a complete solution where everything is managed by the provider. Which cloud service model meets this need?",
+        "options": [
+            "Infrastructure as a Service (IaaS)",
+            "Platform as a Service (PaaS)",
+            "Software as a Service (SaaS)",
+            "Function as a Service (FaaS)"
+        ],
+        "answer": 2,
+        "explanation": "Software as a Service (SaaS) offers complete solutions including infrastructure and applications, with no maintenance responsibilities for the customer. Examples include Office 365 and Google Workspace."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "During a cloud migration, a company moves databases, files, and other data to the cloud, then validates migrated elements to ensure proper configuration and security. Which migration phase includes these activities?",
+        "options": [
+            "Planning",
+            "Implementation",
+            "Optimization",
+            "Retirement"
+        ],
+        "answer": 1,
+        "explanation": "The Implementation phase includes data migration, application migration, infrastructure migration, and testing to validate that migrated elements are properly configured and secure."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A financial trading firm cannot afford to lose even a single minute of transaction data. They need to define the maximum amount of data loss acceptable during a disaster. Which metric should they establish?",
+        "options": [
+            "Recovery Time Objective (RTO)",
+            "Recovery Point Objective (RPO)",
+            "Maximum Tolerable Downtime (MTD)",
+            "Mean Time Between Failures (MTBF)"
+        ],
+        "answer": 1,
+        "explanation": "The Recovery Point Objective (RPO) defines the maximum amount of acceptable data loss during a disaster, specifying how recent the recovered data should be."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A solutions architect is evaluating trade-offs between cost and performance when selecting instance types for a workload. Which free AWS resource can they use to assess their architecture against the six pillars?",
+        "options": [
+            "AWS Config",
+            "AWS Well-Architected Tool",
+            "AWS Trusted Advisor",
+            "AWS CloudTrail"
+        ],
+        "answer": 1,
+        "explanation": "The AWS Well-Architected Tool is a free resource in the AWS Management Console that assesses workloads against the six pillars and offers recommendations for optimization."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A hospital's patient monitoring system cannot remain offline for more than 30 minutes without risking patient safety. Which metric represents this longest acceptable period of unavailability?",
+        "options": [
+            "RTO",
+            "RPO",
+            "MTD",
+            "MTR"
+        ],
+        "answer": 2,
+        "explanation": "Maximum Tolerable Downtime (MTD) is the longest period systems can remain unavailable without serious damage, representing the upper threshold for acceptable downtime."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company maintains multiple network connections from different internet service providers so that if one connection fails, traffic can still flow through the alternate path. Which type of redundancy is this?",
+        "options": [
+            "Data Redundancy",
+            "Hardware Redundancy",
+            "Network Redundancy",
+            "Application Redundancy"
+        ],
+        "answer": 2,
+        "explanation": "Network Redundancy involves multiple network connections to ensure continued connectivity even if one network path fails."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "Under the AWS Shared Responsibility Model, a customer is using Amazon S3 to store data. Compared to using Amazon EC2, which statement accurately describes the customer's responsibility when using S3?",
+        "options": [
+            "The customer has more responsibility for patching and OS management with S3",
+            "AWS abstracts more security responsibilities to itself with S3 than with EC2",
+            "The customer is responsible for physical security in both cases",
+            "AWS has no security responsibilities for S3"
+        ],
+        "answer": 1,
+        "explanation": "Responsibility shifts based on service type. EC2 gives more responsibility to the customer (OS, applications), while S3 and DynamoDB abstract more security responsibilities to AWS."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A development team wants to break their monolithic application into microservices to increase scalability and performance. This will require significant code changes and specialized skills. Which migration strategy does this represent?",
+        "options": [
+            "Rehost",
+            "Replatform",
+            "Refactor",
+            "Retain"
+        ],
+        "answer": 2,
+        "explanation": "Refactoring breaks applications into microservices. It offers increased scalability and better performance but is complex, time-intensive, and requires specialized skills."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to replace its legacy on-premises CRM system with a cloud-based SaaS product like Salesforce. They want fast deployment with minimal configuration effort. Which migration strategy fits this scenario?",
+        "options": [
+            "Rehost",
+            "Repurchase",
+            "Retire",
+            "Retain"
+        ],
+        "answer": 1,
+        "explanation": "Repurchase replaces an existing application with a SaaS product. It offers fast deployment, low configuration effort, and improved security, though with limited customization."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A DevOps team wants to manage infrastructure through code to ensure consistent, repeatable deployments and reduce human error. Which Well-Architected Framework pillar emphasizes this practice?",
+        "options": [
+            "Security",
+            "Operational Excellence",
+            "Reliability",
+            "Performance Efficiency"
+        ],
+        "answer": 1,
+        "explanation": "The Operational Excellence pillar focuses on managing and automating changes, monitoring systems, and improving procedures. It encourages infrastructure as code and performance monitoring."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A small startup is confused about their security responsibilities after moving to AWS. They assumed AWS would handle all security aspects. Which disadvantage of the Shared Responsibility Model is most relevant to their situation?",
+        "options": [
+            "It is too expensive for small organizations",
+            "It can be confusing for small or inexperienced organizations",
+            "It eliminates customer control over data",
+            "It requires AWS to manage all application security"
+        ],
+        "answer": 1,
+        "explanation": "A disadvantage of the Shared Responsibility Model is that it can be confusing for small or inexperienced organizations, creating potential ambiguity for compliance tasks."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "An airline reservation system must be restored within 4 hours after a major outage to avoid massive revenue loss. Which recovery objective specifies this maximum allowable restoration time?",
+        "options": [
+            "RPO",
+            "RTO",
+            "MTD",
+            "SLA"
+        ],
+        "answer": 1,
+        "explanation": "The Recovery Time Objective (RTO) is the maximum allowable time to restore systems after a disaster. Lower RTO is required for systems with high revenue loss potential."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A small business has a limited budget for disaster recovery. They maintain a basic facility with no hardware or data installed, planning to set everything up manually only if a disaster occurs. Which site type fits their approach?",
+        "options": [
+            "Hot Site",
+            "Warm Site",
+            "Cold Site",
+            "Active Site"
+        ],
+        "answer": 2,
+        "explanation": "A Cold Site is a basic setup without hardware or data that requires manual setup during a disaster. It has the lowest cost but the longest recovery time."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company is planning a cloud migration and is currently evaluating their current IT infrastructure, determining technical and financial preparedness, and creating a business case. Which migration phase are they in?",
+        "options": [
+            "Implementation",
+            "Optimization",
+            "Planning",
+            "Execution"
+        ],
+        "answer": 2,
+        "explanation": "The Planning phase involves conducting initial assessments, performing cloud readiness assessments, creating business cases, and developing cloud strategies with defined timelines and budgets."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A bank decides to keep its core legacy mainframe application on-premises because it is too risky to migrate, while moving newer applications to the cloud. Which migration strategy describes this decision?",
+        "options": [
+            "Rehost",
+            "Retain",
+            "Hybrid",
+            "Repurchase"
+        ],
+        "answer": 1,
+        "explanation": "Retain keeps legacy applications on-premises with no changes or downtime. It is used when applications are not suitable for cloud migration due to risk, compliance, or technical constraints."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to migrate its on-premises data center to AWS but needs to keep some legacy applications running locally due to regulatory requirements. Which migration type describes this situation?",
+        "options": [
+            "Cloud to Cloud",
+            "On-Premise to Cloud",
+            "Cloud to On-Premise",
+            "Hybrid Migration"
+        ],
+        "answer": 1,
+        "explanation": "On-Premise to Cloud Migration involves moving from local data centers to cloud service providers, which includes scenarios where some workloads remain on-premises (hybrid approach)."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A hospital's IT system must continue operating during a natural disaster. They have a fully operational secondary data center that receives real-time updates and can take over instantly. Which type of disaster recovery site is this?",
+        "options": [
+            "Cold Site",
+            "Warm Site",
+            "Hot Site",
+            "Virtual Site"
+        ],
+        "answer": 2,
+        "explanation": "A Hot Site is a fully operational location with real-time updates and instant failover. It offers the fastest recovery time but has the highest cost."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "An online banking system needs to ensure that if one server fails, another server immediately takes over without any service interruption. Which design principle does this requirement represent?",
+        "options": [
+            "Scalability",
+            "Redundancy",
+            "High Availability",
+            "Disaster Recovery"
+        ],
+        "answer": 2,
+        "explanation": "High Availability is the ability of a system to remain operational and accessible with minimal downtime, achieved through redundant systems and failover components."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "An organization is adopting AWS and wants structured guidance to reduce risk and improve outcomes across business, people, governance, platform, security, and operations areas. Which AWS framework provides this guidance?",
+        "options": [
+            "AWS Well-Architected Framework",
+            "AWS Cloud Adoption Framework (CAF)",
+            "AWS Migration Hub",
+            "AWS Organizations"
+        ],
+        "answer": 1,
+        "explanation": "The AWS Cloud Adoption Framework (CAF) provides structured guidance for cloud adoption with six perspectives: Business, People, Governance, Platform, Security, and Operations."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to move an existing application to AWS without making any code changes, prioritizing speed and minimal downtime over cloud optimization. Which migration strategy should they use?",
+        "options": [
+            "Replatform",
+            "Refactor",
+            "Rehost",
+            "Repurchase"
+        ],
+        "answer": 2,
+        "explanation": "Rehosting (lift-and-shift) moves existing applications without code changes. It is quick, simple, and ensures minimal downtime, though it offers limited cloud optimization."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "An e-commerce platform experiences unpredictable traffic spikes during holiday sales. They need computing resources that can scale up quickly during peak times and scale down afterward. Which characteristic makes this possible?",
+        "options": [
+            "Resource pooling",
+            "Rapid elasticity",
+            "On-demand self-service",
+            "Measured service"
+        ],
+        "answer": 1,
+        "explanation": "Rapid elasticity supports fast scaling up or down based on demand, allowing businesses to handle growth and maintain competitiveness during traffic spikes."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A startup wants to provision computing resources automatically without requiring human interaction with service providers. Which essential characteristic of cloud computing enables this capability?",
+        "options": [
+            "Broad network access",
+            "On-demand self-service",
+            "Resource pooling",
+            "Measured service"
+        ],
+        "answer": 1,
+        "explanation": "On-demand self-service allows users to provision computing resources automatically without requiring human interaction, enabling fast and flexible resource allocation."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to redesign its applications specifically for cloud infrastructure using containers and microservices to maximize scalability and resilience. What type of applications are they building?",
+        "options": [
+            "Legacy applications",
+            "Cloud-native applications",
+            "Hybrid applications",
+            "Virtualized applications"
+        ],
+        "answer": 1,
+        "explanation": "Cloud-native applications are designed to run on cloud infrastructure, built to be scalable, resilient, and flexible, typically using containers and microservices."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company wants to use Amazon CloudWatch to set custom metrics and alarms to proactively monitor their infrastructure before issues affect users. Which Well-Architected Framework pillar does this align with?",
+        "options": [
+            "Operational Excellence",
+            "Security",
+            "Reliability",
+            "Performance Efficiency"
+        ],
+        "answer": 0,
+        "explanation": "Using Amazon CloudWatch for proactive monitoring aligns with the Operational Excellence pillar, which encourages monitoring systems and improving procedures continuously."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A development team wants to build a custom application but does not want to manage the underlying hardware or operating system. They need a managed environment where they can focus on coding. Which service model should they choose?",
+        "options": [
+            "IaaS",
+            "PaaS",
+            "SaaS",
+            "FaaS"
+        ],
+        "answer": 1,
+        "explanation": "Platform as a Service (PaaS) provides hardware and operating system management while allowing users to build and deploy custom applications, making it ideal for development teams."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A system administrator needs full control over virtualized hardware resources, including the ability to choose the operating system and software stack, but does not want to maintain physical servers. Which service model provides this level of control?",
+        "options": [
+            "SaaS",
+            "PaaS",
+            "IaaS",
+            "FaaS"
+        ],
+        "answer": 2,
+        "explanation": "Infrastructure as a Service (IaaS) gives virtualized hardware resources without software, providing cost-effective computing but requiring full software and OS management by the customer."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A government agency needs to store classified data in a cloud environment that is dedicated exclusively to their organization and not shared with other tenants. Which deployment model should they select?",
+        "options": [
+            "Public Cloud",
+            "Private Cloud",
+            "Hybrid Cloud",
+            "Community Cloud"
+        ],
+        "answer": 1,
+        "explanation": "A Private Cloud provides dedicated infrastructure for one organization, offering greater control and security, which is essential for government agencies handling classified data."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A database server is running out of memory during peak hours. The administrator decides to add more RAM to the existing server rather than adding new servers. Which scaling method is being used?",
+        "options": [
+            "Horizontal scaling",
+            "Vertical scaling",
+            "Diagonal scaling",
+            "Elastic scaling"
+        ],
+        "answer": 1,
+        "explanation": "Vertical Scaling (Scaling Up/Down) increases or decreases resources on a single server, such as adding memory or CPU to an existing server. It is simple but limited by hardware constraints."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A social media platform needs to handle millions of concurrent users during a live event. Instead of upgrading a single server, they add multiple web servers behind a load balancer to distribute traffic. Which scaling strategy are they implementing?",
+        "options": [
+            "Vertical scaling",
+            "Horizontal scaling",
+            "Rightsizing",
+            "Consolidation"
+        ],
+        "answer": 1,
+        "explanation": "Horizontal Scaling (Scaling Out/In) adds or removes multiple servers to meet demand, increases capacity linearly, reduces risk of single points of failure, and supports load balancing."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A company duplicates its critical data across multiple storage devices in different locations to ensure it is not lost if one device fails. Which concept does this practice illustrate?",
+        "options": [
+            "High Availability",
+            "Fault Tolerance",
+            "Data Redundancy",
+            "Load Balancing"
+        ],
+        "answer": 2,
+        "explanation": "Data Redundancy involves duplicating data across multiple storage devices or servers to ensure critical information is not lost during system failures."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A multinational company wants its employees to collaborate on projects from anywhere in the world using any device. Which cloud characteristic supports this requirement?",
+        "options": [
+            "Rapid elasticity",
+            "Broad network access",
+            "Measured service",
+            "Resource pooling"
+        ],
+        "answer": 1,
+        "explanation": "Broad network access enables collaboration and remote work from anywhere by making cloud services available over the network through standard mechanisms."
+    },
+    {
+        "domain": "Domain 1: Cloud Concepts",
+        "scenario": "A developer wants to run code in response to events like file uploads or database changes without provisioning or managing any servers. Which service model and AWS service combination best fits this need?",
+        "options": [
+            "PaaS with AWS Elastic Beanstalk",
+            "IaaS with Amazon EC2",
+            "FaaS with AWS Lambda",
+            "SaaS with Amazon RDS"
+        ],
+        "answer": 2,
+        "explanation": "Function as a Service (FaaS) focuses on serverless execution of event-driven functions. AWS Lambda is the prime example, running code without server management."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security team wants to review IAM policies for external access and detect unintended access that could expose resources. Which IAM feature helps refine these permissions?",
+        "options": [
+            "IAM Access Analyzer",
+            "AWS Config",
+            "AWS CloudTrail",
+            "Amazon GuardDuty"
+        ],
+        "answer": 0,
+        "explanation": "IAM Access Analyzer reviews IAM policies for external access, detects unintended access, and helps refine permissions to improve security posture."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A new AWS account has been created. Which user has unrestricted access to all AWS services and resources, and should be protected with multi-factor authentication and a strong password?",
+        "options": [
+            "IAM Administrator",
+            "Root User",
+            "AWS Support User",
+            "Federated User"
+        ],
+        "answer": 1,
+        "explanation": "The Root User is created when the AWS account is first set up and has unrestricted access to all AWS services and resources. It must be safeguarded with MFA and limited use."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to implement a managed network security service for their VPC traffic that performs deep packet inspection for threat protection. Which service should they use?",
+        "options": [
+            "AWS WAF",
+            "AWS Network Firewall",
+            "AWS Shield",
+            "Security Groups"
+        ],
+        "answer": 1,
+        "explanation": "AWS Network Firewall provides managed network security for VPC traffic and performs deep packet inspection for threat protection."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs managed Microsoft Active Directory capabilities in AWS to manage identity resources across their cloud applications. Which service provides this?",
+        "options": [
+            "AWS IAM",
+            "AWS Directory Service",
+            "AWS IAM Identity Center",
+            "Amazon Cognito"
+        ],
+        "answer": 1,
+        "explanation": "AWS Directory Service provides managed Microsoft Active Directory capabilities, managing identity resources across cloud applications."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security team wants a service that continuously monitors their AWS environment and provides a unified view of security alerts from AWS services and third-party tools. Which service acts as this single pane of glass?",
+        "options": [
+            "Amazon GuardDuty",
+            "AWS Security Hub",
+            "AWS Inspector",
+            "AWS Config"
+        ],
+        "answer": 1,
+        "explanation": "AWS Security Hub is a centralized service providing a unified view of security and compliance, simplifying management of alerts from AWS services and third-party tools."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A small business using AWS wants basic DDoS protection automatically applied to their resources at no additional cost. Which service provides this default protection?",
+        "options": [
+            "AWS WAF",
+            "AWS Shield Standard",
+            "AWS Shield Advanced",
+            "Amazon GuardDuty"
+        ],
+        "answer": 1,
+        "explanation": "AWS Shield Standard is free and automatic for all AWS users, protecting against most common and less complex DDoS attacks without any configuration required."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to ensure that users can log in once and access multiple AWS services and third-party applications without re-entering credentials. Which authentication method provides this experience?",
+        "options": [
+            "Multi-Factor Authentication",
+            "Single Sign-On (SSO)",
+            "Identity Federation",
+            "Access Keys"
+        ],
+        "answer": 1,
+        "explanation": "Single Sign-On (SSO) allows users to log in once and access multiple apps and services, reducing password fatigue and improving security. It can be combined with MFA."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company is experiencing a 2.3 Tbps volumetric DDoS attack against their web application. They need AWS to mitigate the attack and provide financial protection from scaling costs during the attack. Which service should they have subscribed to?",
+        "options": [
+            "AWS Shield Standard",
+            "AWS Shield Advanced",
+            "AWS WAF",
+            "AWS Firewall Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Shield Advanced provides enhanced DDoS protection for critical applications, includes 24/7 access to the AWS DDoS Response Team, and offers financial protection from attack-related scaling costs."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company is launching a new web application and wants to protect it against SQL injection and cross-site scripting attacks. They need a firewall that monitors HTTP and HTTPS traffic. Which service should they deploy?",
+        "options": [
+            "AWS Shield",
+            "AWS WAF",
+            "AWS Network Firewall",
+            "Amazon GuardDuty"
+        ],
+        "answer": 1,
+        "explanation": "AWS WAF (Web Application Firewall) is a virtualized firewall service that monitors HTTP and HTTPS traffic and protects against common web threats like SQL injection and cross-site scripting (XSS)."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to investigate potential security issues by analyzing and visualizing data to quickly detect suspicious activity across their AWS resources. Which service should they use?",
+        "options": [
+            "Amazon GuardDuty",
+            "AWS Detective",
+            "AWS Inspector",
+            "AWS Security Hub"
+        ],
+        "answer": 1,
+        "explanation": "AWS Detective analyzes and investigates potential security issues by visualizing data to quickly detect suspicious activity across AWS resources."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to enforce consistent EC2 and on-premises configurations, schedule OS patching, and execute remote commands securely across their fleet. Which AWS Systems Manager feature should they use?",
+        "options": [
+            "OpsCenter",
+            "Run Command",
+            "State Manager",
+            "Patch Manager"
+        ],
+        "answer": 2,
+        "explanation": "AWS Systems Manager State Manager enforces consistent EC2 and on-premises configurations. Patch Manager deploys OS/software patches, and Run Command executes remote commands securely."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company's security policy requires that only the root user can perform specific account-level tasks. Which of the following is a task that ONLY the root user can perform?",
+        "options": [
+            "Creating IAM users",
+            "Launching EC2 instances",
+            "Closing the AWS account",
+            "Attaching IAM policies"
+        ],
+        "answer": 2,
+        "explanation": "Only the root user can close/terminate the AWS account, change account name/email, restore access for users who lost credentials, and delete service-linked roles."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to protect their EC2 instances by controlling inbound and outbound traffic at the instance level. They need a stateful firewall that automatically allows return traffic. Which security feature should they configure?",
+        "options": [
+            "Network ACLs",
+            "Security Groups",
+            "AWS WAF",
+            "AWS Network Firewall"
+        ],
+        "answer": 1,
+        "explanation": "Security Groups function at the instance level as stateful firewalls. If inbound traffic is allowed, return traffic is automatically allowed. They act as host-based firewalls."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants centralized identity management across multiple AWS accounts and third-party applications, with support for Microsoft Active Directory, Okta, and Azure AD integration. Which AWS service provides this unified access?",
+        "options": [
+            "AWS IAM",
+            "AWS Directory Service",
+            "AWS IAM Identity Center",
+            "Amazon Cognito"
+        ],
+        "answer": 2,
+        "explanation": "AWS IAM Identity Center provides centralized identity and access management across AWS accounts and applications, supporting identity federation with major identity providers."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs dedicated Hardware Security Modules (HSMs) in the cloud to manage, generate, and store cryptographic keys for compliance requirements. Which AWS service meets this need?",
+        "options": [
+            "AWS KMS",
+            "AWS CloudHSM",
+            "AWS Certificate Manager",
+            "AWS Secrets Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS CloudHSM provides dedicated Hardware Security Modules in the cloud for managing, generating, and storing cryptographic keys securely, meeting strict compliance requirements."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A DevOps team wants to collect and analyze logs from EC2 instances, Lambda functions, and on-premises servers in a centralized repository for querying and pattern recognition. Which CloudWatch feature supports this?",
+        "options": [
+            "CloudWatch Metrics",
+            "CloudWatch Alarms",
+            "CloudWatch Logs",
+            "CloudWatch Events"
+        ],
+        "answer": 2,
+        "explanation": "Amazon CloudWatch Logs collects logs from EC2, Lambda, and on-premises servers into a centralized repository, supporting querying, pattern recognition, and visualization using Log Insights."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to use a pre-built policy created and maintained by AWS that grants full access to Amazon S3. What type of policy should they use?",
+        "options": [
+            "Customer-managed policy",
+            "Inline policy",
+            "AWS-managed policy",
+            "Service Control Policy"
+        ],
+        "answer": 2,
+        "explanation": "AWS-managed policies are created and maintained by AWS for common use cases, such as providing full access to S3. They can be attached to multiple users, groups, or roles."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to monitor their EC2 instances and receive alerts when CPU utilization exceeds 90%, with automated actions to scale resources when thresholds are breached. Which service provides this monitoring and alerting capability?",
+        "options": [
+            "AWS CloudTrail",
+            "Amazon CloudWatch",
+            "AWS Config",
+            "AWS X-Ray"
+        ],
+        "answer": 1,
+        "explanation": "Amazon CloudWatch collects and tracks metrics, sets alarms, and monitors AWS resources in real time. It can trigger alerts when thresholds are exceeded and perform automated actions like auto-scaling."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security analyst notices a surge in API calls in their AWS account and needs to identify the origin IP address, the specific event triggered, and the exact timestamp of each call. Which service captures this detailed API activity history?",
+        "options": [
+            "Amazon CloudWatch",
+            "AWS CloudTrail",
+            "AWS Config",
+            "AWS X-Ray"
+        ],
+        "answer": 1,
+        "explanation": "AWS CloudTrail captures and logs all API calls made within an AWS account, recording source IP, triggered events, and timestamps for security analysis and compliance auditing."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to grant users from one AWS account access to resources in another AWS account without sharing long-term credentials. Which IAM feature enables this cross-account access?",
+        "options": [
+            "IAM Groups",
+            "Cross-Account IAM Roles",
+            "IAM Identity Center",
+            "AWS Organizations"
+        ],
+        "answer": 1,
+        "explanation": "Cross-Account IAM Roles allow users from one AWS account to access resources in another, simplifying permission management and improving security without sharing credentials."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A DevOps engineer needs to store database passwords and API keys securely, with automatic rotation capabilities and integration with RDS. Which AWS service should they use?",
+        "options": [
+            "AWS Systems Manager Parameter Store",
+            "AWS Secrets Manager",
+            "AWS KMS",
+            "AWS Certificate Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Secrets Manager manages and protects access keys, passwords, and secrets with encryption, supports secret rotation, replication, and integrates with IAM and RDS credentials."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to automate vulnerability assessments of their applications running on AWS and receive detailed reports listing vulnerabilities by category with prioritized remediation steps. Which service should they use?",
+        "options": [
+            "Amazon GuardDuty",
+            "AWS Inspector",
+            "AWS Security Hub",
+            "AWS Detective"
+        ],
+        "answer": 1,
+        "explanation": "AWS Inspector is a fully managed vulnerability assessment service that analyzes applications for security weaknesses, generates categorized reports, and prioritizes remediation steps."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to securely share specific AWS resources like subnets and Transit Gateways with other AWS accounts without creating duplicate resources. Which service enables this?",
+        "options": [
+            "AWS Organizations",
+            "AWS Resource Access Manager (RAM)",
+            "AWS IAM",
+            "AWS Security Hub"
+        ],
+        "answer": 1,
+        "explanation": "AWS Resource Access Manager (RAM) securely shares AWS resources across accounts, controlling access for collaboration and optimization."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to enforce multi-factor authentication for all users accessing the AWS Management Console. Which authentication method requires two or more factors to verify identity?",
+        "options": [
+            "Single Sign-On",
+            "Multi-Factor Authentication (MFA)",
+            "Identity Federation",
+            "Access Keys"
+        ],
+        "answer": 1,
+        "explanation": "Multi-Factor Authentication (MFA) requires two or more authentication factors (something you know, have, are, do, or location) to verify identity, significantly improving account security."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security team wants to set permission boundaries across multiple AWS accounts in their organization, defining which AWS services and actions are allowed or denied at the organizational level. Which feature should they use?",
+        "options": [
+            "IAM Policies",
+            "Service Control Policies (SCPs)",
+            "Resource-Based Policies",
+            "Session Policies"
+        ],
+        "answer": 1,
+        "explanation": "Service Control Policies (SCPs) set permission boundaries across AWS accounts and OUs, defining which AWS services and actions are allowed or denied for consistent policy enforcement."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company has 50 developers who all need the same set of permissions to access development resources. The administrator wants to manage permissions for all 50 users in one place rather than individually. Which IAM feature should they use?",
+        "options": [
+            "IAM Roles",
+            "IAM Groups",
+            "IAM Policies",
+            "IAM Identity Center"
+        ],
+        "answer": 1,
+        "explanation": "IAM Groups are collections of IAM users that allow permissions to be assigned to multiple users simultaneously, simplifying permission management across departments or roles."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to ensure their AWS environment adheres to the AWS Acceptable Use Policy and wants to report suspicious traffic or potential security vulnerabilities. Which AWS team handles these reports?",
+        "options": [
+            "AWS Support Team",
+            "AWS Trust and Safety",
+            "AWS Professional Services",
+            "AWS Partner Network"
+        ],
+        "answer": 1,
+        "explanation": "AWS Trust and Safety focuses on ensuring secure and responsible use of AWS services, responding to threats including fraud, scams, malware, and DDoS attacks, and enforcing the AWS Acceptable Use Policy."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security team wants to centrally manage AWS WAF rules, AWS Shield Advanced protection, and VPC security group policies across multiple AWS accounts. Which service provides this centralized management?",
+        "options": [
+            "AWS Security Hub",
+            "AWS Firewall Manager",
+            "AWS Config",
+            "AWS Organizations"
+        ],
+        "answer": 1,
+        "explanation": "AWS Firewall Manager centralizes WAF rules, Shield Advanced, and VPC security group management, enforcing consistent security policies across multiple accounts."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to automate the provisioning, deployment, and renewal of TLS/SSL certificates for their web applications. Which AWS service handles this?",
+        "options": [
+            "AWS KMS",
+            "AWS Certificate Manager (ACM)",
+            "AWS CloudHSM",
+            "AWS Secrets Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Certificate Manager (ACM) manages TLS/SSL certificates for secure data transfer, automating certificate provisioning, deployment, and renewal."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company uses Microsoft Active Directory for employee authentication and wants to allow employees to access AWS resources using their existing corporate credentials without creating separate IAM users. Which approach should they implement?",
+        "options": [
+            "IAM Users with passwords",
+            "Identity Federation",
+            "Access Keys for each employee",
+            "AWS Root Account sharing"
+        ],
+        "answer": 1,
+        "explanation": "Identity Federation grants external identities access to AWS without creating separate IAM users. It supports SAML 2.0, OIDC, and custom brokers for integration with corporate directories."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to browse a curated digital catalog of third-party security products including threat detection, data protection, access control, and compliance management tools. Where can they find these solutions?",
+        "options": [
+            "AWS Service Catalog",
+            "AWS Marketplace",
+            "AWS Partner Network",
+            "AWS Support Center"
+        ],
+        "answer": 1,
+        "explanation": "AWS Marketplace is a curated digital catalog of third-party software solutions, including security products for threat detection, data protection, access control, and compliance management."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security architect is designing a VPC and needs a stateless firewall that operates at the subnet level with ordered rule lists evaluated in ascending order. Which component should they implement?",
+        "options": [
+            "Security Groups",
+            "Network ACLs",
+            "AWS WAF",
+            "AWS Shield"
+        ],
+        "answer": 1,
+        "explanation": "Network ACLs function at the subnet level as stateless firewalls with ordered rule lists. Rules are evaluated in ascending order, and return traffic must be explicitly allowed."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to schedule administrative tasks like patch deployment during maintenance windows to minimize disruption. Which AWS Systems Manager feature supports this scheduling?",
+        "options": [
+            "Automation",
+            "Maintenance Window",
+            "OpsCenter",
+            "Incident Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Systems Manager Maintenance Window schedules admin tasks to occur during defined periods, minimizing disruption to business operations."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to grant temporary permissions to an external consultant to access specific AWS resources without creating a permanent IAM user account. Which IAM feature is designed for this use case?",
+        "options": [
+            "IAM Group",
+            "IAM Role",
+            "IAM Policy",
+            "IAM User"
+        ],
+        "answer": 1,
+        "explanation": "IAM Roles are assumed by users or services for temporary permissions. They are ideal for granting external identities or services access without creating permanent IAM users."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A developer needs a centralized hierarchical storage for application configuration parameters and secrets that can be referenced in scripts and code. Which AWS Systems Manager feature should they use?",
+        "options": [
+            "OpsCenter",
+            "Parameter Store",
+            "State Manager",
+            "Patch Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Systems Manager Parameter Store provides centralized hierarchical storage for secrets and configuration data, supporting tagging, hierarchies, and encryption with AWS KMS."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A financial services firm needs to automate compliance assessments and generate up-to-date compliance status reports for strict data handling laws. Which AWS service should they use?",
+        "options": [
+            "AWS Config",
+            "AWS Audit Manager",
+            "AWS Security Hub",
+            "AWS Trusted Advisor"
+        ],
+        "answer": 1,
+        "explanation": "AWS Audit Manager is a managed service that automates assessment processes for compliance with regulations and standards, generating up-to-date compliance status reports."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to protect data in transit between their users and their web application hosted on AWS. Which encryption protocol should they use to secure client-server communications?",
+        "options": [
+            "SSL",
+            "TLS",
+            "SSH",
+            "IPsec"
+        ],
+        "answer": 1,
+        "explanation": "Transport Layer Security (TLS) replaces the older SSL protocol and secures client-server communications for data in transit. It is supported by Amazon CloudFront, ELB, S3, and RDS."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to know which AWS services and resources are covered under specific compliance certifications like HIPAA, FedRAMP, and ISO 27001. How many security standards and certifications does AWS support?",
+        "options": [
+            "50",
+            "100",
+            "143",
+            "200"
+        ],
+        "answer": 2,
+        "explanation": "AWS supports 143 security standards and certifications, including PCI-DSS, HIPAA, GDPR, FedRAMP, FIPS 140-2, and NIST 800-171."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security team needs to define permissions in a JSON document that specifies which actions are allowed or denied on specific AWS resources. Which IAM component are they creating?",
+        "options": [
+            "IAM User",
+            "IAM Group",
+            "IAM Policy",
+            "IAM Role"
+        ],
+        "answer": 2,
+        "explanation": "IAM policies are JSON documents that define permissions for AWS resources, controlling who can access what resources and what actions they can perform."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to use machine learning to detect and protect sensitive data like personally identifiable information (PII) stored in Amazon S3. Which service functions as a Data Loss Prevention (DLP) tool?",
+        "options": [
+            "Amazon GuardDuty",
+            "AWS Macie",
+            "AWS Inspector",
+            "AWS Security Hub"
+        ],
+        "answer": 1,
+        "explanation": "AWS Macie uses machine learning to detect and protect sensitive data, identify data leaks, and alert on unusual data access, functioning as a Data Loss Prevention (DLP) tool."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "In an IAM policy evaluation, a user has an explicit allow for S3 access from one policy and an explicit deny for S3 access from another policy. What is the final result?",
+        "options": [
+            "Allow, because allow overrides deny",
+            "Deny, because deny overrides allow",
+            "Allow, because the first policy evaluated wins",
+            "Deny, because no policy means implicit deny"
+        ],
+        "answer": 1,
+        "explanation": "In IAM policy evaluation logic, explicit deny always overrides any allow. This ensures security by defaulting to the most restrictive access when conflicts exist."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A German e-commerce company must comply with both PCI-DSS for payment processing and GDPR for customer data protection. Which AWS resource helps them verify that AWS infrastructure meets these regulatory requirements?",
+        "options": [
+            "AWS Security Hub",
+            "AWS Artifact",
+            "AWS Config",
+            "AWS Audit Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Artifact provides on-demand access to AWS security and compliance reports, allowing customers to download documents needed for audits and compliance validations like PCI-DSS and GDPR."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to manage secure user sign-up, sign-in, and access control for their web and mobile applications. Which AWS service is designed specifically for this customer identity and access management?",
+        "options": [
+            "AWS IAM Identity Center",
+            "Amazon Cognito",
+            "AWS Directory Service",
+            "AWS Resource Access Manager"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Cognito manages secure user sign-up, sign-in, and access for web and mobile apps, supporting identity across AWS-hosted and third-party applications."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants to create individual login credentials for each employee who needs AWS access, ensuring each person has only the permissions necessary for their job. Which AWS service should they use?",
+        "options": [
+            "AWS Organizations",
+            "AWS IAM",
+            "AWS Directory Service",
+            "Amazon Cognito"
+        ],
+        "answer": 1,
+        "explanation": "AWS IAM (Identity and Access Management) manages access to AWS services and resources, allowing creation and management of users and groups while enforcing the principle of least privilege."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company needs to encrypt sensitive data stored in Amazon S3 and manage the encryption keys centrally. Which AWS service provides centralized management of cryptographic keys?",
+        "options": [
+            "AWS Certificate Manager",
+            "AWS KMS",
+            "AWS Secrets Manager",
+            "AWS CloudHSM"
+        ],
+        "answer": 1,
+        "explanation": "AWS Key Management Service (KMS) provides centralized management of cryptographic keys and protects sensitive data at rest, such as data in Amazon S3 or managed databases."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A company wants an automated service that acts like a 24/7 cloud consultant, providing real-time recommendations on cost optimization, security improvements, performance tuning, fault tolerance, and service limits. Which service is this?",
+        "options": [
+            "AWS Config",
+            "AWS Trusted Advisor",
+            "AWS Security Hub",
+            "AWS Well-Architected Tool"
+        ],
+        "answer": 1,
+        "explanation": "AWS Trusted Advisor provides real-time recommendations across five key areas: Cost optimization, Security, Performance, Fault tolerance, and Service limits, acting like a 24/7 cloud consultant."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A security administrator needs to generate a credential report showing the status of all IAM user credentials in the account, including password age and access key rotation status. Where can they find this report?",
+        "options": [
+            "AWS CloudTrail",
+            "IAM Dashboard Access Reports",
+            "AWS Config",
+            "Amazon CloudWatch"
+        ],
+        "answer": 1,
+        "explanation": "The IAM Dashboard includes Access Reports such as the Credential Report, which shows user credentials status, helping administrators monitor and enforce credential rotation policies."
+    },
+    {
+        "domain": "Domain 2: Security and Compliance",
+        "scenario": "A compliance officer needs to continuously track and monitor changes to AWS resources like EC2 instance types, S3 bucket policies, and security group rules to maintain a searchable configuration history. Which service provides this capability?",
+        "options": [
+            "AWS CloudTrail",
+            "AWS Config",
+            "AWS Audit Manager",
+            "Amazon CloudWatch"
+        ],
+        "answer": 1,
+        "explanation": "AWS Config continuously tracks and monitors changes to AWS resources, maintaining a searchable record of resource configurations for visibility and troubleshooting."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a fully managed Windows file server that supports SMB protocol and integrates natively with Windows environments. Which AWS file storage service should they use?",
+        "options": [
+            "Amazon EFS",
+            "Amazon FSx for Windows File Server",
+            "Amazon FSx for Lustre",
+            "AWS Storage Gateway"
+        ],
+        "answer": 1,
+        "explanation": "Amazon FSx for Windows File Server provides a native Windows file system for Windows environments, fully managed by AWS with support for SMB protocol."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to privately access AWS services like S3 and DynamoDB from within their VPC without using an internet gateway, NAT device, or VPN. Which feature should they implement?",
+        "options": [
+            "VPC Peering",
+            "VPC Endpoints",
+            "AWS PrivateLink",
+            "Direct Connect"
+        ],
+        "answer": 1,
+        "explanation": "VPC Endpoints allow private access to AWS services from within a VPC, reducing the need for internet gateways and improving performance by keeping traffic within the AWS network."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to create and manage RESTful APIs at scale, with features like traffic management, authorization, throttling, and monitoring. They want to pay per API call with no minimum fees. Which service should they use?",
+        "options": [
+            "AWS AppSync",
+            "Amazon API Gateway",
+            "AWS ALB",
+            "AWS CloudFront"
+        ],
+        "answer": 1,
+        "explanation": "Amazon API Gateway is a fully managed service for creating, publishing, maintaining, monitoring, and securing APIs at scale, with pay-per-API-call pricing and no minimum fees."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a fully managed centralized backup service that supports EBS volumes, RDS databases, DynamoDB tables, and EFS file systems, with cross-region and cross-account backup capabilities. Which service should they use?",
+        "options": [
+            "Amazon S3",
+            "AWS Backup",
+            "Amazon Data Lifecycle Manager",
+            "AWS Snapshot Manager"
+        ],
+        "answer": 1,
+        "explanation": "AWS Backup is a fully managed centralized backup service supporting EBS, RDS, DynamoDB, EFS, and Storage Gateway, with cross-region and cross-account backup support and integration with AWS Organizations."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to connect their on-premises network to their Amazon VPC using an encrypted IPsec tunnel over the public internet. Which managed VPN service should they use?",
+        "options": [
+            "AWS Client VPN",
+            "AWS Site-to-Site VPN",
+            "AWS Direct Connect",
+            "AWS Global Accelerator"
+        ],
+        "answer": 1,
+        "explanation": "AWS Site-to-Site VPN connects on-premises networks to Amazon VPC using IPsec tunnels over the internet, using a Customer Gateway and Virtual Private Gateway."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to run a web application with unpredictable traffic patterns. They want a compute service that provides scalable virtual machines with a pay-as-you-go pricing model and full control over the operating system. Which AWS service should they use?",
+        "options": [
+            "AWS Lambda",
+            "Amazon EC2",
+            "AWS Fargate",
+            "AWS Elastic Beanstalk"
+        ],
+        "answer": 1,
+        "explanation": "Amazon EC2 provides scalable compute capacity via virtual machines (instances) with a pay-as-you-go model, giving users full control over the OS and applications."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A developer wants to run code in response to S3 upload events without provisioning or managing servers. They only want to pay for the compute time consumed. Which service should they use?",
+        "options": [
+            "Amazon EC2",
+            "AWS Lambda",
+            "AWS Fargate",
+            "AWS Batch"
+        ],
+        "answer": 1,
+        "explanation": "AWS Lambda executes code in response to events without server management, using a pay-as-you-go model where you only pay for compute time used."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants a relational database that automatically starts up, shuts down, and scales capacity based on application demand without manual intervention. Which Aurora configuration supports this?",
+        "options": [
+            "Aurora provisioned",
+            "Aurora Serverless",
+            "Aurora Global Database",
+            "Aurora Multi-Master"
+        ],
+        "answer": 1,
+        "explanation": "Aurora Serverless is an auto-scaling database configuration that starts up, shuts down, and scales automatically based on application demand."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to store secondary backups that can be easily recreated if lost. They want the cheapest infrequent access storage that stores data in only one Availability Zone. Which S3 storage class should they choose?",
+        "options": [
+            "S3 Standard-IA",
+            "S3 One Zone-IA",
+            "S3 Glacier Instant Retrieval",
+            "S3 Glacier Deep Archive"
+        ],
+        "answer": 1,
+        "explanation": "S3 One Zone-IA stores data in a single Availability Zone and is 20% cheaper than Standard-IA, making it suitable for secondary backups and easily recreated data."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a dedicated, private network connection from their data center to AWS with speeds ranging from 50 Mbps to 100 Gbps, bypassing the public internet entirely. Which service should they use?",
+        "options": [
+            "AWS Site-to-Site VPN",
+            "AWS Client VPN",
+            "AWS Direct Connect",
+            "AWS Global Accelerator"
+        ],
+        "answer": 2,
+        "explanation": "AWS Direct Connect provides a dedicated, private network connection from on-premises to AWS, bypassing the public internet with speeds from 50 Mbps to 100 Gbps."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company is migrating from Oracle to Aurora PostgreSQL and needs to convert their database schema, including analyzing compatibility and automatically converting most schema components. Which tool should they use alongside DMS?",
+        "options": [
+            "AWS Glue",
+            "AWS Schema Conversion Tool (SCT)",
+            "AWS Athena",
+            "Amazon QuickSight"
+        ],
+        "answer": 1,
+        "explanation": "AWS Schema Conversion Tool (SCT) converts database schemas between engines, analyzes source schemas, provides compatibility reports, and automatically converts most schema components."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to improve the performance and availability of their application by routing user traffic through the nearest AWS edge location and then to the best regional endpoint using static IPs. Which service should they use?",
+        "options": [
+            "Amazon CloudFront",
+            "AWS Global Accelerator",
+            "AWS Route 53",
+            "AWS Direct Connect"
+        ],
+        "answer": 1,
+        "explanation": "AWS Global Accelerator is a networking service that uses AWS global infrastructure to route user traffic through the nearest edge location to the best AWS endpoint, improving performance and availability with static IPs."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to deploy third-party virtual networking appliances like firewalls and intrusion detection systems transparently between traffic source and destination. Which load balancer supports this use case?",
+        "options": [
+            "ALB",
+            "NLB",
+            "Gateway Load Balancer (GWLB)",
+            "Classic Load Balancer"
+        ],
+        "answer": 2,
+        "explanation": "Gateway Load Balancer (GWLB) is used to deploy and scale third-party virtual networking appliances like firewalls and analytics tools, operating transparently at Layers 3 and 4."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company has created a VPC with public and private subnets. Instances in the private subnet need to access the internet for software updates but should not be directly accessible from the internet. Which component should they add?",
+        "options": [
+            "Internet Gateway",
+            "NAT Gateway",
+            "VPC Peering",
+            "VPC Endpoint"
+        ],
+        "answer": 1,
+        "explanation": "NAT Gateway enables private subnet instances to access the internet without being directly accessible from it, translating private IP addresses to public ones for outbound traffic."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to take point-in-time backups of their EBS volumes and store them incrementally in Amazon S3. Which EBS feature supports this?",
+        "options": [
+            "EBS Snapshots",
+            "EBS AMIs",
+            "EBS Replication",
+            "EBS Backup"
+        ],
+        "answer": 0,
+        "explanation": "Amazon EBS Snapshots are point-in-time backups saved to Amazon S3. They are stored incrementally, with only changed blocks saved after the first snapshot."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company is building a real-time chat application that requires persistent two-way communication between clients and servers. Which API Gateway type should they use?",
+        "options": [
+            "REST API",
+            "RESTful API",
+            "WebSocket API",
+            "HTTP API"
+        ],
+        "answer": 2,
+        "explanation": "WebSocket APIs in Amazon API Gateway are used for real-time, two-way communication, maintaining persistent connections suitable for chat apps, multiplayer games, and streaming services."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "An application needs to distribute incoming HTTP and HTTPS traffic across multiple EC2 instances based on the content of the request, such as URL paths or host headers. Which load balancer should they use?",
+        "options": [
+            "Network Load Balancer (NLB)",
+            "Application Load Balancer (ALB)",
+            "Gateway Load Balancer (GWLB)",
+            "Classic Load Balancer"
+        ],
+        "answer": 1,
+        "explanation": "Application Load Balancer (ALB) operates at Layer 7 (Application Layer) and routes HTTP/HTTPS traffic based on request content like URL paths or host headers, ideal for microservices and containers."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs object storage that offers 99.999999999% durability, supports objects up to 5 terabytes, and provides features like versioning, replication, and lifecycle policies. Which service meets these requirements?",
+        "options": [
+            "Amazon EBS",
+            "Amazon S3",
+            "Amazon EFS",
+            "Amazon FSx"
+        ],
+        "answer": 1,
+        "explanation": "Amazon S3 provides object storage with 99.999999999% durability (eleven 9s), supports objects up to 5TB, and offers versioning, cross-region replication, and lifecycle policies."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A security team wants to analyze recorded video footage to identify people entering an office building and detect facial emotions. Which machine learning service should they use?",
+        "options": [
+            "Amazon Textract",
+            "Amazon Rekognition",
+            "Amazon Comprehend",
+            "Amazon Polly"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Rekognition analyzes images and videos to identify objects, people, text, and faces, and can detect facial emotions and compare faces for security applications."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A gaming company needs compute instances optimized for high-speed compute tasks like gaming servers and batch processing. Which EC2 instance category should they choose?",
+        "options": [
+            "General-purpose",
+            "Compute-optimized",
+            "Memory-optimized",
+            "Storage-optimized"
+        ],
+        "answer": 1,
+        "explanation": "Compute-optimized instances are designed for compute-bound applications like batch processing, media transcoding, high-performance web servers, and gaming servers."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to migrate their on-premises MySQL database to Amazon Aurora with minimal downtime. Which AWS service supports this continuous replication migration?",
+        "options": [
+            "AWS SCT",
+            "AWS DMS",
+            "AWS Migration Hub",
+            "AWS DataSync"
+        ],
+        "answer": 1,
+        "explanation": "AWS Database Migration Service (DMS) supports continuous data replication with minimal downtime, enabling migration from on-premises MySQL to Amazon Aurora."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company has data with unpredictable access patterns and wants S3 to automatically move objects between frequent and infrequent access tiers without retrieval charges. Which storage class should they use?",
+        "options": [
+            "S3 Standard",
+            "S3 Standard-IA",
+            "S3 Intelligent-Tiering",
+            "S3 Glacier"
+        ],
+        "answer": 2,
+        "explanation": "S3 Intelligent-Tiering automatically moves data between access tiers based on access patterns, with no retrieval charges, making it ideal for unpredictable workloads."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a high-performance file system optimized for compute-intensive workloads like machine learning that integrates with Amazon S3 for high-speed processing. Which FSx option should they choose?",
+        "options": [
+            "FSx for Windows File Server",
+            "FSx for Lustre",
+            "FSx for NetApp ONTAP",
+            "FSx for OpenZFS"
+        ],
+        "answer": 1,
+        "explanation": "FSx for Lustre is optimized for compute-intensive applications like machine learning and integrates with Amazon S3 for high-speed processing of large datasets."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A media company wants to automatically convert podcast audio into written blog posts. Which service can transcribe spoken content and recognize different speakers?",
+        "options": [
+            "Amazon Polly",
+            "Amazon Transcribe",
+            "Amazon Translate",
+            "Amazon Comprehend"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Transcribe is a speech-to-text service that converts audio and video to written text, using machine learning to recognize different speakers in conversations."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A development team wants to run Docker containers on AWS with a fully managed orchestration platform that is native to AWS and simpler to operate. Which service should they choose?",
+        "options": [
+            "Amazon EKS",
+            "Amazon ECS",
+            "AWS Fargate",
+            "Amazon ECR"
+        ],
+        "answer": 1,
+        "explanation": "Amazon ECS is a fully managed container orchestration platform native to AWS that simplifies deployment and scaling of Docker containers, making it easier to operate for simple apps."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to run containerized microservices without managing EC2 instances or clusters, with automatic provisioning and scaling of container infrastructure. Which serverless container service should they use?",
+        "options": [
+            "Amazon ECS",
+            "Amazon EKS",
+            "AWS Fargate",
+            "AWS Lambda"
+        ],
+        "answer": 2,
+        "explanation": "AWS Fargate is a serverless container platform that runs containers without managing EC2 infrastructure or clusters, automatically provisioning and scaling resources."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A startup needs a simple, cost-effective virtual private server for a low-traffic website with fixed monthly pricing starting at $3.50. Which AWS service should they choose?",
+        "options": [
+            "Amazon EC2",
+            "Amazon LightSail",
+            "AWS Elastic Beanstalk",
+            "AWS Lambda"
+        ],
+        "answer": 1,
+        "explanation": "Amazon LightSail is a VPS solution offering preconfigured, cost-effective compute instances with fixed monthly pricing ranging from $3.50 to $160, ideal for simple workloads and beginners."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to automate the creation of EBS snapshots on a daily schedule and retain only the 5 most recent snapshots for volumes tagged with specific labels. Which service should they use?",
+        "options": [
+            "AWS Backup",
+            "Amazon Data Lifecycle Manager",
+            "AWS Lambda",
+            "Amazon CloudWatch"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Data Lifecycle Manager manages EBS snapshots and AMIs using policies, with schedules and retention settings based on resource tags."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to bridge their on-premises environment with AWS cloud storage, allowing them to store files and backups in Amazon S3 while still accessing them through standard file protocols. Which hybrid storage service should they deploy?",
+        "options": [
+            "AWS DataSync",
+            "AWS Storage Gateway",
+            "AWS Snowball",
+            "AWS Transfer Family"
+        ],
+        "answer": 1,
+        "explanation": "AWS Storage Gateway is a hybrid cloud storage service that bridges on-premises and AWS storage, supporting iSCSI, SMB, and NFS protocols with File Gateway, Volume Gateway, and Tape Gateway options."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to create a logically isolated virtual network in AWS where they can launch resources with custom IP addressing, subnets, route tables, and security configurations. Which service provides this capability?",
+        "options": [
+            "AWS Direct Connect",
+            "Amazon VPC",
+            "AWS Transit Gateway",
+            "AWS PrivateLink"
+        ],
+        "answer": 1,
+        "explanation": "Amazon VPC (Virtual Private Cloud) allows creation of a logically isolated section of the AWS Cloud with custom network configurations including subnets, route tables, and security groups."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A remote employee needs secure access to AWS resources from any location using an OpenVPN client. Which AWS VPN service supports this individual user access scenario?",
+        "options": [
+            "AWS Site-to-Site VPN",
+            "AWS Client VPN",
+            "AWS Direct Connect",
+            "AWS VPN Gateway"
+        ],
+        "answer": 1,
+        "explanation": "AWS Client VPN is a managed client-based VPN that enables secure access to AWS resources from anywhere, using OpenVPN clients and supporting split-tunneling."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs high-performance block storage for their database workloads running on EC2 instances. They require persistent storage that is automatically replicated within an Availability Zone. Which service should they use?",
+        "options": [
+            "Amazon S3",
+            "Amazon EBS",
+            "Amazon EFS",
+            "Amazon Instance Store"
+        ],
+        "answer": 1,
+        "explanation": "Amazon EBS provides high-performance block storage for use with EC2 instances, with volumes automatically replicated within an Availability Zone for durability."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to provide remote employees with secure access to full Windows and Linux virtual desktops from any internet-connected device. Which AWS service provides this Desktop-as-a-Service capability?",
+        "options": [
+            "Amazon AppStream 2.0",
+            "Amazon WorkSpaces",
+            "Amazon WorkSpaces Web",
+            "AWS Client VPN"
+        ],
+        "answer": 1,
+        "explanation": "Amazon WorkSpaces is a fully managed Desktop-as-a-Service (DaaS) that provides secure, scalable virtual desktops supporting Windows, Linux, and macOS environments."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to run Kubernetes on AWS for a highly scalable application that needs to be portable across multiple cloud providers. Which managed service should they use?",
+        "options": [
+            "Amazon ECS",
+            "Amazon EKS",
+            "AWS Fargate",
+            "AWS App Runner"
+        ],
+        "answer": 1,
+        "explanation": "Amazon EKS is a managed Kubernetes service that runs open-source Kubernetes, offering cross-cloud portability and compatibility for highly scalable applications."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to stream specific applications (not full desktops) from AWS to a wide variety of user devices without installing software locally. Which service supports this application streaming?",
+        "options": [
+            "Amazon WorkSpaces",
+            "Amazon AppStream 2.0",
+            "AWS AppSync",
+            "Amazon CloudFront"
+        ],
+        "answer": 1,
+        "explanation": "Amazon AppStream 2.0 is a fully managed application streaming service that streams applications from AWS to user devices without local installation, centralizing application management."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a fully managed Docker image repository to store and manage container images for use with both ECS and EKS. Which service provides this capability?",
+        "options": [
+            "Amazon S3",
+            "Amazon ECR",
+            "AWS CodeCommit",
+            "AWS Artifact"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Elastic Container Registry (ECR) is a fully managed Docker image repository that stores and manages container images for use with ECS and EKS."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A network architect wants to implement a software-defined network where the control plane, data plane, and management plane are decoupled from physical devices and managed through APIs. Which networking approach enables this?",
+        "options": [
+            "Traditional Networking",
+            "Software Defined Networking (SDN)",
+            "Peer-to-Peer Networking",
+            "Mesh Networking"
+        ],
+        "answer": 1,
+        "explanation": "Software Defined Networking (SDN) uses software-based controllers or APIs to manage network traffic, decoupling the control, data, and management planes from physical devices."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A social network company needs to store and navigate highly connected data like user relationships and friend connections with millisecond query latency. Which AWS database service is purpose-built for this?",
+        "options": [
+            "Amazon RDS",
+            "Amazon DynamoDB",
+            "Amazon Neptune",
+            "Amazon MemoryDB"
+        ],
+        "answer": 2,
+        "explanation": "Amazon Neptune is a fully managed graph database designed for highly connected datasets, supporting fast relationship navigation with millisecond query latency."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company stores frequently accessed data in S3 but wants to automatically move objects to cheaper storage tiers after 30 days of no access, and then to archival storage after 90 days. Which S3 feature enables this automation?",
+        "options": [
+            "S3 Replication",
+            "S3 Lifecycle Policies",
+            "S3 Intelligent-Tiering",
+            "S3 Batch Operations"
+        ],
+        "answer": 1,
+        "explanation": "S3 Lifecycle Policies automate transitions between storage classes and deletions based on object age, such as moving from S3 Standard to S3-IA after 30 days and to Glacier after 90 days."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a fully managed relational database that supports MySQL, PostgreSQL, Oracle, SQL Server, and MariaDB, with automated provisioning, patching, and backups. Which service should they choose?",
+        "options": [
+            "Amazon DynamoDB",
+            "Amazon RDS",
+            "Amazon Aurora",
+            "Amazon Redshift"
+        ],
+        "answer": 1,
+        "explanation": "Amazon RDS is a fully managed relational database service supporting MySQL, PostgreSQL, Oracle, SQL Server, MariaDB, and Amazon Aurora, with automated provisioning, patching, and backups."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs an in-memory database that delivers microsecond read latency for caching, session storage, and real-time analytics. Which Redis-compatible service should they use?",
+        "options": [
+            "Amazon ElastiCache",
+            "Amazon MemoryDB for Redis",
+            "Amazon DynamoDB DAX",
+            "Amazon Neptune"
+        ],
+        "answer": 1,
+        "explanation": "Amazon MemoryDB for Redis is a fully managed in-memory database built on open-source Redis, delivering microsecond read latency and single-digit millisecond write latency for caching and real-time analytics."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a fully managed file storage service that supports NFS protocol, scales automatically to petabytes, and stores data redundantly across multiple Availability Zones. Which service should they choose?",
+        "options": [
+            "Amazon S3",
+            "Amazon EFS",
+            "Amazon FSx",
+            "AWS Storage Gateway"
+        ],
+        "answer": 1,
+        "explanation": "Amazon EFS is a fully managed, serverless file storage service that supports NFS, scales to petabytes, and stores data redundantly across multiple Availability Zones with 99.999999999% durability."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A developer wants to deploy a web application written in Python without managing infrastructure, provisioning, load balancing, or scaling. They just want to upload their code and let AWS handle the rest. Which service is best suited?",
+        "options": [
+            "Amazon EC2",
+            "AWS Elastic Beanstalk",
+            "AWS Lambda",
+            "AWS Batch"
+        ],
+        "answer": 1,
+        "explanation": "AWS Elastic Beanstalk is a fully managed deployment service that handles provisioning, load balancing, scaling, and monitoring. Developers only need to upload their code."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to automatically adjust the number of EC2 instances in their fleet based on CPU utilization metrics, ensuring high availability across multiple Availability Zones. Which AWS feature should they configure?",
+        "options": [
+            "Elastic Load Balancing",
+            "EC2 Auto Scaling",
+            "AWS Batch",
+            "AWS Lambda"
+        ],
+        "answer": 1,
+        "explanation": "EC2 Auto Scaling dynamically adjusts the number of EC2 instances based on defined metrics like CPU utilization, maintaining desired capacity and high availability across multiple AZs."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a browser-based solution that allows secure access to internal websites and SaaS applications without requiring client software or VPNs, with sessions that do not retain data after closing. Which service fits this need?",
+        "options": [
+            "Amazon WorkSpaces",
+            "Amazon AppStream 2.0",
+            "Amazon WorkSpaces Web",
+            "AWS Client VPN"
+        ],
+        "answer": 2,
+        "explanation": "Amazon WorkSpaces Web is a fully managed, non-persistent, browser-based solution for secure access to internal websites and SaaS apps without client software or VPNs."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to register a new domain name and manage DNS records including A, AAAA, CNAME, MX, and TXT records. They also need health checks and failover routing. Which AWS service provides these capabilities?",
+        "options": [
+            "AWS Global Accelerator",
+            "Amazon Route 53",
+            "AWS CloudFront",
+            "AWS Certificate Manager"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Route 53 is a scalable DNS web service that provides domain registration, DNS routing with various record types, health checks, and failover capabilities."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company wants to convert text into lifelike speech for their virtual assistant. Which AWS service uses deep learning to produce natural-sounding voiceovers?",
+        "options": [
+            "Amazon Transcribe",
+            "Amazon Polly",
+            "Amazon Translate",
+            "Amazon Lex"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Polly is a text-to-speech service using deep learning to produce lifelike voiceovers from text input, supporting multiple languages and voices."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company is running an in-memory database that requires a high memory-to-CPU ratio for real-time big data analytics. Which EC2 instance category is best suited for this workload?",
+        "options": [
+            "General-purpose",
+            "Compute-optimized",
+            "Memory-optimized",
+            "Accelerated computing"
+        ],
+        "answer": 2,
+        "explanation": "Memory-optimized instances have a high memory-to-CPU ratio and are suitable for in-memory databases and real-time big data analytics."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A research institution needs to run hundreds of thousands of parallel batch computing jobs for scientific simulations, with dynamic provisioning of optimal compute resources. Which service should they use?",
+        "options": [
+            "AWS Lambda",
+            "AWS Batch",
+            "AWS Fargate",
+            "Amazon EC2 Auto Scaling"
+        ],
+        "answer": 1,
+        "explanation": "AWS Batch is a fully managed batch processing service that executes large numbers of batch computing jobs efficiently, dynamically provisioning optimal compute resources."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A movie studio needs to render CGI and 3D graphics using GPU-based processing. Which EC2 instance category should they select?",
+        "options": [
+            "High-performance computing (HPC)",
+            "Accelerated computing",
+            "Storage-optimized",
+            "Memory-optimized"
+        ],
+        "answer": 1,
+        "explanation": "Accelerated computing instances use hardware accelerators like GPUs and are ideal for graphics processing, pattern recognition, and floating-point calculations used in CGI and 3D rendering."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A hospital wants to extract structured data from scanned patient forms and handwritten medical records into a usable database format. Which service goes beyond traditional OCR to accomplish this?",
+        "options": [
+            "Amazon Rekognition",
+            "Amazon Textract",
+            "Amazon Comprehend",
+            "Amazon Translate"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Textract is a machine learning-based document analysis service that extracts data from forms, tables, and structured documents beyond traditional OCR, converting scanned documents into usable structured data."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A data scientist needs a fully managed service to build, train, and deploy machine learning models at scale. Which AWS service provides the necessary tools and infrastructure?",
+        "options": [
+            "Amazon Comprehend",
+            "Amazon SageMaker",
+            "Amazon Rekognition",
+            "Amazon Lex"
+        ],
+        "answer": 1,
+        "explanation": "Amazon SageMaker provides tools for building, training, and deploying machine learning models at scale, offering a fully managed environment for the entire ML lifecycle."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs to establish a private network connection between two VPCs to keep traffic off the public internet. Which VPC feature enables this?",
+        "options": [
+            "VPN Connection",
+            "VPC Peering",
+            "Transit Gateway",
+            "Direct Connect"
+        ],
+        "answer": 1,
+        "explanation": "VPC Peering creates a private network connection between two VPCs, keeping traffic off the public internet and enhancing security."
+    },
+    {
+        "domain": "Domain 3: Cloud Technology and Services",
+        "scenario": "A company needs a MySQL-compatible database that provides 5x the throughput of standard MySQL, with up to 128TB of storage and support for up to 15 read replicas. Which service meets these requirements?",
+        "options": [
+            "Amazon RDS for MySQL",
+            "Amazon Aurora",
+            "Amazon DynamoDB",
+            "Amazon Neptune"
+        ],
+        "answer": 1,
+        "explanation": "Amazon Aurora is a fully managed relational database compatible with MySQL and PostgreSQL, providing 5x the throughput of MySQL, up to 128TB storage, and up to 15 Aurora Replicas."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to customize cost categorization and allocation based on their business needs, creating custom billing rules for advanced tagging strategies and department-level cost splitting. Which service should they use?",
+        "options": [
+            "AWS Cost Explorer",
+            "AWS Billing Conductor",
+            "AWS Budgets",
+            "AWS Organizations"
+        ],
+        "answer": 1,
+        "explanation": "AWS Billing Conductor customizes cost categorization and allocation, enabling custom billing rules based on business needs for advanced tagging and department-level cost splitting."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to browse and purchase third-party software solutions that integrate with AWS, with options for pay-as-you-go, subscriptions, and free trials, all with unified billing. Where should they look?",
+        "options": [
+            "AWS Service Catalog",
+            "AWS Marketplace",
+            "AWS Partner Network",
+            "AWS Support Center"
+        ],
+        "answer": 1,
+        "explanation": "AWS Marketplace is a digital solution hub for third-party software and services that integrates with AWS infrastructure, offering flexible pricing models and unified billing."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to detect unusual spending patterns across services and accounts, receiving timely alerts when abnormal usage occurs. Which AWS cost management feature provides this anomaly detection?",
+        "options": [
+            "AWS Budgets",
+            "AWS Cost Explorer",
+            "Cost Anomaly Detection",
+            "AWS Trusted Advisor"
+        ],
+        "answer": 2,
+        "explanation": "Cost Anomaly Detection identifies unusual spending patterns across services, accounts, or tags, learning regular usage patterns to reduce false positives and providing timely alerts."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company needs to group related cost allocation tags under a category name for simplified reporting, such as grouping Sales and Marketing tags under a Websites cost category. Which feature supports this?",
+        "options": [
+            "Cost Allocation Tags",
+            "Cost Categories",
+            "AWS Organizations",
+            "AWS Budgets"
+        ],
+        "answer": 1,
+        "explanation": "Cost Categories group related cost allocation tags under a category name for reporting purposes, using rules like 'Inherited Value' for simplified configuration."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants programmatic access to AWS Health Dashboard data to integrate service health updates into their centralized monitoring platform alongside metrics from other clouds. Which feature enables this?",
+        "options": [
+            "AWS Health Dashboard",
+            "AWS Health API",
+            "Amazon CloudWatch",
+            "AWS Config"
+        ],
+        "answer": 1,
+        "explanation": "AWS Health API allows programmatic access to AWS Health Dashboard data, enabling integration of AWS health updates into custom dashboards and third-party monitoring tools."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company needs to reserve capacity in a specific Availability Zone to ensure availability during peak times, but they do not need a discount. They only want to guarantee that capacity is available when needed. Which option should they choose?",
+        "options": [
+            "Reserved Instances",
+            "Spot Instances",
+            "Capacity Reservations",
+            "Savings Plans"
+        ],
+        "answer": 2,
+        "explanation": "Capacity Reservations reserve capacity in a specific Availability Zone without discounts, billing at the On-Demand rate, to guarantee availability when needed."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A large enterprise running mission-critical workloads on AWS requires 24/7 phone and email access to Cloud Support Engineers, infrastructure event management, and fast response times. Which support plan meets these needs?",
+        "options": [
+            "Developer Support",
+            "Business Support",
+            "Enterprise On-Ramp Support",
+            "Enterprise Support"
+        ],
+        "answer": 1,
+        "explanation": "AWS Business Support provides premium support for businesses running critical applications, including 24/7 phone and email access to Cloud Support Engineers and fast response times."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company using AWS Lambda and serverless computing pays only for the compute time they consume with no upfront costs. Which type of expenditure does this cloud model represent?",
+        "options": [
+            "Capital Expenditure (CAPEX)",
+            "Operational Expenditure (OPEX)",
+            "Fixed Expenditure",
+            "Sunk Cost"
+        ],
+        "answer": 1,
+        "explanation": "Cloud computing promotes Operational Expenditures (OPEX), which are ongoing, usage-based costs like serverless computing, providing agility and reduced upfront investment."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A development team is building and testing applications on AWS and needs technical support with guaranteed response times. They do not require 24/7 phone access. Which AWS Support plan is most appropriate?",
+        "options": [
+            "Basic Support",
+            "Developer Support",
+            "Business Support",
+            "Enterprise Support"
+        ],
+        "answer": 1,
+        "explanation": "AWS Developer Support is designed for developers testing or building applications on AWS, including technical support and guaranteed response times, ideal for early-phase adopters."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to reduce their AWS costs by identifying idle or underutilized resources, suggesting instance resizing, and flagging unrestricted security ports. Which service provides these real-time recommendations?",
+        "options": [
+            "AWS Cost Explorer",
+            "AWS Trusted Advisor",
+            "AWS Budgets",
+            "AWS Compute Optimizer"
+        ],
+        "answer": 1,
+        "explanation": "AWS Trusted Advisor provides real-time recommendations for cost optimization, security, performance, fault tolerance, and service limits, acting like an automated cloud consultant."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to commit to a consistent amount of compute usage over 1 or 3 years across multiple instance types and regions for maximum flexibility. Which pricing model offers up to 72% discount with this flexibility?",
+        "options": [
+            "Reserved Instances",
+            "Spot Instances",
+            "Savings Plans",
+            "Dedicated Hosts"
+        ],
+        "answer": 2,
+        "explanation": "Savings Plans offer up to 72% discount for committed usage over 1 or 3 years. Compute Savings Plans are flexible across regions, OS, and instance sizes."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company is comparing their on-premises data center costs to AWS. Their on-premises model involves large upfront hardware purchases and long-term maintenance contracts. Which type of expenditure characterizes this traditional IT model?",
+        "options": [
+            "Operational Expenditure (OPEX)",
+            "Capital Expenditure (CAPEX)",
+            "Variable Expenditure",
+            "Utility Expenditure"
+        ],
+        "answer": 1,
+        "explanation": "Traditional IT relies on Capital Expenditures (CAPEX), which are long-term investments in assets like hardware and software with upfront costs and fixed commitments."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company is analyzing their data transfer costs. They notice that transferring data from the internet into AWS is mostly free, but transferring data out to the internet incurs significant charges. Which terms describe these transfers?",
+        "options": [
+            "Upload and Download",
+            "Ingress and Egress",
+            "Inbound and Outbound",
+            "Import and Export"
+        ],
+        "answer": 1,
+        "explanation": "Incoming data transfer (Ingress) into AWS is mostly free, while outgoing data transfer (Egress) from AWS to the internet is charged on a tiered pricing model."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to purchase EC2 instances for a steady-state workload that runs 24/7 for the next three years. They are willing to commit to a long-term contract in exchange for the largest possible discount. Which pricing option should they choose?",
+        "options": [
+            "On-Demand Instances",
+            "Spot Instances",
+            "Standard Reserved Instances",
+            "Savings Plans"
+        ],
+        "answer": 2,
+        "explanation": "Standard Reserved Instances offer the largest discount (up to 75% off On-Demand) for predictable, steady-state usage when customers commit to a term and can pay upfront."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company needs to run software that requires license compliance at the host level, with an entire EC2 server reserved for their organization. Which EC2 option supports license reuse and deeper host-level control?",
+        "options": [
+            "Dedicated Instances",
+            "Dedicated Hosts",
+            "Reserved Instances",
+            "Spot Instances"
+        ],
+        "answer": 1,
+        "explanation": "Dedicated Hosts reserve entire EC2 servers for one organization, allowing license reuse and deeper host-level control, useful for compliance-heavy and licensed environments."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to receive detailed cost and usage data in CSV format delivered to an S3 bucket, including information about AWS credits, Reserved Instances, and Savings Plans. Which reporting tool should they use?",
+        "options": [
+            "AWS Cost Explorer",
+            "AWS Budgets",
+            "AWS Cost and Usage Report",
+            "AWS Billing Conductor"
+        ],
+        "answer": 2,
+        "explanation": "AWS Cost and Usage Report is the most detailed AWS cost reporting tool, including credits, Reserved Instances, Savings Plans, and resource IDs, delivered to S3 for analysis."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants flexibility to change instance families, operating systems, or regions during their reserved capacity commitment while still receiving a significant discount. Which pricing option provides this flexibility?",
+        "options": [
+            "Standard Reserved Instances",
+            "Convertible Reserved Instances",
+            "Scheduled Reserved Instances",
+            "Spot Instances"
+        ],
+        "answer": 1,
+        "explanation": "Convertible Reserved Instances allow changes to instance families, OS, or regions during the contract term, offering flexibility with a slightly smaller discount than Standard RIs."
+    },
+    {
+        "domain": "Domain 4: Billing, Pricing, and Support",
+        "scenario": "A company wants to create a custom catalog of pre-approved third-party software for their employees to ensure all purchases meet internal compliance and governance standards. Which AWS Marketplace feature supports this?",
+        "options": [
+            "Public Marketplace",
+            "Private Marketplace",
+            "AWS Service Catalog",
+            "AWS Partner Network"
+        ],
+        "answer": 1,
+        "explanation": "AWS Marketplace Private Marketplace allows large enterprises to create a custom catalog of pre-approved software, ensuring purchases meet compliance and governance standards."
+    }
+];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let flaggedQuestions = new Array(questions.length).fill(false);
+        let timeLeft = 200 * 60; // 200 minutes in seconds
+        let timerInterval;
+
+        document.getElementById('qCount').innerText = questions.length;
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function startTimer() {
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.classList.remove('hidden');
+            timerDisplay.innerText = formatTime(timeLeft);
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerText = formatTime(timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                }
+            }, 1000);
+        }
+
+        function updateProgress() {
+            const pct = ((currentQuestionIndex + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+        }
+
+        function startExam() {
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('quizScreen').classList.remove('hidden');
+            startTimer();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('currentQNum').innerText = currentQuestionIndex + 1;
+            document.getElementById('totalQNum').innerText = questions.length;
+            document.getElementById('currentDomain').innerText = q.domain;
+            document.getElementById('questionText').innerText = q.scenario;
+
+            const flagBtn = document.getElementById('flagBtn');
+            if (flaggedQuestions[currentQuestionIndex]) {
+                flagBtn.classList.add('flagged');
+                flagBtn.innerText = 'Flagged for Review';
+            } else {
+                flagBtn.classList.remove('flagged');
+                flagBtn.innerText = 'Flag for Review';
+            }
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = '';
+
+            q.options.forEach((opt, index) => {
+                const label = document.createElement('label');
+                label.className = 'option-label';
+
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'option';
+                input.value = index;
+                if (userAnswers[currentQuestionIndex] === index) {
+                    input.checked = true;
+                }
+
+                input.onchange = () => selectOption(index);
+
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(opt));
+                optionsContainer.appendChild(label);
+            });
+
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+
+            if (currentQuestionIndex === questions.length - 1) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('submitBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('submitBtn').classList.add('hidden');
+            }
+
+            updateProgress();
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestionIndex] = index;
+        }
+
+        function toggleFlag() {
+            flaggedQuestions[currentQuestionIndex] = !flaggedQuestions[currentQuestionIndex];
+            const flagBtn = document.getElementById('flagBtn');
+            if (flaggedQuestions[currentQuestionIndex]) {
+                flagBtn.classList.add('flagged');
+                flagBtn.innerText = 'Flagged for Review';
+            } else {
+                flagBtn.classList.remove('flagged');
+                flagBtn.innerText = 'Flag for Review';
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                loadQuestion();
+            }
+        }
+
+        function submitExam() {
+            clearInterval(timerInterval);
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('timerDisplay').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            generateReport();
+        }
+
+        function generateReport() {
+            const domainStats = {};
+            let correctAnswers = 0;
+
+            questions.forEach((q, index) => {
+                if (!domainStats[q.domain]) {
+                    domainStats[q.domain] = { total: 0, correct: 0 };
+                }
+                domainStats[q.domain].total++;
+
+                const isCorrect = userAnswers[index] === q.answer;
+                if (isCorrect) {
+                    correctAnswers++;
+                    domainStats[q.domain].correct++;
+                }
+
+                const reviewContainer = document.getElementById('reviewContainer');
+                const reviewDiv = document.createElement('div');
+                reviewDiv.className = `review-item ${isCorrect ? 'correct' : 'incorrect'}`;
+
+                let reviewHTML = `<strong>Q${index + 1} (${q.domain}):</strong> ${q.scenario}<br>`;
+                reviewHTML += `<em>Your Answer:</em> ${userAnswers[index] !== null ? q.options[userAnswers[index]] : 'No Answer'}<br>`;
+                if (!isCorrect) {
+                    reviewHTML += `<em>Correct Answer:</em> <strong>${q.options[q.answer]}</strong><br>`;
+                }
+                reviewHTML += `<div class="explanation"><strong>Explanation:</strong> ${q.explanation}</div>`;
+
+                reviewDiv.innerHTML = reviewHTML;
+                reviewContainer.appendChild(reviewDiv);
+            });
+
+            const percentage = ((correctAnswers / questions.length) * 100).toFixed(2);
+            document.getElementById('finalScore').innerText = `Final Score: ${percentage}% (${correctAnswers}/${questions.length})`;
+
+            const passFail = document.getElementById('passFailStatus');
+            if (percentage >= 70) {
+                passFail.innerText = "Status: PASS";
+                passFail.style.color = "var(--success-color)";
+                passFail.style.fontWeight = "bold";
+            } else {
+                passFail.innerText = "Status: FAIL";
+                passFail.style.color = "var(--error-color)";
+                passFail.style.fontWeight = "bold";
+            }
+
+            const timeSpent = (200 * 60) - timeLeft;
+            const mins = Math.floor(timeSpent / 60);
+            const secs = timeSpent % 60;
+            document.getElementById('timeRemaining').innerText = `Time spent: ${mins}m ${secs}s`;
+
+            const tbody = document.getElementById('domainTableBody');
+            for (const [domain, stats] of Object.entries(domainStats)) {
+                const tr = document.createElement('tr');
+                const domPercent = ((stats.correct / stats.total) * 100).toFixed(2);
+
+                if (domPercent < 70) {
+                    tr.className = "needs-improvement";
+                }
+
+                tr.innerHTML = `
+                    <td>${domain}</td>
+                    <td>${domPercent}% (${stats.correct}/${stats.total})</td>
+                    <td>${domPercent < 70 ? 'Needs Improvement' : 'Proficient'}</td>
+                `;
+                tbody.appendChild(tr);
+            }
+        }
+    </script>
+</body>
+</html>

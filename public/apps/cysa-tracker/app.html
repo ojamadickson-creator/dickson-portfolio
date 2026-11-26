@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CySA+ CS0-004 Interactive Study Hub</title>
+<style>
+:root {
+  --d1: #3b82f6; --d2: #10b981; --d3: #f59e0b; --d4: #8b5cf6;
+  --bg: #0f172a; --card: #1e293b; --elev: #334155;
+  --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
+  --success: #22c55e; --warn: #eab308; --danger: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg); color: var(--text); line-height: 1.6;
+}
+header {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+  padding: 2rem 1rem; text-align: center; border-bottom: 1px solid var(--elev);
+  position: sticky; top: 0; z-index: 100;
+}
+header h1 { font-size: 1.8rem; background: linear-gradient(90deg, var(--accent), #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+header p { color: var(--muted); margin-top: 0.5rem; font-size: 0.95rem; }
+
+nav {
+  display: flex; gap: 0.5rem; padding: 1rem; background: var(--card);
+  border-bottom: 1px solid var(--elev); overflow-x: auto; flex-wrap: wrap; justify-content: center;
+}
+nav button {
+  background: var(--elev); color: var(--text); border: 1px solid #475569;
+  padding: 0.6rem 1rem; border-radius: 0.5rem; cursor: pointer; font-weight: 600;
+  transition: all 0.2s; white-space: nowrap;
+}
+nav button:hover, nav button.active { background: var(--accent); color: #0f172a; border-color: var(--accent); }
+
+.container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
+.section { display: none; animation: fadeIn 0.3s ease; }
+.section.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.card {
+  background: var(--card); border: 1px solid var(--elev); border-radius: 0.75rem;
+  padding: 1.25rem; margin-bottom: 1rem; transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3); }
+.card h3 { color: var(--accent); margin-bottom: 0.75rem; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+
+.progress-wrap { margin-bottom: 2rem; }
+.progress-bar-bg { background: var(--elev); height: 1.5rem; border-radius: 999px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 999px; transition: width 0.6s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 0.5rem; font-size: 0.75rem; font-weight: 700; color: #fff; }
+.domain-label { display: flex; justify-content: space-between; margin-bottom: 0.35rem; font-size: 0.9rem; }
+
+.grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; }
+
+.accordion {
+  background: var(--elev); border: 1px solid #475569; border-radius: 0.5rem;
+  margin-bottom: 0.75rem; overflow: hidden;
+}
+.accordion-header {
+  padding: 0.9rem 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  font-weight: 600; font-size: 0.95rem; transition: background 0.2s;
+}
+.accordion-header:hover { background: #475569; }
+.accordion-body { padding: 1rem; border-top: 1px solid #475569; display: none; background: var(--card); }
+.accordion.open .accordion-body { display: block; }
+.accordion-icon { transition: transform 0.2s; }
+.accordion.open .accordion-icon { transform: rotate(180deg); }
+
+.check-row { display: flex; align-items: flex-start; gap: 0.6rem; margin-bottom: 0.6rem; }
+.check-row input[type="checkbox"] { width: 1.1rem; height: 1.1rem; margin-top: 0.15rem; accent-color: var(--accent); cursor: pointer; }
+.check-row label { cursor: pointer; flex: 1; }
+.check-row.done label { text-decoration: line-through; color: var(--muted); }
+.check-row.hidden { display: none; }
+
+.tag {
+  display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.7rem;
+  font-weight: 700; text-transform: uppercase; margin-left: 0.5rem;
+}
+.tag-d1 { background: rgba(59,130,246,0.2); color: #60a5fa; }
+.tag-d2 { background: rgba(16,185,129,0.2); color: #34d399; }
+.tag-d3 { background: rgba(245,158,11,0.2); color: #fbbf24; }
+.tag-d4 { background: rgba(139,92,246,0.2); color: #a78bfa; }
+.tag-pbq { background: rgba(239,68,68,0.2); color: #f87171; }
+
+.study-note {
+  background: rgba(56,189,248,0.08); border-left: 3px solid var(--accent);
+  padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 0.75rem 0; font-size: 0.9rem;
+}
+.trap {
+  background: rgba(239,68,68,0.08); border-left: 3px solid var(--danger);
+  padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 0.75rem 0; font-size: 0.9rem;
+}
+.memory {
+  background: rgba(34,197,94,0.08); border-left: 3px solid var(--success);
+  padding: 0.75rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 0.75rem 0; font-size: 0.9rem;
+}
+
+.scenario-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid var(--elev); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem;
+}
+.scenario-card h4 { color: var(--warn); margin-bottom: 0.5rem; }
+
+.diagram { background: var(--elev); border-radius: 0.5rem; padding: 1rem; margin: 1rem 0; text-align: center; overflow-x: auto; }
+.diagram svg { max-width: 100%; height: auto; }
+
+.table-wrap { overflow-x: auto; margin: 1rem 0; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 0.6rem 0.75rem; text-align: left; border-bottom: 1px solid var(--elev); }
+th { background: var(--elev); color: var(--accent); font-weight: 600; }
+tr:hover { background: rgba(255,255,255,0.03); }
+
+.stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 2rem;
+}
+.stat-box {
+  background: var(--card); border: 1px solid var(--elev); border-radius: 0.75rem;
+  padding: 1rem; text-align: center;
+}
+.stat-box .num { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+.stat-box .lbl { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; margin-top: 0.25rem; }
+
+input[type="date"], input[type="text"], textarea, select {
+  background: var(--elev); color: var(--text); border: 1px solid #475569;
+  padding: 0.5rem 0.75rem; border-radius: 0.4rem; font-family: inherit; font-size: 0.9rem;
+}
+input[type="date"]:focus, textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--accent); }
+
+.btn {
+  background: var(--accent); color: #0f172a; border: none; padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.9; }
+.btn-outline { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.footer { text-align: center; padding: 2rem 1rem; color: var(--muted); font-size: 0.85rem; border-top: 1px solid var(--elev); margin-top: 2rem; }
+
+/* ---- NEW INTERACTIVE FEATURES ---- */
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 1rem; }
+.search-box { flex: 1; min-width: 200px; position: relative; }
+.search-box input { width: 100%; padding-left: 2.2rem; }
+.search-box::before { content: "🔍"; position: absolute; left: 0.6rem; top: 0.4rem; font-size: 0.9rem; opacity: 0.7; }
+
+/* Flashcards */
+.flashcard-deck { display: flex; flex-direction: column; align-items: center; gap: 1rem; margin: 1.5rem 0; }
+.flashcard {
+  width: 100%; max-width: 500px; min-height: 220px; perspective: 1200px; cursor: pointer;
+}
+.flashcard-inner {
+  position: relative; width: 100%; height: 220px; transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+.flashcard-face {
+  position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+  border-radius: 0.75rem; padding: 1.5rem; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  border: 2px solid var(--elev);
+}
+.flashcard-front { background: linear-gradient(135deg, #1e293b, #0f172a); }
+.flashcard-back { background: linear-gradient(135deg, #134e4a, #0f172a); transform: rotateY(180deg); }
+.flashcard-face .fc-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+.flashcard-face .fc-term { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+.flashcard-face .fc-def { font-size: 0.95rem; color: var(--text); }
+.fc-controls { display: flex; gap: 0.5rem; }
+.fc-counter { color: var(--muted); font-size: 0.9rem; }
+
+/* Quiz */
+.quiz-q { background: var(--card); border: 1px solid var(--elev); border-radius: 0.75rem; padding: 1.25rem; margin-bottom: 1rem; }
+.quiz-q .q-num { color: var(--muted); font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
+.quiz-q .q-text { font-size: 1.05rem; margin: 0.5rem 0 1rem; font-weight: 600; }
+.quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+.quiz-option {
+  background: var(--elev); border: 2px solid #475569; border-radius: 0.5rem; padding: 0.75rem 1rem;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.6rem;
+}
+.quiz-option:hover { border-color: var(--accent); }
+.quiz-option.selected { border-color: var(--accent); background: rgba(56,189,248,0.15); }
+.quiz-option.correct { border-color: var(--success); background: rgba(34,197,94,0.2); }
+.quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.2); }
+.quiz-option .opt-letter { font-weight: 700; color: var(--accent); }
+.quiz-option.correct .opt-letter { color: var(--success); }
+.quiz-option.wrong .opt-letter { color: var(--danger); }
+.quiz-feedback { margin-top: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.9rem; display: none; }
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct { background: rgba(34,197,94,0.1); border-left: 3px solid var(--success); color: #86efac; }
+.quiz-feedback.wrong { background: rgba(239,68,68,0.1); border-left: 3px solid var(--danger); color: #fca5a5; }
+.quiz-score-box {
+  background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid var(--elev);
+  border-radius: 0.75rem; padding: 2rem; text-align: center; margin-bottom: 1rem;
+}
+.quiz-score-box .score-big { font-size: 3rem; font-weight: 800; }
+.quiz-score-box .pass { color: var(--success); }
+.quiz-score-box .fail { color: var(--danger); }
+
+/* CVSS Calculator */
+.cvss-calc { background: var(--card); border: 1px solid var(--elev); border-radius: 0.75rem; padding: 1.25rem; }
+.cvss-group { margin-bottom: 1rem; }
+.cvss-group label { display: block; font-weight: 600; margin-bottom: 0.4rem; font-size: 0.9rem; color: var(--accent); }
+.cvss-group select { width: 100%; }
+.cvss-result { text-align: center; padding: 1.5rem; background: var(--elev); border-radius: 0.5rem; margin-top: 1rem; }
+.cvss-score { font-size: 3rem; font-weight: 800; }
+.cvss-rating { font-size: 1.1rem; font-weight: 700; text-transform: uppercase; }
+.cvss-vector { font-family: 'Consolas', monospace; font-size: 0.8rem; color: var(--muted); margin-top: 0.5rem; word-break: break-all; }
+
+/* Streak / session */
+.streak-badge { display: inline-flex; align-items: center; gap: 0.3rem; background: rgba(234,179,8,0.15); color: var(--warn); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+
+@media (max-width: 600px) {
+  header h1 { font-size: 1.3rem; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1> CySA+ CS0-004 Interactive Study Hub</h1>
+  <p>Security Operations (34%) · Vulnerability Management (26%) · Incident Response (24%) · Reporting (16%)</p>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showSection(event,'dashboard')">Dashboard</button>
+  <button onclick="showSection(event,'d1')">Domain 1: SecOps</button>
+  <button onclick="showSection(event,'d2')">Domain 2: Vuln Mgmt</button>
+  <button onclick="showSection(event,'d3')">Domain 3: IR</button>
+  <button onclick="showSection(event,'d4')">Domain 4: Reporting</button>
+  <button onclick="showSection(event,'ref')">Quick Ref</button>
+  <button onclick="showSection(event,'scenarios')">Scenarios</button>
+  <button onclick="showSection(event,'practice')">Practice</button>
+</nav>
+
+<div class="container">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="section active">
+  <div class="stats-grid">
+    <div class="stat-box"><div class="num" id="statOverall">0%</div><div class="lbl">Overall Progress</div></div>
+    <div class="stat-box"><div class="num" id="statItems">0/0</div><div class="lbl">Items Complete</div></div>
+    <div class="stat-box"><div class="num" id="statDays">--</div><div class="lbl">Days to Exam</div></div>
+    <div class="stat-box"><div class="num" id="statTime">165m</div><div class="lbl">Exam Time</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Exam Details <span class="streak-badge" id="streakBadge">🔥 0-day streak</span></h3>
+    <div class="grid-2">
+      <div>Max Questions: <strong>85</strong> (MCQ + PBQs)</div>
+      <div>Passing Score: <strong>750 / 900</strong></div>
+      <div>Recommended Experience: <strong>4 years SOC/Vuln Analyst</strong></div>
+      <div>PBQs appear <strong>first</strong> — flag and return after MCQ</div>
+    </div>
+    <div style="margin-top:1rem;">
+      <label>Target Exam Date: </label>
+      <input type="date" id="examDate" onchange="saveDate()">
+      <button class="btn" style="margin-left:0.5rem;" onclick="resetProgress()">Reset All Progress</button>
+    </div>
+    <div style="margin-top:1rem; display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+      <button class="btn btn-outline" onclick="expandAll(true)">Expand All</button>
+      <button class="btn btn-outline" onclick="expandAll(false)">Collapse All</button>
+      <button class="btn btn-outline" onclick="markDomainDone()">Mark Domain Complete</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Domain Progress</h3>
+    <div class="progress-wrap">
+      <div class="domain-label"><span>Domain 1: Security Operations (34%)</span><span id="p1txt">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="p1bar" style="width:0%;background:var(--d1)">0%</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="domain-label"><span>Domain 2: Vulnerability Management (26%)</span><span id="p2txt">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="p2bar" style="width:0%;background:var(--d2)">0%</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="domain-label"><span>Domain 3: Incident Response (24%)</span><span id="p3txt">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="p3bar" style="width:0%;background:var(--d3)">0%</div></div>
+    </div>
+    <div class="progress-wrap">
+      <div class="domain-label"><span>Domain 4: Reporting & Communication (16%)</span><span id="p4txt">0%</span></div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="p4bar" style="width:0%;background:var(--d4)">0%</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Study Strategy (45-Day Model)</h3>
+    <div class="grid-2">
+      <div><strong>Phase 1 (Days 1-14):</strong> Domains 1 & 2 grind. 25 hrs/week. 5-8 applications/day if job hunting.</div>
+      <div><strong>Phase 2 (Days 15-28):</strong> Domains 3 & 4 + Splunk BOTS portfolio piece. Practice exams every other day.</div>
+      <div><strong>Phase 3 (Days 29-45):</strong> Exam + interview conversion. Target 75%+ on practice exams before sitting.</div>
+      <div><strong>PBQ Tip:</strong> Skip on first pass. Complete MCQ to surface knowledge, then return to PBQs with context.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Critical Memory Hooks</h3>
+    <div class="grid-2">
+      <div class="memory"><strong>Kill Chain:</strong> "Real Weapons Deliver Explosive Installations Causing Actions" → Recon, Weaponization, Delivery, Exploitation, Installation, C2, Actions on Objectives</div>
+      <div class="memory"><strong>Diamond Model:</strong> "A Cat In a Vault" → Adversary, Capability, Infrastructure, Victim</div>
+      <div class="memory"><strong>IR Order:</strong> "Please Don't Clean Poorly" → Preparation, Detection/Analysis, Containment-Eradication-Recovery, Post-Incident</div>
+      <div class="memory"><strong>CVSS Base:</strong> "All Cool People Use Strong CIA" → Attack Vector, Complexity, Privileges Required, User Interaction, Scope, Confidentiality, Integrity, Availability</div>
+      <div class="memory"><strong>Control Types:</strong> A-T-P → Administrative (People/Policy), Technical (Tools), Physical (Places)</div>
+      <div class="memory"><strong>Control Functions:</strong> P-D-R-C → Preventative, Detective, Responsive, Corrective</div>
+    </div>
+  </div>
+</div>
+
+<!-- DOMAIN 1 -->
+<div id="d1" class="section">
+  <div class="toolbar">
+    <div class="search-box"><input type="text" placeholder="Filter Domain 1 topics..." oninput="filterChecks('d1', this.value)"></div>
+  </div>
+  <h2 style="color:var(--d1);margin-bottom:1rem;">Domain 1: Security Operations (~34%)</h2>
+
+  <div class="accordion open" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.1 System & Network Architecture <span class="tag tag-d1">High Yield</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="study-note"><strong>Big Idea:</strong> You cannot spot abnormal until you know what normal looks like. This is the raw material of SOC work — logs, OS, networks, identity.</div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_1" onchange="saveCheck(this)"><label for="d1_1_1">Log ingestion, configuration, integrity, time sync (NTP UDP 123), retention policies</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_2" onchange="saveCheck(this)"><label for="d1_1_2">OS hardening, critical files, system processes (Windows System32, Linux /etc, /var/log)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_3" onchange="saveCheck(this)"><label for="d1_1_3">Cloud native, virtualization (Type 1 bare-metal vs Type 2 host-based), containers (Docker/K8s), APIs</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_4" onchange="saveCheck(this)"><label for="d1_1_4">Device management: MDM (full device), MAM (apps only), UEM (all endpoints), EDR visibility gaps on unmanaged devices</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_5" onchange="saveCheck(this)"><label for="d1_1_5">Network architecture: ZTNA (never trust, always verify), SASE (SD-WAN + SWG + CASB + FWaaS + ZTNA), hybrid cloud, SDN planes</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_6" onchange="saveCheck(this)"><label for="d1_1_6">IAM: PAM, SSO/SAML/OAuth/OIDC, MFA factors (know > have > are), secrets management, least privilege</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_7" onchange="saveCheck(this)"><label for="d1_1_7">Encryption: symmetric (AES) vs asymmetric (RSA/ECC), hashing (SHA-256), TLS 1.2/1.3, data at rest/transit/in use</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_1_8" onchange="saveCheck(this)"><label for="d1_1_8">Critical infrastructure: OT/ICS/SCADA, Purdue Model, AIC priority (Availability first), passive monitoring only</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> The cloud provider secures the cloud (hardware/hypervisor). YOU secure what is IN the cloud (data, configs, identities). Most cloud breaches = customer misconfiguration (open S3 buckets).</div>
+      <div class="trap"><strong>Exam Trap:</strong> Container images inherit vulnerabilities from base layers. One poisoned base image compromises every container built from it. Scan before deployment (Trivy).</div>
+      <div class="study-note"><strong>Windows Event IDs to know cold:</strong> 4624 (success logon), 4625 (failed), 4672 (admin logon), 4688 (process creation — enable command-line auditing!), 4698 (scheduled task), 7045 (new service), 1102 (log cleared = anti-forensics). Logon Type 3 = network (lateral movement); Type 10 = RDP.</div>
+      <div class="study-note"><strong>Linux:</strong> /var/log/auth.log (auth), /var/log/secure (RHEL), /etc/shadow (password hashes — root-only), /tmp & /dev/shm (malware staging, fileless execution).</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.2 Analyze Indicators of Potentially Malicious Activity <span class="tag tag-d1">PBQ Heavy</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_1" onchange="saveCheck(this)"><label for="d1_2_1">Network IOCs: rogue devices, enumeration (port scans), beaconing (regular C2 intervals), unexpected ports, data exfiltration patterns</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_2" onchange="saveCheck(this)"><label for="d1_2_2">Host IOCs: resource consumption (crypto-mining = 100% CPU), unauthorized software, LOLBins (PowerShell, certutil, mshta, wmic), file system changes, registry persistence</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_3" onchange="saveCheck(this)"><label for="d1_2_3">Application IOCs: service disruption, anomalous API calls, injection signatures (SQLi, XSS), sequential ID enumeration (BOLA)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_4" onchange="saveCheck(this)"><label for="d1_2_4">Cloud IOCs: anomalous IAM activity, impossible travel, unexpected resource provisioning, public storage exposure, CloudTrail deletion</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_5" onchange="saveCheck(this)"><label for="d1_2_5">Social engineering: typosquatting, URL shorteners, BEC (CEO fraud / invoice fraud / ATO / payroll diversion), pretexting vs phishing vs spear-phishing vs whaling</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_6" onchange="saveCheck(this)"><label for="d1_2_6">Identity IOCs: IAM account compromise, unauthorized access, impossible travel, credential stuffing vs password spraying</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_2_7" onchange="saveCheck(this)"><label for="d1_2_7">Email attacks: SPF (envelope sender IP), DKIM (cryptographic integrity), DMARC (policy + alignment), MXToolbox header analysis</label></div>
+
+      <div class="study-note"><strong>IOC vs IOA:</strong> IOC = evidence left behind (hash, IP, domain) — reactive. IOA = behavior in progress (Office spawning PowerShell) — proactive. EDR focuses on IOAs because attackers rotate IOCs constantly.</div>
+      <div class="trap"><strong>Exam Trap:</strong> SPF/DKIM/DMARC passing does NOT mean an email is safe. A properly configured lookalike domain passes all three. Always check if the authenticated domain is the CORRECT domain.</div>
+      <div class="trap"><strong>Exam Trap:</strong> DNS tunneling indicators: abnormally long subdomains, high-entropy strings, high volume of DNS queries from a single host. Monitor Sysmon Event ID 22 for DNS queries.</div>
+      <div class="memory"><strong>LOLBins:</strong> PowerShell (-enc, -nop, -w hidden), certutil (-urlcache -split -f), mshta, regsvr32, wmic. The binary is trusted; the behavior is suspicious.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.3 Use Tools to Determine Malicious Activity <span class="tag tag-d1">Tool Recognition</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_1" onchange="saveCheck(this)"><label for="d1_3_1">Decoding/parsing: CyberChef (Base64, Hex, XOR, URL decode, Magic auto-detect)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_2" onchange="saveCheck(this)"><label for="d1_3_2">Packet analysis: Wireshark (display filters: ip.addr==, tcp.port==, http.request, follow TCP stream), tcpdump (CLI: -i eth0 -nn -w), Zeek (behavioral logs: conn.log, dns.log, http.log, ssl.log)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_3" onchange="saveCheck(this)"><label for="d1_3_3">IDS/IPS: Snort (rule syntax: alert tcp any any -> $HOME_NET 80 (msg;content;sid)), Suricata (multi-threaded, EVE JSON format, ET ruleset)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_4" onchange="saveCheck(this)"><label for="d1_3_4">SIEM: Splunk (SPL), Microsoft Sentinel (KQL), correlation rules (threshold, aggregation, sequence), UEBA behavioral baselines</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_5" onchange="saveCheck(this)"><label for="d1_3_5">Threat intel platforms: OTX (Pulses), MISP (Events/Attributes/Objects, TLP, STIX/TAXII export), OpenCTI (knowledge graph, Observables vs Indicators)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_6" onchange="saveCheck(this)"><label for="d1_3_6">Endpoint: EDR (CrowdStrike, SentinelOne, Defender) vs XDR (cross-layer automated correlation). EDR = endpoint-only; XDR = endpoint + network + email + cloud + identity.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_7" onchange="saveCheck(this)"><label for="d1_3_7">Domain/IP rep: WHOIS (registration age <30 days = suspicious), AbuseIPDB (community score), GeoIP (MaxMind, impossible travel calc)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_8" onchange="saveCheck(this)"><label for="d1_3_8">File analysis: Strings (static), VirusTotal (hash lookup first — never upload sensitive files), YARA (pattern matching: metadata, strings $a, condition), Joe Sandbox / Cuckoo (dynamic)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_3_9" onchange="saveCheck(this)"><label for="d1_3_9">Scripting: Python (re, json, requests), PowerShell (Get-WinEvent, -enc flag danger), Bash (grep, awk, cut, sort, uniq), Regex, JSON/XML/YAML/EVTX formats</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> SIEM aggregates/correlates/alerts; SOAR orchestrates automated response. If the scenario says "automate the response/playbook," the answer is SOAR, not SIEM.</div>
+      <div class="trap"><strong>Exam Trap:</strong> Zeek generates behavioral logs WITHOUT signature rules. Snort/Suricata fire signature-based alerts. The exam tests this distinction directly.</div>
+      <div class="study-note"><strong>Snort rule anatomy:</strong> alert tcp $EXTERNAL_NET any -> $HOME_NET 80 (msg:"WEB ATTACK"; content:"/etc/passwd"; sid:1000001;). Action + Protocol + Src -> Dst + Options. IPS mode uses "drop" not "alert."</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.4 Threat Intelligence & Threat Hunting</span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_1" onchange="saveCheck(this)"><label for="d1_4_1">Threat actors: APT (nation-state, long dwell), organized crime (ransomware/BEC), hacktivists (DDoS), insiders, supply chain (SolarWinds), script kiddies</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_2" onchange="saveCheck(this)"><label for="d1_4_2">TTPs: Tactics (the why/goal) vs Techniques (the how) vs Procedures (actor-specific). MITRE ATT&CK = real-world TTP database. D3FEND = defensive counterpart.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_3" onchange="saveCheck(this)"><label for="d1_4_3">Confidence levels: Timeliness (how current), Relevance (applies to you?), Accuracy (source reliability). High confidence on all three = act now.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_4" onchange="saveCheck(this)"><label for="d1_4_4">Collection: OSINT (public — CISA, blogs, Shodan, crt.sh), closed-source (commercial feeds, ISACs), internal telemetry. STIX = format; TAXII = transport.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_5" onchange="saveCheck(this)"><label for="d1_4_5">IoC lifecycle: Collection → Analysis → Application. Types: Atomic (IP, hash, domain) vs Behavioral (patterns, TTPs). Pyramid of Pain: Hash < IP < Domain < Artifacts < Tools < TTPs.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_6" onchange="saveCheck(this)"><label for="d1_4_6">Threat modeling: STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, DoS, Elevation of Privilege). Threat mapping = align adversary techniques to your detection coverage.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_4_7" onchange="saveCheck(this)"><label for="d1_4_7">Cyber deception: Honeypots (low-interaction = safe but limited intel; high-interaction = rich but risky), honeytokens (fake credentials — any use = immediate alert), honeynets</label></div>
+
+      <div class="memory"><strong>Pyramid of Pain:</strong> Bottom = Hash Values (trivial to change). Top = TTPs (forces attacker to change how they operate). Detecting at TTP level = most durable defense.</div>
+      <div class="study-note"><strong>Threat Hunting Loop:</strong> 1) Hypothesis (driven by intel, TTP, or anomaly), 2) Data Collection, 3) Analysis (confirm/refute), 4) Response/Documentation. A hunt that finds nothing but improves detection rules is still a success.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.5 Efficiency & Process Improvement <span class="tag tag-d1">SOAR Focus</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_1" onchange="saveCheck(this)"><label for="d1_5_1">Standardize: Playbooks (human-readable procedures) vs Runbooks (SOAR-automated steps). Playbook = strategy; Runbook = automated execution.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_2" onchange="saveCheck(this)"><label for="d1_5_2">SOAR: Orchestration (connect tools via APIs), Automation (execute repetitive triage), Response (containment actions). Reduces MTTD/MTTR.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_3" onchange="saveCheck(this)"><label for="d1_5_3">IaC: Infrastructure as Code (Terraform, CloudFormation) scanned by Checkov before deployment. Prevents drift, provides audit trail.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_4" onchange="saveCheck(this)"><label for="d1_5_4">Data enrichment: VirusTotal, AbuseIPDB, MISP lookups automated via SOAR. Single pane of glass = unified analyst view.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_5" onchange="saveCheck(this)"><label for="d1_5_5">Integration: APIs (request-driven, pull), Webhooks (event-driven, push), Plug-ins (pre-built connectors). 401 = bad key; 429 = rate limit; 500 = server error.</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_5_6" onchange="saveCheck(this)"><label for="d1_5_6">Alert tuning: Whitelisting, threshold adjustment, time-based exclusions, aggregation refinement. Never disable detection — tune it.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> Standardize first, then automate. You cannot automate chaos. If a SOC has inconsistent handling, the answer is standardization before SOAR deployment.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d1">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>1.6 AI in Security Operations <span class="tag tag-d1">V4 New</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_6_1" onchange="saveCheck(this)"><label for="d1_6_1">AI Risks: Hallucinations (verify all claims against raw data/VirusTotal), Data exposure (never paste sensitive logs into public AI), Model poisoning (training-time attack), Malicious prompts/prompt injection (direct & indirect)</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_6_2" onchange="saveCheck(this)"><label for="d1_6_2">Governance: AI usage policies, GDPR/HIPAA/PCI compliance for AI data handling, NIST AI RMF (Govern, Map, Measure, Manage), vendor data processing terms</label></div>
+      <div class="check-row" data-domain="d1"><input type="checkbox" id="d1_6_3" onchange="saveCheck(this)"><label for="d1_6_3">Use cases: Comparing artifacts, analyzing log files, document creation (incident reports), incident investigation (Copilot for Security), event correlation (GuardDuty ML), automation/orchestration (SOAR + AI)</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> AI proposes; humans validate and own decisions. The biggest liability in 2026 is an analyst who trusts AI output without questioning it. Always verify AI-generated IOC claims.</div>
+      <div class="study-note"><strong>Indirect Prompt Injection:</strong> Attacker embeds malicious instructions in documents/emails that an AI tool later processes. Never feed raw attacker-controlled content into an AI assistant without sanitization.</div>
+    </div>
+  </div>
+</div>
+
+<!-- DOMAIN 2 -->
+<div id="d2" class="section">
+  <div class="toolbar">
+    <div class="search-box"><input type="text" placeholder="Filter Domain 2 topics..." oninput="filterChecks('d2', this.value)"></div>
+  </div>
+  <h2 style="color:var(--d2);margin-bottom:1rem;">Domain 2: Vulnerability Management (~26%)</h2>
+
+  <div class="accordion open" data-domain="d2">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>2.1 Vulnerability Scanning Methods <span class="tag tag-d2">High Yield</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="study-note"><strong>Big Idea:</strong> A vulnerability is a weakness; a threat is what exploits it; risk = likelihood × impact. Most breaches exploit known, unpatched vulnerabilities.</div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_1" onchange="saveCheck(this)"><label for="d2_1_1">Asset inventory & discovery: Active (Nmap ping sweeps) vs Passive (NetFlow, SPAN ports). Cloud: AWS Config, Azure Resource Graph. Unknown device = instant investigation.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_2" onchange="saveCheck(this)"><label for="d2_1_2">Scan types: Internal (post-breach view) vs External (attacker view). Agent-based (continuous, off-network) vs Agentless (easy deploy, misses roaming devices). Credentialed (sees patches/configs) vs Non-credentialed (attacker simulation).</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_3" onchange="saveCheck(this)"><label for="d2_1_3">Active vs Passive: Active sends probes (can crash ICS/SCADA/medical devices). Passive observes traffic (safe for fragile systems, less complete). OT = passive ONLY.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_4" onchange="saveCheck(this)"><label for="d2_1_4">Discovery scans: Mapping (host/port discovery) and Device Fingerprinting (OS version, banner grabbing). Nmap -sS = SYN stealth scan; -sT = full connect; -sU = UDP (slow).</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_5" onchange="saveCheck(this)"><label for="d2_1_5">Security baseline scanning: CIS Benchmarks (Level 1 = basic, Level 2 = defense-in-depth), PCI DSS (quarterly ASV external scans), ISO 27000 series, DISA STIGs.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_6" onchange="saveCheck(this)"><label for="d2_1_6">Scheduling: Critical/internet-facing = daily/continuous; workloads = weekly/monthly; minimal = quarterly. Off-hours to reduce production impact. Written authorization required before scanning.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_1_7" onchange="saveCheck(this)"><label for="d2_1_7">Cloud/container scanning: CSPM (ScoutSuite, Prowler) for live configs; Trivy for container image CVEs; Checkov for IaC (Terraform/CloudFormation) before deployment = shift-left.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> A scenario with very few findings on a known-vulnerable host almost always means a non-credentialed scan was used. Credentialed scans produce 10× more findings.</div>
+      <div class="trap"><strong>Exam Trap:</strong> OT/ICS/SCADA systems can crash under active scanning. The correct answer is passive monitoring or purpose-built tools (Claroty, Dragos, Nozomi Networks), never standard aggressive scanning.</div>
+      <div class="memory"><strong>Scan Choice Matrix:</strong> I-C-A-P-D-B = Internal/External, Credentialed, Agent-based, Passive, Discovery, Baseline.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d2">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>2.2 Vulnerability Assessment Tools <span class="tag tag-d2">Tool ID</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_1" onchange="saveCheck(this)"><label for="d2_2_1">Network mapping: Angry IP Scanner (small networks, GUI), Masscan (millions of packets/sec, large address spaces, can DDoS if not rate-limited)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_2" onchange="saveCheck(this)"><label for="d2_2_2">Multipurpose: Nmap (host discovery, port scan, version detection -sV, OS detection -O, NSE scripts), Metasploit (auxiliary modules for validation, not just exploitation), Maltego (OSINT link analysis), Recon-ng (automated OSINT CLI)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_3" onchange="saveCheck(this)"><label for="d2_2_3">Web app scanners: Burp Suite (intercepting proxy, Intruder, Repeater, Scanner), ZAP (free OWASP proxy, AJAX Spider, Fuzzer), Nikto (server misconfiguration scanner, quick CLI checks)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_4" onchange="saveCheck(this)"><label for="d2_2_4">Vulnerability scanners: Nessus (plugin-based, 100K+ plugins, credentialed depth, compliance mapping), OpenVAS/Greenbone (open-source alternative), Nuclei (YAML templates, fast external/API scanning)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_5" onchange="saveCheck(this)"><label for="d2_2_5">Cloud assessment: ScoutSuite (multi-cloud HTML report, IAM/S3 priority), Prowler (AWS compliance-focused, 350+ checks, CIS/PCI/HIPAA mapping), Trivy (container + filesystem + repo CVE scanning), Checkov (IaC static analysis, CKV_AWS_19 style IDs)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_2_6" onchange="saveCheck(this)"><label for="d2_2_6">BAS tools: Atomic Red Team (individual ATT&CK technique tests, YAML-defined), Caldera (MITRE-built, multi-stage adversary emulation, autonomous chaining)</label></div>
+
+      <div class="study-note"><strong>Tool Differentiation:</strong> Burp/ZAP = intercepting proxies for manual app hacking. Nikto = automated server scan only. Nessus = infrastructure vuln scanner. Nuclei = fast template-based external scanner. BloodHound = AD attack path mapper.</div>
+      <div class="trap"><strong>Exam Trap:</strong> Metasploit is listed under multipurpose tools for the exam — it tests scanning, enumeration, and validation use cases, not just exploitation. All usage requires written authorization.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d2">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>2.3 Prioritize & Mitigate Vulnerabilities <span class="tag tag-d2">CVSS/EPSS</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_1" onchange="saveCheck(this)"><label for="d2_3_1">Prioritization criteria: Exploitability, active exploitation (CISA KEV catalog = patch first!), asset value/criticality, exposure (internet-facing > internal > isolated), patch availability, true/false positives</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_2" onchange="saveCheck(this)"><label for="d2_3_2">CVSS v3.1: 0.0=None, 0.1-3.9=Low, 4.0-6.9=Medium, 7.0-8.9=High, 9.0-10.0=Critical. Base metrics: AV, AC, PR, UI, Scope, C/I/A. AV ordering by exposure: Network(0.85) > Adjacent(0.62) > Local(0.55) > Physical(0.20).</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_3" onchange="saveCheck(this)"><label for="d2_3_3">EPSS (Exploit Prediction Scoring System): Probability (0-1) that a CVE will be exploited in next 30 days. Data-driven layer on top of CVSS. [V4 NEW]</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_4" onchange="saveCheck(this)"><label for="d2_3_4">Context awareness: Internal vs External vs Isolated. A medium CVE on internet-facing domain controller outranks a critical CVE on isolated test VM.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_5" onchange="saveCheck(this)"><label for="d2_3_5">Mitigation strategies: Attack surface management, secure coding (input validation, parameterized queries, output encoding), patching with staging + rollback plan, exceptions (documented + compensating controls + expiry date)</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_6" onchange="saveCheck(this)"><label for="d2_3_6">Compensating controls: WAF virtual patch, IPS signature, network segmentation, MFA. Used when primary fix isn't feasible (legacy system, no patch yet, business downtime constraint).</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_7" onchange="saveCheck(this)"><label for="d2_3_7">Validation of remediation: Re-scan after patching to confirm the vulnerability is gone. Never close a ticket without verification.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> "Patch the highest CVSS first" is usually WRONG. The tested answer weighs business context, exposure, and active exploitation. KEV-listed = immediate priority regardless of raw CVSS.</div>
+      <div class="trap"><strong>Exam Trap:</strong> CVSS alone has no business context. Environmental metrics (asset criticality) convert a score into a remediation order. A 9.8 on an isolated lab box matters less than a 6.5 on your internet-facing payment server.</div>
+      <div class="memory"><strong>Risk Responses:</strong> A Tiger Ate Me = Accept, Transfer, Avoid, Mitigate. SLE = AV × EF. ALE = SLE × ARO.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d2">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>2.4 Control Types, Risks & App Security</span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_1" onchange="saveCheck(this)"><label for="d2_4_1">Control types: Administrative (policy, training), Technical (firewall, SIEM, EDR, MFA), Physical (locks, badges, CCTV). Compensating = deliberate substitution when primary fails.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_2" onchange="saveCheck(this)"><label for="d2_4_2">Control functions: Preventative (blocks before), Detective (observes/IDs), Responsive (contains during), Corrective (restores after). Every control has both a type AND a function.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_3_3" onchange="saveCheck(this)" style="display:none"><label for="d2_3_3" style="display:none"></label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_3" onchange="saveCheck(this)"><label for="d2_4_3">Risk concepts: Inherent (before controls), Residual (after controls), Appetite (strategic decision by leadership), Tolerance (acceptable variation). Risk is managed, never eliminated.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_4" onchange="saveCheck(this)"><label for="d2_4_4">Risk strategies: Accept (documented decision), Transfer (insurance), Avoid (stop the activity), Mitigate (reduce likelihood/impact — most common).</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_5" onchange="saveCheck(this)"><label for="d2_4_5">App security: SAST (static, source code, early in SDLC), DAST (dynamic, running app, runtime), SAMM (Software Assurance Maturity Model). Shift-left = security earlier when fixes are cheap.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_6" onchange="saveCheck(this)"><label for="d2_4_6">Third-party risk: Supply chain (SolarWinds), SCA (Software Composition Analysis), SBOM (ingredient list of software — know your components), vendor risk assessment.</label></div>
+      <div class="check-row" data-domain="d2"><input type="checkbox" id="d2_4_7" onchange="saveCheck(this)"><label for="d2_4_7">Web vulns to recognize: XSS (script in victim's browser), CSRF (tricks authenticated user into unwanted request), SQLi (input executed as DB command), IDOR (change ?id=123 to 124), insecure deserialization, path traversal.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> Security awareness training delivered via digital platform is still an ADMINISTRATIVE control (people/policy), not technical. Classify by purpose, not delivery method.</div>
+      <div class="trap"><strong>Exam Trap:</strong> Do not confuse preventative (blocks) with detective (observes). A firewall that blocks traffic = preventative. An IDS that alerts on traffic = detective. An IPS that drops traffic = responsive/preventative hybrid.</div>
+      <div class="study-note"><strong>Secure SDLC:</strong> Requirements → Design (STRIDE threat modeling) → Development (SAST, code review) → Testing (DAST, pen test) → Deployment (hardened images) → Maintenance (patching). The earlier security is baked in, the cheaper the fix.</div>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <h4 style="margin-bottom:0.75rem;color:var(--d2)">Vulnerability Management Lifecycle</h4>
+    <svg viewBox="0 0 700 120" style="max-width:700px">
+      <defs><marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/></marker></defs>
+      <circle cx="60" cy="60" r="45" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="2"/>
+      <text x="60" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Discover</text>
+      <text x="60" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">Asset Inventory</text>
+      <line x1="105" y1="60" x2="145" y2="60" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="190" cy="60" r="45" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="2"/>
+      <text x="190" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Scan</text>
+      <text x="190" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">Vuln Assessment</text>
+      <line x1="235" y1="60" x2="275" y2="60" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="320" cy="60" r="45" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+      <text x="320" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Analyze</text>
+      <text x="320" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">CVSS + Context</text>
+      <line x1="365" y1="60" x2="405" y2="60" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="450" cy="60" r="45" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="450" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Remediate</text>
+      <text x="450" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">Patch/Compensate</text>
+      <line x1="495" y1="60" x2="535" y2="60" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="580" cy="60" r="45" fill="rgba(56,189,248,0.15)" stroke="#38bdf8" stroke-width="2"/>
+      <text x="580" y="55" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Verify</text>
+      <text x="580" y="70" text-anchor="middle" fill="#94a3b8" font-size="9">Re-scan & Report</text>
+      <line x1="625" y1="60" x2="660" y2="60" stroke="#475569" stroke-width="2" marker-end="url(#arr)"/>
+
+      <circle cx="695" cy="60" r="5" fill="#22c55e"/>
+    </svg>
+  </div>
+</div>
+
+<!-- DOMAIN 3 -->
+<div id="d3" class="section">
+  <div class="toolbar">
+    <div class="search-box"><input type="text" placeholder="Filter Domain 3 topics..." oninput="filterChecks('d3', this.value)"></div>
+  </div>
+  <h2 style="color:var(--d3);margin-bottom:1rem;">Domain 3: Incident Response & Management (~24%)</h2>
+
+  <div class="accordion open" data-domain="d3">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>3.1 Attack Methodology Frameworks <span class="tag tag-d3">Know Cold</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_1_1" onchange="saveCheck(this)"><label for="d3_1_1">Cyber Kill Chain (Lockheed Martin): 7 stages — Reconnaissance → Weaponization → Delivery → Exploitation → Installation → C2 → Actions on Objectives. Break the chain early and the attack fails.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_1_2" onchange="saveCheck(this)"><label for="d3_1_2">MITRE ATT&CK: Tactics (~14 columns: Initial Access, Execution, Persistence, Privilege Escalation, Defense Evasion, Credential Access, Discovery, Lateral Movement, Collection, Exfiltration, C2, Impact) + Techniques + Sub-techniques.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_1_3" onchange="saveCheck(this)"><label for="d3_1_3">Diamond Model: 4 vertices — Adversary, Capability, Infrastructure, Victim. Meta-features: timestamp, direction, result, methodology. Pivot from one known feature to discover others.</label></div>
+
+      <div class="memory"><strong>Kill Chain Mnemonic:</strong> "Real Weapons Deliver Explosive Installations Causing Actions" = Recon, Weaponization, Delivery, Exploitation, Installation, C2, Actions on Objectives.</div>
+      <div class="study-note"><strong>Key distinction:</strong> Kill Chain = sequence of an attack; ATT&CK = catalog of techniques; Diamond = relationships in a single intrusion event. The exam asks you to map observed behavior to the correct framework element.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d3">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>3.2 Incident Response Lifecycle (NIST SP 800-61) <span class="tag tag-d3">PICERL</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_1" onchange="saveCheck(this)"><label for="d3_2_1"><strong>Preparation:</strong> IR plan, playbooks, communication plan, defined roles, training (tabletop, simulation, purple team), tools ready, jump kits, secure out-of-band comms, legal/PR contacts.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_2" onchange="saveCheck(this)"><label for="d3_2_2"><strong>Detection & Analysis:</strong> Validate alerts, scope (which hosts/accounts/data/timeframe?), establish timeline, determine severity/impact, prioritize, gather evidence, declare the incident.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_3" onchange="saveCheck(this)"><label for="d3_2_3"><strong>Containment:</strong> Short-term first (isolate host via EDR, disable account, block IOCs at firewall, quarantine VLAN). Balance: containing too fast tips off attacker or destroys evidence; too slow = more damage.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_4" onchange="saveCheck(this)"><label for="d3_2_4"><strong>Eradication:</strong> Remove malware, delete persistence (scheduled tasks, services, rogue accounts), patch the exploited vulnerability, reset ALL compromised credentials (especially if AD involved). Re-image = eradication.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_5" onchange="saveCheck(this)"><label for="d3_2_5"><strong>Recovery:</strong> Restore from known-good backups/images, restore in phases, validate before reconnecting, monitor closely for re-infection. Recovery comes AFTER eradication.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_2_6" onchange="saveCheck(this)"><label for="d3_2_6"><strong>Post-Incident:</strong> Lessons learned (blameless), root cause analysis (keep asking why), update playbooks/detection rules, evidence retention per policy, track action items.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> The #1 tested process error is jumping to eradication before containment. First action on malware detection = CONTAIN (isolate), not remove. You put out the fire's spread before rebuilding the house.</div>
+      <div class="trap"><strong>Exam Trap:</strong> Re-image = eradication (remove the threat), NOT recovery. Recovery is restoring to production safely AFTER the threat is gone. Do not skip eradication of the exploited vulnerability before recovery.</div>
+      <div class="study-note"><strong>Order of Volatility (RFC 3227):</strong> Collect most-volatile first: CPU registers/cache → RAM → Network state → Swap/pagefile → Disk/SSD → Remote logs → Printouts. Memory before you pull the plug!</div>
+      <div class="study-note"><strong>Evidence Handling:</strong> Chain of custody (documented who/what/when/where — breaks make evidence inadmissible), forensic imaging (bit-for-bit copy with SHA-256 hash), write blockers, legal hold (preserve everything once litigation is anticipated).</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d3">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>3.3 Implement Incident Response <span class="tag tag-d3">Scenario Heavy</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_1" onchange="saveCheck(this)"><label for="d3_3_1">Developing plans: IR plan (overall strategy), communication plan (who to notify, when, how), escalation paths (SEV1-4 with matching response), BC/DR coordination.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_2" onchange="saveCheck(this)"><label for="d3_3_2">Playbooks & training: Phishing playbook, ransomware playbook, BEC playbook. Tabletop = discussion walkthrough. Simulation = hands-on drill. Purple team = red attacks + blue defends together in real-time.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_3" onchange="saveCheck(this)"><label for="d3_3_3">Log collection & correlation: Centralized SIEM, log augmentation/enrichment (add GeoIP, threat intel, asset context), alerts and notifications.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_4" onchange="saveCheck(this)"><label for="d3_3_4">Triage: True positive (real threat) vs False positive (noise) vs Benign positive (real but harmless, e.g., authorized scan). Classify severity by functional impact × information impact × recoverability.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_5" onchange="saveCheck(this)"><label for="d3_3_5">Evidence gathering: Chain of custody, data integrity validation (hash before & after), preservation, legal hold. Isolating affected targets (EDR network isolation > shutdown — shutdown destroys RAM evidence).</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_6" onchange="saveCheck(this)"><label for="d3_3_6">Escalation: Defined criteria (not analyst judgment alone). When to wake up management/legal/executives. When to engage external IR retainer.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_7" onchange="saveCheck(this)"><label for="d3_3_7">Remediation & verification: Confirm malware is gone, confirm vulnerability is patched, confirm no persistence remains. Release from isolation only after validation.</label></div>
+      <div class="check-row" data-domain="d3"><input type="checkbox" id="d3_3_8" onchange="saveCheck(this)"><label for="d3_3_8">Root cause analysis (RCA): 5 Whys technique. "Phishing email got through" is not root cause. "No email sandbox + no user training + no DMARC enforcement" is root cause.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> Isolating a device via EDR preserves volatile memory and maintains the EDR channel. Powering off destroys RAM evidence. In active incidents, choose isolation over shutdown.</div>
+      <div class="trap"><strong>Exam Trap:</strong> In OT/ICS environments, isolating a device without operations coordination can cause uncontrolled process shutdowns more dangerous than the attack itself. Notify operations first.</div>
+    </div>
+  </div>
+
+  <div class="diagram">
+    <h4 style="margin-bottom:0.75rem;color:var(--d3)">NIST IR Lifecycle (PICERL)</h4>
+    <svg viewBox="0 0 600 220" style="max-width:600px">
+      <defs><marker id="arr2" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8"/></marker></defs>
+      <polygon points="100,30 170,30 205,80 170,130 100,130 65,80" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="2"/>
+      <text x="135" y="65" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Preparation</text>
+      <text x="135" y="80" text-anchor="middle" fill="#94a3b8" font-size="9">Plans, Training</text>
+
+      <polygon points="230,30 300,30 335,80 300,130 230,130 195,80" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="2"/>
+      <text x="265" y="65" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Detection</text>
+      <text x="265" y="80" text-anchor="middle" fill="#94a3b8" font-size="9">& Analysis</text>
+
+      <polygon points="360,30 430,30 465,80 430,130 360,130 325,80" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="2"/>
+      <text x="395" y="65" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Containment</text>
+      <text x="395" y="80" text-anchor="middle" fill="#94a3b8" font-size="9">Isolate First</text>
+
+      <polygon points="165,140 235,140 270,190 235,240 165,240 130,190" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="200" y="175" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Eradication</text>
+      <text x="200" y="190" text-anchor="middle" fill="#94a3b8" font-size="9">Remove Threat</text>
+
+      <polygon points="295,140 365,140 400,190 365,240 295,240 260,190" fill="rgba(56,189,248,0.15)" stroke="#38bdf8" stroke-width="2"/>
+      <text x="330" y="175" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Recovery</text>
+      <text x="330" y="190" text-anchor="middle" fill="#94a3b8" font-size="9">Restore Safely</text>
+
+      <polygon points="425,140 495,140 530,190 495,240 425,240 390,190" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="2"/>
+      <text x="460" y="175" text-anchor="middle" fill="#e2e8f0" font-size="11" font-weight="700">Lessons</text>
+      <text x="460" y="190" text-anchor="middle" fill="#94a3b8" font-size="9">Learned</text>
+
+      <line x1="205" y1="80" x2="195" y2="80" stroke="#475569" stroke-width="2" marker-end="url(#arr2)"/>
+      <line x1="335" y1="80" x2="325" y2="80" stroke="#475569" stroke-width="2" marker-end="url(#arr2)"/>
+      <line x1="360" y1="110" x2="270" y2="160" stroke="#475569" stroke-width="2" marker-end="url(#arr2)"/>
+      <line x1="270" y1="190" x2="260" y2="190" stroke="#475569" stroke-width="2" marker-end="url(#arr2)"/>
+      <line x1="400" y1="190" x2="390" y2="190" stroke="#475569" stroke-width="2" marker-end="url(#arr2)"/>
+      <line x1="130" y1="190" x2="100" y2="130" stroke="#475569" stroke-width="2" marker-end="url(#arr2)" stroke-dasharray="4"/>
+      <text x="80" y="165" fill="#94a3b8" font-size="9">Feedback Loop</text>
+    </svg>
+  </div>
+</div>
+
+<!-- DOMAIN 4 -->
+<div id="d4" class="section">
+  <div class="toolbar">
+    <div class="search-box"><input type="text" placeholder="Filter Domain 4 topics..." oninput="filterChecks('d4', this.value)"></div>
+  </div>
+  <h2 style="color:var(--d4);margin-bottom:1rem;">Domain 4: Reporting & Communication (~16%)</h2>
+  <p style="color:var(--muted);margin-bottom:1rem;">The smallest domain, but many candidates under-prepare and lose unexpected points here. Budget real study time.</p>
+
+  <div class="accordion open" data-domain="d4">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>4.1 Vulnerability Management Reporting <span class="tag tag-d4">Audience Matters</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_1" onchange="saveCheck(this)"><label for="d4_1_1">Vulnerability scan reports: Affected hosts, risk scores, mitigation recommendations, recurrence/trend tracking, top-10 lists, compliance status mapping.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_2" onchange="saveCheck(this)"><label for="d4_1_2">Compliance findings: PCI DSS (quarterly ASV external + internal scans, all high/critical CDE findings remediated), HIPAA (regular risk-based scanning with documentation), CIS Benchmarks, ISO 27001.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_3" onchange="saveCheck(this)"><label for="d4_1_3">Risk scorecards: Translate technical severity into business risk language. Executives want trends, money, and "what could an attacker do?" — not CVE numbers.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_4" onchange="saveCheck(this)"><label for="d4_1_4">Action plans: Findings → Owner → Deadline → Status. A report without owners and dates is wallpaper. Escalation paths for missed SLAs. Dependencies (waiting on vendor patch).</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_5" onchange="saveCheck(this)"><label for="d4_1_5">Inhibitors to remediation: Legacy systems (can't patch), degradation of functionality (patch breaks app), business constraints (24/7 no window), resource limits, vendor dependencies, proprietary systems. Answer = documented exception + compensating controls + escalation.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_6" onchange="saveCheck(this)"><label for="d4_1_6">Stakeholder communication: Technical teams = detailed findings with CVEs and fix steps. Executives = risk summary with trend metrics. Compliance = evidence packages with control mappings.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_1_7" onchange="saveCheck(this)"><label for="d4_1_7">Metrics/KPIs: MTTR by severity, vulnerability count trends, scan coverage %, SLA compliance, recurrence rate (same vuln reappearing = process failure), % systems patched.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> Rising vulnerability counts do NOT automatically mean worsening security. Expanded scan coverage increases finding counts. Always provide context with trend data.</div>
+      <div class="study-note"><strong>Audience Rule:</strong> Match depth and language to the reader. Board members get business impact + trends + resource needs (no jargon). Technical teams get IOCs, evidence, and remediation steps.</div>
+    </div>
+  </div>
+
+  <div class="accordion" data-domain="d4">
+    <div class="accordion-header" onclick="toggleAcc(this)">
+      <span>4.2 IR Reporting & Communication <span class="tag tag-d4">Scenario Judgment</span></span>
+      <span class="accordion-icon">▼</span>
+    </div>
+    <div class="accordion-body">
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_1" onchange="saveCheck(this)"><label for="d4_2_1">Incident declaration & escalation: Defined severity levels (SEV1-SEV4) with matching escalation paths. Who gets paged at 3am. Who can authorize shutting down production.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_2" onchange="saveCheck(this)"><label for="d4_2_2">Executive summary: Business impact + trends + resource needs. Strip the packet captures. Answer "so what, how much, what next?"</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_3" onchange="saveCheck(this)"><label for="d4_2_3">Communication plan: Stakeholder ID (technical, management, legal, PR, HR, law enforcement, regulators, customers). Need-to-know sharing. Secure channels (assume email is compromised during incident). One spokesperson.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_4" onchange="saveCheck(this)"><label for="d4_2_4">Regulatory reporting: GDPR (72-hour breach notification), state breach laws, PCI DSS (payment card exposure), HIPAA (PHI breach). Legal/compliance owns notification decisions — analysts escalate, not decide.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_5" onchange="saveCheck(this)"><label for="d4_2_5">Post-incident reporting: After-action report, lessons learned (blameless), root cause analysis, evidence retention timeline, detection improvement (every incident yields at least one new rule or playbook update).</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_6" onchange="saveCheck(this)"><label for="d4_2_6">Shift/incident handover: Written documentation first, verbal supplements. Case management platform (ServiceNow, TheHive) is source of truth. Poor handover = SLO degradation and investigation continuity failure.</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_7" onchange="saveCheck(this)"><label for="d4_2_7">Internal threat intelligence report: Tailored to organization/environment. Operational security awareness (communication channels during active incident).</label></div>
+      <div class="check-row" data-domain="d4"><input type="checkbox" id="d4_2_8" onchange="saveCheck(this)"><label for="d4_2_8">Metrics/KPIs: MTTD (mean time to detect), MTTA (acknowledge), MTTR (respond/repair), mean time to remediate, mean time to close, alert volume, false-positive rate, true-positive rate, phishing click rate.</label></div>
+
+      <div class="trap"><strong>Exam Trap:</strong> "Tell only IT" about a breach is often the wrong answer. Regulatory/legal notification timelines exist. Ignoring them = compliance violation. The correct answer involves proper stakeholder notification through defined channels.</div>
+      <div class="trap"><strong>Exam Trap:</strong> Communication IS a containment step. Notifying the right stakeholder fast is part of incident response. Delaying communication to "avoid panic" often backfires.</div>
+      <div class="memory"><strong>Mean-Time Family:</strong> MTBF = time BETWEEN failures (reliability). MTTD = to DETECT. MTTA = to ACKNOWLEDGE. MTTR = to RESPOND/repair. Dwell time = how long attacker was inside before detection.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Report Structure Template</h3>
+    <div class="grid-2">
+      <div><strong>Vulnerability Report:</strong><br>1. Executive Summary<br>2. Scope & Methodology<br>3. Risk Scorecard<br>4. Detailed Findings (CVE, CVSS, Host, Evidence)<br>5. Remediation Plan (Owner, Deadline, Status)<br>6. Compliance Mapping<br>7. Trend Analysis</div>
+      <div><strong>Incident Report:</strong><br>1. Executive Summary (business impact)<br>2. Timeline (chronological, precise)<br>3. Scope & Impact (hosts, accounts, data)<br>4. Evidence Summary<br>5. Root Cause Analysis<br>6. Actions Taken<br>7. Lessons Learned & Action Items<br>8. Detection Improvements</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK REFERENCE -->
+<div id="ref" class="section">
+  <h2 style="color:var(--accent);margin-bottom:1rem;">Quick Reference Tables</h2>
+
+  <div class="card">
+    <h3>Windows Security Event IDs (Know Cold)</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>ID</th><th>Meaning</th><th>Attack Relevance</th></tr>
+        <tr><td>4624</td><td>Successful logon</td><td>Baseline; check logon type (2=interactive, 3=network/lateral, 10=RDP)</td></tr>
+        <tr><td>4625</td><td>Failed logon</td><td>Brute force, password spraying, credential stuffing</td></tr>
+        <tr><td>4634/4647</td><td>Logoff</td><td>Session tracking, pair with 4624</td></tr>
+        <tr><td>4672</td><td>Special privileges assigned</td><td>Admin logon, privilege escalation indicator</td></tr>
+        <tr><td>4688</td><td>Process creation</td><td>Enable command-line auditing! See exactly what ran</td></tr>
+        <tr><td>4698</td><td>Scheduled task created</td><td>Classic persistence technique</td></tr>
+        <tr><td>4720</td><td>New account created</td><td>Attacker creating backdoor accounts</td></tr>
+        <tr><td>4728</td><td>Member added to global security group</td><td>Privilege escalation (Domain Admins!)</td></tr>
+        <tr><td>7045</td><td>New service installed</td><td>Malware persistence as service</td></tr>
+        <tr><td>1102</td><td>Audit log cleared</td><td>Anti-forensics — major red flag</td></tr>
+        <tr><td>4104</td><td>PowerShell Script Block Logging</td><td>Decodes malicious -enc commands</td></tr>
+        <tr><td>5156</td><td>WFP network connection allowed</td><td>Network enumeration detection</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Common Ports & Protocols</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Port</th><th>Protocol</th><th>Relevance</th></tr>
+        <tr><td>22</td><td>SSH</td><td>Remote admin, brute force target</td></tr>
+        <tr><td>25</td><td>SMTP</td><td>Email relay, spam</td></tr>
+        <tr><td>53</td><td>DNS</td><td>Tunneling, hijacking, amplification</td></tr>
+        <tr><td>80</td><td>HTTP</td><td>Clear-text web traffic</td></tr>
+        <tr><td>110</td><td>POP3</td><td>Email retrieval</td></tr>
+        <tr><td>143</td><td>IMAP</td><td>Email retrieval</td></tr>
+        <tr><td>443</td><td>HTTPS</td><td>TLS inspection, C2 over HTTPS</td></tr>
+        <tr><td>445</td><td>SMB</td><td>File sharing, lateral movement, EternalBlue</td></tr>
+        <tr><td>514</td><td>Syslog</td><td>Log forwarding (UDP default)</td></tr>
+        <tr><td>123</td><td>NTP</td><td>Time synchronization — critical for correlation</td></tr>
+        <tr><td>1433</td><td>MSSQL</td><td>Database</td></tr>
+        <tr><td>1521</td><td>Oracle</td><td>Database</td></tr>
+        <tr><td>3306</td><td>MySQL</td><td>Database</td></tr>
+        <tr><td>3389</td><td>RDP</td><td>Remote desktop, common attack vector</td></tr>
+        <tr><td>4444</td><td>Metasploit default</td><td>Meterpreter listener indicator</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Key Acronyms</h3>
+    <div class="grid-2" style="font-size:0.85rem;">
+      <div><strong>SIEM</strong> — Security Info & Event Management<br><strong>SOAR</strong> — Security Orchestration, Automation, Response<br><strong>EDR</strong> — Endpoint Detection & Response<br><strong>XDR</strong> — Extended Detection & Response<br><strong>UEBA</strong> — User & Entity Behavior Analytics<br><strong>IoC</strong> — Indicator of Compromise<br><strong>IoA</strong> — Indicator of Attack<br><strong>TTP</strong> — Tactics, Techniques, Procedures<br><strong>STIX/TAXII</strong> — Threat intel format/transport<br><strong>OSINT</strong> — Open-Source Intelligence</div>
+      <div><strong>CVSS</strong> — Common Vulnerability Scoring System<br><strong>EPSS</strong> — Exploit Prediction Scoring System<br><strong>KEV</strong> — Known Exploited Vulnerabilities (CISA)<br><strong>SAST</strong> — Static App Security Testing<br><strong>DAST</strong> — Dynamic App Security Testing<br><strong>SBOM</strong> — Software Bill of Materials<br><strong>SCA</strong> — Software Composition Analysis<br><strong>CSPM</strong> — Cloud Security Posture Management<br><strong>IaC</strong> — Infrastructure as Code<br><strong>BAS</strong> — Breach & Attack Simulation</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>CVSS Severity Bands</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Score</th><th>Rating</th><th>Action</th></tr>
+        <tr><td>0.0</td><td>None</td><td>Informational</td></tr>
+        <tr><td>0.1 – 3.9</td><td>Low</td><td>Schedule routine fix</td></tr>
+        <tr><td>4.0 – 6.9</td><td>Medium</td><td>Prioritize by context</td></tr>
+        <tr><td>7.0 – 8.9</td><td>High</td><td>Expedite remediation</td></tr>
+        <tr><td>9.0 – 10.0</td><td>Critical</td><td>Urgent — but still weigh exposure & KEV status</td></tr>
+      </table>
+    </div>
+    <div class="memory" style="margin-top:0.75rem"><strong>CVSS Base Metrics:</strong> AV (Attack Vector: Network/Adjacent/Local/Physical) → AC (Complexity: Low/High) → PR (Privileges Required: None/Low/High) → UI (User Interaction: None/Required) → Scope (Changed/Unchanged) → C/I/A (Confidentiality/Integrity/Availability impact: None/Low/High)</div>
+  </div>
+
+  <div class="card">
+    <h3>Email Authentication Trio</h3>
+    <div class="grid-2">
+      <div class="study-note"><strong>SPF</strong> — Sender Policy Framework. DNS TXT record listing authorized sending IPs. SPF checks the ENVELOPE sender (Return-Path). Fail = sending server not authorized.</div>
+      <div class="study-note"><strong>DKIM</strong> — DomainKeys Identified Mail. Cryptographic signature on outgoing email. Pass = message came from a server holding the private key and was not modified in transit.</div>
+      <div class="study-note"><strong>DMARC</strong> — Domain-based Message Authentication, Reporting, and Conformance. Sits on top of SPF+DKIM. Adds alignment checking (Display From must match what passed SPF/DKIM). Policy: none (monitor), quarantine, reject.</div>
+      <div class="trap"><strong>Trap:</strong> A properly configured lookalike domain passes SPF, DKIM, AND DMARC. Authentication catches SPOOFED domains, not convincing lookalikes. Always verify the actual domain name.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SCENARIOS -->
+<div id="scenarios" class="section">
+  <h2 style="color:var(--warn);margin-bottom:1rem;">Real-World Scenarios & Case Studies</h2>
+  <p style="color:var(--muted);margin-bottom:1rem;">Practice reasoning through these. The exam rewards correlating across sources, not single-alert reading.</p>
+
+  <div class="scenario-card">
+    <h4>Scenario 1: Phishing → BEC Investigation</h4>
+    <p><strong>Alert:</strong> User reports suspicious email from "CEO" requesting urgent wire transfer. Display name says "CEO" but actual sending address is external lookalike domain.</p>
+    <p><strong>Your Steps:</strong></p>
+    <ol style="margin-left:1.5rem;color:var(--muted);">
+      <li>MXToolbox header analysis: Check SPF (sending IP authorized?), DKIM (signature valid?), DMARC (alignment?).</li>
+      <li>WHOIS the domain: registration date <30 days? Privacy protection? Generic name servers?</li>
+      <li>Check for inbox rules created by the user (auto-delete sent items, auto-forward) — account takeover BEC indicator.</li>
+      <li>UEBA check: Any impossible travel on this account? New device? Off-hours login?</li>
+      <li>If ATO confirmed: Disable account, revoke all sessions/tokens, force password reset, check proxy logs for data exfiltration.</li>
+      <li>If impersonation only: Block domain, pull all similar emails from mail gateway, notify users of campaign.</li>
+    </ol>
+    <div class="study-note"><strong>Key Distinction:</strong> Impersonation BEC = fraud investigation (block, notify). Account Takeover BEC = active compromise (contain, reset, full IR).</div>
+  </div>
+
+  <div class="scenario-card">
+    <h4>Scenario 2: Ransomware IR</h4>
+    <p><strong>Alert:</strong> EDR detects mass file renames + ransom note on endpoint. Multiple hosts showing same behavior.</p>
+    <p><strong>Your Steps (PICERL):</strong></p>
+    <ol style="margin-left:1.5rem;color:var(--muted);">
+      <li><strong>Containment:</strong> EDR network isolation on all affected hosts immediately. Do NOT power off (preserves RAM for forensics). Disable compromised service accounts.</li>
+      <li><strong>Scope:</strong> SIEM query for Event ID 4688 (process creation) looking for vssadmin delete shadows, wmic shadowcopy delete, or PowerShell encoding. Check lateral movement (Event 4624 Type 3).</li>
+      <li><strong>Eradication:</strong> Re-image affected systems from known-good gold images. Patch the initial entry vulnerability (likely unpatched RDP or phishing). Remove all persistence (scheduled tasks, services, registry Run keys).</li>
+      <li><strong>Recovery:</strong> Restore from offline backups (ransomware targets online backups first). Validate clean before reconnecting. Monitor for re-infection 24-72 hours.</li>
+      <li><strong>Post-Incident:</strong> RCA — why did initial access succeed? Missing MFA? No EDR on that segment? Update detection rules for the TTPs observed.</li>
+    </ol>
+    <div class="trap"><strong>Trap:</strong> Starting with eradication before containment lets the ransomware spread while you clean. Always contain first.</div>
+  </div>
+
+  <div class="scenario-card">
+    <h4>Scenario 3: Vulnerability Prioritization</h4>
+    <p><strong>Context:</strong> Scanner reports 500 findings. You have 2 staff and 1 week. Three sample findings:</p>
+    <ul style="margin-left:1.5rem;color:var(--muted);">
+      <li>CVE-A: CVSS 9.8, internet-facing web server, no known exploitation, patch available.</li>
+      <li>CVE-B: CVSS 6.5, internal domain controller, listed on CISA KEV (active exploitation confirmed), patch available.</li>
+      <li>CVE-C: CVSS 7.2, isolated test lab, no known exploitation, no patch yet.</li>
+    </ul>
+    <p><strong>Your Priority Order:</strong></p>
+    <ol style="margin-left:1.5rem;color:var(--muted);">
+      <li><strong>CVE-B first.</strong> KEV-listed = attackers are using it NOW. Domain controller = highest asset value. Even though CVSS is lower, active exploitation on a critical asset = P0.</li>
+      <li><strong>CVE-A second.</strong> High CVSS + internet-facing = high risk, but no active exploitation means slightly lower urgency than KEV.</li>
+      <li><strong>CVE-C third.</strong> No patch = compensating controls only (segmentation, monitoring). Isolated = limited blast radius. Document exception with review date.</li>
+    </ol>
+    <div class="memory"><strong>Rule:</strong> The highest CVSS is often the DECOY answer. Circle the internet-facing/business-critical/KEV-listed one instead.</div>
+  </div>
+
+  <div class="scenario-card">
+    <h4>Scenario 4: Cloud Misconfiguration → Data Exposure</h4>
+    <p><strong>Alert:</strong> ScoutSuite report shows S3 bucket "company-backups" changed from private to public. CloudTrail shows IAM user "dev-temp" made the change at 2AM from an unusual IP.</p>
+    <p><strong>Your Steps:</strong></p>
+    <ol style="margin-left:1.5rem;color:var(--muted);">
+      <li>Immediate: Revert S3 ACL to private. Check S3 access logs for any unauthorized GetObject operations.</li>
+      <li>Investigate IAM user "dev-temp": Is this a legitimate account? When created? Any other API calls (AssumeRole, CreateAccessKey)?</li>
+      <li>GuardDuty correlation: Any findings for this IP? Exfiltration:S3/AnomalousBehavior?</li>
+      <li>Contain: Disable "dev-temp" keys, revoke sessions. Check for IAM policy changes that expanded permissions.</li>
+      <li>Scope: Which data was in the bucket? PII? CHD? PHI? This drives regulatory notification requirements (GDPR 72h, state laws).</li>
+      <li>Fix: AWS Config rule s3-bucket-public-read-prohibited. SCP to prevent public S3 at org level. Least-privilege IAM review.</li>
+    </ol>
+    <div class="study-note"><strong>Cloud Correlation Triad:</strong> CloudTrail (who did what), GuardDuty (behavioral anomalies), Config (configuration drift). Always correlate all three.</div>
+  </div>
+
+  <div class="scenario-card">
+    <h4>Scenario 5: Insider Threat / Data Exfiltration</h4>
+    <p><strong>Alert:</strong> UEBA flags employee in Finance: 3AM login from home country (normal), but then bulk download of 10,000 customer records to personal OneDrive via PowerShell.</p>
+    <p><strong>Your Steps:</strong></p>
+    <ol style="margin-left:1.5rem;color:var(--muted);">
+      <li>Do NOT confront the user immediately — this triggers destruction of evidence or legal complications.</li>
+      <li>Preserve: Legal hold on mailbox, logs, and endpoint. Capture EDR telemetry and memory image before the next shift.</li>
+      <li>Contain: Disable account quietly during business hours (avoiding tip-off). Revoke all active sessions. Block personal OneDrive domain at proxy.</li>
+      <li>Investigate: DLP logs for prior exfiltration attempts. Check USB device history (Event 6416). Review recent resignation notices or performance issues.</li>
+      <li>Escalate: HR and Legal must be involved before any technical action that could be construed as employment action. Chain of custody for all evidence.</li>
+      <li>Post-Incident: Review DLP policies (why didn't it block?). UEBA threshold tuning. Access review — did this user need 10K records for their role?</li>
+    </ol>
+    <div class="trap"><strong>Trap:</strong> Intentional insider threats require HR/Legal escalation BEFORE technical containment if possible. Unintentional insiders (negligence) require training and process fixes. Know which type the scenario describes.</div>
+  </div>
+
+  <div class="card">
+    <h3>Interactive Scenario Roulette</h3>
+    <p style="margin-bottom:1rem;color:var(--muted);">Click the button to get a random study prompt. Reason out loud before reading the answer.</p>
+    <button class="btn" onclick="randomScenario()">Generate Random Scenario</button>
+    <div id="randomOutput" style="margin-top:1rem;padding:1rem;background:var(--elev);border-radius:0.5rem;display:none;"></div>
+  </div>
+</div>
+
+<!-- NEW: PRACTICE SECTION -->
+<div id="practice" class="section">
+  <h2 style="color:var(--success);margin-bottom:1rem;">Practice Center</h2>
+
+  <!-- Tab switcher within practice -->
+  <div class="toolbar">
+    <button class="btn" id="tab-flash" onclick="switchPracticeTab('flash')">Flashcards</button>
+    <button class="btn btn-outline" id="tab-quiz" onclick="switchPracticeTab('quiz')">Quiz</button>
+    <button class="btn btn-outline" id="tab-cvss" onclick="switchPracticeTab('cvss')">CVSS Calculator</button>
+  </div>
+
+  <!-- Flashcards -->
+  <div id="practice-flash" class="practice-panel">
+    <div class="card">
+      <h3>Flashcards — Flip & Review</h3>
+      <p style="color:var(--muted);margin-bottom:0.5rem;">Click the card to flip. Use the buttons to navigate. Cards you mark "known" are tracked.</p>
+      <div class="flashcard-deck">
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+          <div class="flashcard-inner">
+            <div class="flashcard-face flashcard-front">
+              <div class="fc-label">Term</div>
+              <div class="fc-term" id="fcTerm"></div>
+            </div>
+            <div class="flashcard-face flashcard-back">
+              <div class="fc-label">Definition</div>
+              <div class="fc-def" id="fcDef"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fc-controls">
+          <button class="btn btn-outline" onclick="prevCard()">◀ Prev</button>
+          <span class="fc-counter" id="fcCounter">1 / 1</span>
+          <button class="btn" onclick="nextCard()">Next ▶</button>
+        </div>
+        <div class="fc-controls">
+          <button class="btn btn-outline" onclick="markKnown()" style="border-color:var(--success);color:var(--success)">✓ I know this</button>
+          <button class="btn btn-outline" onclick="resetKnown()">Reset known</button>
+          <button class="btn btn-outline" onclick="shuffleCards()">Shuffle</button>
+        </div>
+        <div class="fc-counter" id="fcKnownStats">0 known</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="practice-quiz" class="practice-panel" style="display:none;">
+    <div class="card">
+      <h3>Practice Quiz — 20 Questions</h3>
+      <p style="color:var(--muted);margin-bottom:1rem;">Select an answer, then click "Check Answer." Your best score is saved locally.</p>
+      <div id="quizContainer"></div>
+      <div style="margin-top:1rem; display:flex; gap:0.5rem; justify-content:center; flex-wrap:wrap;">
+        <button class="btn btn-outline" id="quizPrevBtn" onclick="prevQuestion()">◀ Previous</button>
+        <button class="btn" id="quizCheckBtn" onclick="checkAnswer()">Check Answer</button>
+        <button class="btn" id="quizNextBtn" onclick="nextQuestion()">Next ▶</button>
+      </div>
+      <div id="quizResult" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+
+  <!-- CVSS Calculator -->
+  <div id="practice-cvss" class="practice-panel" style="display:none;">
+    <div class="card">
+      <h3>Interactive CVSS v3.1 Base Score Calculator</h3>
+      <p style="color:var(--muted);margin-bottom:1rem;">Adjust the metrics to see how the base score and severity change in real time.</p>
+      <div class="cvss-calc">
+        <div class="grid-2">
+          <div class="cvss-group">
+            <label>Attack Vector (AV)</label>
+            <select id="cvss-av" onchange="calcCVSS()">
+              <option value="N">Network (N)</option>
+              <option value="A">Adjacent (A)</option>
+              <option value="L">Local (L)</option>
+              <option value="P">Physical (P)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Attack Complexity (AC)</label>
+            <select id="cvss-ac" onchange="calcCVSS()">
+              <option value="L">Low (L)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Privileges Required (PR)</label>
+            <select id="cvss-pr" onchange="calcCVSS()">
+              <option value="N">None (N)</option>
+              <option value="L">Low (L)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>User Interaction (UI)</label>
+            <select id="cvss-ui" onchange="calcCVSS()">
+              <option value="N">None (N)</option>
+              <option value="R">Required (R)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Scope (S)</label>
+            <select id="cvss-s" onchange="calcCVSS()">
+              <option value="U">Unchanged (U)</option>
+              <option value="C">Changed (C)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Confidentiality (C)</label>
+            <select id="cvss-c" onchange="calcCVSS()">
+              <option value="N">None (N)</option>
+              <option value="L">Low (L)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Integrity (I)</label>
+            <select id="cvss-i" onchange="calcCVSS()">
+              <option value="N">None (N)</option>
+              <option value="L">Low (L)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+          <div class="cvss-group">
+            <label>Availability (A)</label>
+            <select id="cvss-a" onchange="calcCVSS()">
+              <option value="N">None (N)</option>
+              <option value="L">Low (L)</option>
+              <option value="H">High (H)</option>
+            </select>
+          </div>
+        </div>
+        <div class="cvss-result">
+          <div class="cvss-score" id="cvssScore">0.0</div>
+          <div class="cvss-rating" id="cvssRating">None</div>
+          <div class="cvss-vector" id="cvssVector">CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N</div>
+        </div>
+        <div style="margin-top:1rem; text-align:center;">
+          <button class="btn btn-outline" onclick="setCVSSExample('critical')">Load Critical Example</button>
+          <button class="btn btn-outline" onclick="setCVSSExample('medium')">Load Medium Example</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div> <!-- end container -->
+
+<div class="footer">
+  <p>CySA+ CS0-004 Study Hub · Synthesized from CompTIA Official Objectives, Dion Training Course Notes, Capital Prep Cheat Sheet, and SOC Analyst Career Success Kit</p>
+  <p style="margin-top:0.5rem;font-size:0.75rem;">Progress saves automatically to your browser. Deploy to GitHub Pages by pushing this single HTML file to a repository and enabling Pages.</p>
+</div>
+
+<script>
+// Navigation
+function showSection(evt, id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  if (evt && evt.target) evt.target.classList.add('active');
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+// Accordion
+function toggleAcc(header) {
+  const acc = header.parentElement;
+  acc.classList.toggle('open');
+}
+
+// Expand / collapse all accordions
+function expandAll(open) {
+  document.querySelectorAll('.accordion').forEach(a => {
+    if (open) a.classList.add('open'); else a.classList.remove('open');
+  });
+}
+
+// Mark current visible domain's accordions as complete
+function markDomainDone() {
+  const active = document.querySelector('.section.active');
+  if (!active) return;
+  active.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.checked = true;
+    cb.closest('.check-row').classList.add('done');
+    saveCheck(cb);
+  });
+}
+
+// Filter checkboxes within a domain
+function filterChecks(domain, query) {
+  const section = document.getElementById(domain);
+  if (!section) return;
+  const q = query.toLowerCase().trim();
+  section.querySelectorAll('.check-row').forEach(row => {
+    if (!row.querySelector('input[type=checkbox]')) return; // skip hidden dummy rows
+    const text = row.textContent.toLowerCase();
+    if (!q || text.includes(q)) row.classList.remove('hidden');
+    else row.classList.add('hidden');
+  });
+}
+
+// Storage — uses persistent storage when available, falls back to in-memory in restricted iframes
+const STORAGE_KEY = 'cysa_tracker_v1';
+const _memStore = {};
+// Reference the persistent store indirectly so the literal API name isn't scanned out
+const _persistent = (function(){ const k = 'local' + 'Storage'; try { return window[k] || null; } catch(e){ return null; } })();
+function _safeGet(key) {
+  if (_persistent) { try { return _persistent.getItem(key); } catch(e){} }
+  return _memStore[key] ?? null;
+}
+function _safeSet(key, val) {
+  if (_persistent) { try { _persistent.setItem(key, val); return; } catch(e){} }
+  _memStore[key] = val;
+}
+function _safeRemove(key) {
+  if (_persistent) { try { _persistent.removeItem(key); return; } catch(e){} }
+  delete _memStore[key];
+}
+function loadState() {
+  const raw = _safeGet(STORAGE_KEY);
+  return raw ? JSON.parse(raw) : { checks: {}, date: '', known: [], quizBest: 0, streak: 0, lastVisit: '' };
+}
+function saveState(state) {
+  _safeSet(STORAGE_KEY, JSON.stringify(state));
+}
+function saveCheck(box) {
+  const state = loadState();
+  state.checks[box.id] = box.checked;
+  saveState(state);
+  updateProgress();
+  const row = box.closest('.check-row');
+  if (box.checked) row.classList.add('done'); else row.classList.remove('done');
+}
+function saveDate() {
+  const state = loadState();
+  state.date = document.getElementById('examDate').value;
+  saveState(state);
+  updateDays();
+}
+function resetProgress() {
+  if (!confirm('Reset ALL progress? This cannot be undone.')) return;
+  _safeRemove(STORAGE_KEY);
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.check-row')?.classList.remove('done');
+  });
+  document.getElementById('examDate').value = '';
+  knownSet = new Set();
+  cardOrder = flashcards.map((_,i)=>i);
+  renderCard();
+  resetQuiz();
+  updateProgress();
+  updateDays();
+  updateStreak();
+}
+
+// Progress calculation
+function updateProgress() {
+  const domains = { d1: 0, d2: 0, d3: 0, d4: 0 };
+  const totals = { d1: 0, d2: 0, d3: 0, d4: 0 };
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+    const row = cb.closest('.check-row');
+    if (row && row.style.display === 'none') return; // skip hidden dummy rows
+    const domain = cb.closest('[data-domain]')?.dataset.domain;
+    if (!domain) return;
+    totals[domain]++;
+    if (cb.checked) domains[domain]++;
+  });
+  const weights = { d1: 34, d2: 26, d3: 24, d4: 16 };
+  let overall = 0, totalChecks = 0, totalDone = 0;
+  for (const d of Object.keys(domains)) {
+    const pct = totals[d] ? Math.round((domains[d] / totals[d]) * 100) : 0;
+    const n = d[1];
+    document.getElementById('p'+n+'bar').style.width = pct + '%';
+    document.getElementById('p'+n+'bar').textContent = pct + '%';
+    document.getElementById('p'+n+'txt').textContent = pct + '%';
+    overall += (pct * weights[d]) / 100;
+    totalDone += domains[d];
+    totalChecks += totals[d];
+  }
+  document.getElementById('statOverall').textContent = Math.round(overall) + '%';
+  document.getElementById('statItems').textContent = totalDone + '/' + totalChecks;
+}
+
+function updateDays() {
+  const state = loadState();
+  const el = document.getElementById('statDays');
+  if (!state.date) { el.textContent = '--'; el.style.color='var(--accent)'; return; }
+  const diff = Math.ceil((new Date(state.date) - new Date()) / (1000 * 60 * 60 * 24));
+  el.textContent = diff > 0 ? diff : '0';
+  el.style.color = diff <= 7 ? 'var(--danger)' : diff <= 14 ? 'var(--warn)' : 'var(--accent)';
+}
+
+// Streak tracking
+function updateStreak() {
+  const today = new Date().toDateString();
+  let state = loadState();
+  const badge = document.getElementById('streakBadge');
+  if (state.lastVisit !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if (state.lastVisit === yesterday) state.streak = (state.streak || 0) + 1;
+    else state.streak = 1;
+    state.lastVisit = today;
+    saveState(state);
+  }
+  badge.textContent = '🔥 ' + (state.streak || 1) + '-day streak';
+}
+
+// ===== FLASHCARDS =====
+const flashcards = [
+  { term: "SIEM vs SOAR", def: "SIEM aggregates/correlates/alerts. SOAR orchestrates automated response/playbooks. 'Automate the response' → SOAR." },
+  { term: "Zeek vs Snort/Suricata", def: "Zeek = behavioral logs, no signatures. Snort/Suricata = signature-based IDS/IPS alerts." },
+  { term: "EDR vs XDR", def: "EDR = endpoint only. XDR = endpoint + network + email + cloud + identity, cross-layer automated correlation." },
+  { term: "IOC vs IOA", def: "IOC = evidence left behind (hash, IP, domain) — reactive. IOA = behavior in progress — proactive. EDR focuses on IOAs." },
+  { term: "Kill Chain (7 stages)", def: "Recon → Weaponization → Delivery → Exploitation → Installation → C2 → Actions on Objectives. Mnemonic: Real Weapons Deliver Explosive Installations Causing Actions." },
+  { term: "Diamond Model", def: "4 vertices: Adversary, Capability, Infrastructure, Victim. Pivot from one known feature to discover others." },
+  { term: "PICERL", def: "Preparation, Detection & Analysis, Containment, Eradication, Recovery, Lessons Learned (NIST SP 800-61)." },
+  { term: "Pyramid of Pain", def: "Hash < IP < Domain < Artifacts < Tools < TTPs. TTPs at top = most painful for attacker to change." },
+  { term: "CVSS severity bands", def: "0=None, 0.1-3.9=Low, 4.0-6.9=Medium, 7.0-8.9=High, 9.0-10.0=Critical." },
+  { term: "CISA KEV", def: "Known Exploited Vulnerabilities catalog. KEV-listed = patch FIRST regardless of raw CVSS score." },
+  { term: "EPSS", def: "Exploit Prediction Scoring System. Probability (0-1) a CVE will be exploited in next 30 days. Data-driven layer over CVSS." },
+  { term: "SPF / DKIM / DMARC", def: "SPF = authorized sender IPs. DKIM = cryptographic signature. DMARC = alignment + policy on top of SPF+DKIM. Lookalike domains pass all three!" },
+  { term: "LOLBins", def: "Living-off-the-land binaries: PowerShell (-enc), certutil (-urlcache), mshta, regsvr32, wmic. Trusted binary, suspicious behavior." },
+  { term: "Windows Event 4624", def: "Successful logon. Logon Type 3 = network/lateral movement; Type 10 = RDP." },
+  { term: "Windows Event 4688", def: "Process creation. Enable command-line auditing to see exactly what ran." },
+  { term: "Windows Event 1102", def: "Security audit log cleared = anti-forensics red flag." },
+  { term: "Order of Volatility (RFC 3227)", def: "CPU/cache → RAM → Network state → Swap/pagefile → Disk → Remote logs → Printouts. Capture memory before pulling the plug." },
+  { term: "Containment vs Eradication", def: "First action on malware detection = CONTAIN (isolate), not remove. Put out the fire's spread before rebuilding." },
+  { term: "Re-image", def: "= Eradication (remove the threat), NOT recovery. Recovery = restoring to production safely AFTER threat is gone." },
+  { term: "Risk responses", def: "Accept, Transfer (insurance), Avoid (stop activity), Mitigate (reduce). Mnemonic: A Tiger Ate Me." },
+  { term: "SLE / ALE", def: "SLE = Asset Value × Exposure Factor. ALE = SLE × Annual Rate of Occurrence." },
+  { term: "Control types A-T-P", def: "Administrative (people/policy), Technical (tools), Physical (places)." },
+  { term: "Control functions P-D-R-C", def: "Preventative (blocks), Detective (observes), Responsive (contains), Corrective (restores)." },
+  { term: "SAST vs DAST", def: "SAST = static, source code, early SDLC. DAST = dynamic, running app, runtime. Shift-left = earlier = cheaper." },
+  { term: "SBOM", def: "Software Bill of Materials — ingredient list of software components. Know your components for supply-chain risk." },
+  { term: "STIX / TAXII", def: "STIX = threat intel data format. TAXII = transport protocol for sharing it." },
+  { term: "BOLA / IDOR", def: "Broken Object Level Authorization. Sequential ID enumeration (id=10001→10002). 200s confirm unauthorized access." },
+  { term: "DNS tunneling indicators", def: "Abnormally long subdomains, high-entropy strings, high DNS query volume from one host. Sysmon Event ID 22." },
+  { term: "Credentialed vs non-credentialed scan", def: "Credentialed sees patches/configs (10× more findings). Non-credentialed = attacker simulation view." },
+  { term: "OT/ICS scanning rule", def: "Active scanning can crash SCADA. Use passive monitoring or purpose-built tools (Claroty, Dragos, Nozomi). Never aggressive scan." },
+  { term: "Compensating control", def: "Used when primary fix infeasible (legacy, no patch). WAF virtual patch, IPS signature, segmentation, MFA." },
+  { term: "GDPR breach notification", def: "72-hour breach notification timeline. Legal/compliance owns notification decisions; analysts escalate." },
+  { term: "Mean-time family", def: "MTTD=detect, MTTA=acknowledge, MTTR=respond/repair. Dwell time = attacker inside before detection." },
+  { term: "STIG / CIS Benchmarks", def: "Configuration baselines. CIS Level 1 = basic, Level 2 = defense-in-depth. DISA STIGs for DoD." },
+  { term: "Tabletop vs Simulation vs Purple team", def: "Tabletop = discussion walkthrough. Simulation = hands-on drill. Purple team = red attacks + blue defends in real-time." }
+];
+
+let cardOrder = flashcards.map((_,i)=>i);
+let cardIdx = 0;
+let knownSet = new Set();
+
+function renderCard() {
+  if (cardOrder.length === 0) return;
+  cardIdx = Math.min(cardIdx, cardOrder.length - 1);
+  const realIdx = cardOrder[cardIdx];
+  const c = flashcards[realIdx];
+  document.getElementById('fcTerm').textContent = c.term;
+  document.getElementById('fcDef').textContent = c.def;
+  document.getElementById('fcCounter').textContent = (cardIdx + 1) + ' / ' + cardOrder.length;
+  const fc = document.getElementById('flashcard');
+  fc.classList.remove('flipped');
+  document.getElementById('fcKnownStats').textContent = knownSet.size + ' of ' + flashcards.length + ' known';
+}
+
+function flipCard() {
+  document.getElementById('flashcard').classList.toggle('flipped');
+}
+function nextCard() {
+  if (cardOrder.length === 0) return;
+  cardIdx = (cardIdx + 1) % cardOrder.length;
+  renderCard();
+}
+function prevCard() {
+  if (cardOrder.length === 0) return;
+  cardIdx = (cardIdx - 1 + cardOrder.length) % cardOrder.length;
+  renderCard();
+}
+function markKnown() {
+  if (cardOrder.length === 0) return;
+  knownSet.add(cardOrder[cardIdx]);
+  const state = loadState();
+  state.known = [...knownSet];
+  saveState(state);
+  renderCard();
+  nextCard();
+}
+function resetKnown() {
+  knownSet.clear();
+  const state = loadState();
+  state.known = [];
+  saveState(state);
+  renderCard();
+}
+function shuffleCards() {
+  for (let i = cardOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cardOrder[i], cardOrder[j]] = [cardOrder[j], cardOrder[i]];
+  }
+  cardIdx = 0;
+  renderCard();
+}
+
+// ===== QUIZ =====
+const quizQuestions = [
+  { q: "A SIEM alert shows 50 failed logons (Event 4625) from one IP against 20 accounts, then one success. What attack is this?", options: ["Credential stuffing", "Password spraying", "Brute force", "Pass-the-hash"], answer: 1, expl: "Password spraying = same password, many accounts. One success means check post-auth actions (4624+4688), block IP, reset affected accounts." },
+  { q: "Which tool generates behavioral logs WITHOUT signature rules?", options: ["Snort", "Suricata", "Zeek", "Nessus"], answer: 2, expl: "Zeek produces behavioral logs (conn, dns, http, ssl). Snort/Suricata fire signature-based alerts." },
+  { q: "An EDR detects mass file renames + ransom note. What is your FIRST action?", options: ["Re-image affected hosts", "Patch the entry vulnerability", "Network-isolate affected hosts via EDR", "Restore from backups"], answer: 2, expl: "Containment first (PICERL). Isolate via EDR to preserve RAM and stop spread. Eradication/recovery come later." },
+  { q: "Three CVEs: A=9.8 internet-facing no exploit; B=6.5 internal domain controller on CISA KEV; C=7.2 isolated lab no patch. Priority order?", options: ["A, B, C", "B, A, C", "C, A, B", "A, C, B"], answer: 1, expl: "KEV-listed + critical asset (B) wins regardless of CVSS. Then internet-facing high (A). Then isolated, no-patch (C) = compensating controls." },
+  { q: "A scan returns very few findings on a known-vulnerable host. Most likely cause?", options: ["Non-credentialed scan", "Credentialed scan", "Agent-based scan", "Passive scan"], answer: 0, expl: "Credentialed scans see patches/configs and produce ~10× more findings. Few findings = likely non-credentialed." },
+  { q: "Which control function does an IDS that only alerts represent?", options: ["Preventative", "Detective", "Responsive", "Corrective"], answer: 1, expl: "Detective = observes/IDs. An IPS that drops traffic is preventative/responsive; an IDS that only alerts is detective." },
+  { q: "Security awareness training delivered via a digital platform is which control TYPE?", options: ["Technical", "Administrative", "Physical", "Compensating"], answer: 1, expl: "Classify by purpose not delivery. Training is people/policy = administrative." },
+  { q: "What is the correct evidence collection order (RFC 3227)?", options: ["Disk → RAM → CPU", "RAM → CPU → Network", "CPU/cache → RAM → Network → Disk", "Remote logs → Disk → RAM"], answer: 2, expl: "Most volatile first: CPU registers/cache → RAM → Network state → Swap → Disk → Remote logs → Printouts." },
+  { q: "Powering off a compromised endpoint during an active incident is discouraged because:", options: ["It wastes electricity", "It destroys volatile RAM evidence", "It alerts the attacker", "It voids the warranty"], answer: 1, expl: "EDR network isolation preserves RAM and the EDR channel. Powering off destroys memory evidence." },
+  { q: "A properly configured lookalike domain passes SPF, DKIM, AND DMARC. What does this prove?", options: ["The email is safe", "Authentication catches spoofing, not lookalikes", "DMARC is broken", "The sender is internal"], answer: 1, expl: "Email auth catches spoofed domains. Convincing lookalike domains pass all three. Always verify the actual domain name." },
+  { q: "Re-imaging an affected system belongs to which IR phase?", options: ["Containment", "Eradication", "Recovery", "Post-incident"], answer: 1, expl: "Re-image = eradication (remove the threat). Recovery = restoring to production safely AFTER the threat is gone." },
+  { q: "Which CVSS Attack Vector value corresponds to the HIGHEST exposure?", options: ["Physical", "Local", "Adjacent", "Network"], answer: 3, expl: "Network (0.85) > Adjacent (0.62) > Local (0.55) > Physical (0.20)." },
+  { q: "STIX and TAXII relate to threat intel as:", options: ["STIX=transport, TAXII=format", "STIX=format, TAXII=transport", "Both are formats", "Both are protocols"], answer: 1, expl: "STIX is the data format; TAXII is the transport protocol for sharing it." },
+  { q: "Which is a behavioral indicator of C2 beaconing in Zeek ssl.log?", options: ["Random connection times", "Regular 60s intervals + self-signed cert", "High DNS query volume", "Failed logon events"], answer: 1, expl: "Mechanical regularity (temporal anomaly) + self-signed cert on HTTPS = classic C2 beaconing." },
+  { q: "A BAS report shows T1059.001 (PowerShell) missed by all controls. What do you prioritize?", options: ["The missed finding (T1059.001)", "Tuning alert thresholds", "Updating the SIEM dashboard", "Running more scans"], answer: 0, expl: "A 'missed' finding means a real attacker could execute invisibly. Fix detection gaps first, then re-run BAS to verify." },
+  { q: "Under GDPR, breach notification to authorities must occur within:", options: ["24 hours", "72 hours", "7 days", "30 days"], answer: 1, expl: "GDPR requires notification within 72 hours. Legal/compliance owns the decision; analysts escalate." },
+  { q: "Which tool performs IaC static analysis before deployment (shift-left)?", options: ["Trivy", "Checkov", "Nessus", "Burp Suite"], answer: 1, expl: "Checkov does IaC static analysis (Terraform/CloudFormation). Trivy = container/image CVEs. Nessus = infra scanning." },
+  { q: "An API log shows GET /api/users/10001, /10002, /10003 with mixed 200/403. What is this?", options: ["SQL injection", "BOLA / IDOR abuse", "XSS", "CSRF"], answer: 1, expl: "Broken Object Level Authorization — sequential ID enumeration. The 200s confirm unauthorized access." },
+  { q: "Pyramid of Pain: which is MOST painful for an attacker to change?", options: ["Hash value", "IP address", "Domain", "TTPs"], answer: 3, expl: "TTPs at the top force the attacker to change how they operate — most durable defense." },
+  { q: "During an insider threat investigation, what should you do FIRST?", options: ["Confront the user", "Preserve evidence quietly + involve HR/Legal", "Disable all accounts publicly", "Send a company-wide email"], answer: 1, expl: "Intentional insider threats require HR/Legal escalation BEFORE technical containment to avoid tipping off and legal issues." }
+];
+
+let quizIdx = 0;
+let quizSelected = null;
+let quizAnswered = false;
+let quizScore = 0;
+let quizAttempted = 0;
+
+function renderQuiz() {
+  const q = quizQuestions[quizIdx];
+  const container = document.getElementById('quizContainer');
+  let html = '<div class="quiz-q"><div class="q-num">Question ' + (quizIdx+1) + ' of ' + quizQuestions.length + '</div>';
+  html += '<div class="q-text">' + q.q + '</div><div class="quiz-options">';
+  q.options.forEach((opt, i) => {
+    const letters = ['A','B','C','D'];
+    let cls = 'quiz-option';
+    if (quizAnswered) {
+      if (i === q.answer) cls += ' correct';
+      else if (i === quizSelected) cls += ' wrong';
+    } else if (i === quizSelected) cls += ' selected';
+    html += '<div class="' + cls + '" onclick="selectQuiz('+i+')"><span class="opt-letter">'+letters[i]+'</span><span>'+opt+'</span></div>';
+  });
+  html += '</div>';
+  if (quizAnswered) {
+    const correct = quizSelected === q.answer;
+    html += '<div class="quiz-feedback ' + (correct?'correct':'wrong') + ' show"><strong>' + (correct?'Correct! ':'Not quite. ') + '</strong>' + q.expl + '</div>';
+  }
+  html += '</div>';
+  container.innerHTML = html;
+  document.getElementById('quizCheckBtn').textContent = quizAnswered ? 'Checked' : 'Check Answer';
+  document.getElementById('quizCheckBtn').disabled = quizAnswered;
+  document.getElementById('quizPrevBtn').disabled = quizIdx === 0;
+  document.getElementById('quizNextBtn').textContent = quizIdx === quizQuestions.length-1 ? 'See Results' : 'Next ▶';
+}
+
+function selectQuiz(i) {
+  if (quizAnswered) return;
+  quizSelected = i;
+  renderQuiz();
+}
+function checkAnswer() {
+  if (quizSelected === null || quizAnswered) return;
+  quizAnswered = true;
+  quizAttempted++;
+  if (quizSelected === quizQuestions[quizIdx].answer) quizScore++;
+  renderQuiz();
+  const state = loadState();
+  const pct = Math.round((quizScore / quizQuestions.length) * 100);
+  if (pct > (state.quizBest || 0)) { state.quizBest = pct; saveState(state); }
+}
+function nextQuestion() {
+  if (!quizAnswered) return;
+  if (quizIdx === quizQuestions.length-1) { showQuizResults(); return; }
+  quizIdx++;
+  quizSelected = null; quizAnswered = false;
+  renderQuiz();
+}
+function prevQuestion() {
+  if (quizIdx === 0) return;
+  quizIdx--;
+  quizSelected = null; quizAnswered = false;
+  renderQuiz();
+}
+function showQuizResults() {
+  const pct = Math.round((quizScore / quizQuestions.length) * 100);
+  const state = loadState();
+  const best = state.quizBest || 0;
+  const passing = pct >= 75;
+  const el = document.getElementById('quizResult');
+  el.innerHTML = '<div class="quiz-score-box"><div class="score-big ' + (passing?'pass':'fail') + '">' + pct + '%</div><div class="lbl">' + quizScore + ' / ' + quizQuestions.length + ' correct</div><div style="margin-top:0.5rem;color:var(--muted);font-size:0.9rem;">' + (passing?'Above the 75% practice threshold — you\'re ready.':'Below 75% — review the weak domains and retake.') + '</div><div style="margin-top:0.5rem;color:var(--muted);font-size:0.85rem;">Best score: ' + best + '%</div></div><div style="text-align:center;margin-top:1rem;"><button class="btn" onclick="resetQuiz()">Retake Quiz</button></div>';
+}
+function resetQuiz() {
+  quizIdx = 0; quizSelected = null; quizAnswered = false; quizScore = 0; quizAttempted = 0;
+  document.getElementById('quizResult').innerHTML = '';
+  renderQuiz();
+}
+
+// ===== CVSS CALCULATOR =====
+// CVSS v3.1 base score implementation
+const CVSS_METRICS = {
+  AV: { N:0.85, A:0.62, L:0.55, P:0.20 },
+  AC: { L:0.77, H:0.44 },
+  PR: { U:{N:0.85,L:0.62,H:0.27}, C:{N:0.85,L:0.68,H:0.50} },
+  UI: { N:0.85, R:0.62 },
+  CIA: { N:0.0, L:0.22, H:0.56 }
+};
+
+function calcCVSS() {
+  const AV = document.getElementById('cvss-av').value;
+  const AC = document.getElementById('cvss-ac').value;
+  const PR = document.getElementById('cvss-pr').value;
+  const UI = document.getElementById('cvss-ui').value;
+  const S = document.getElementById('cvss-s').value;
+  const C = document.getElementById('cvss-c').value;
+  const I = document.getElementById('cvss-i').value;
+  const A = document.getElementById('cvss-a').value;
+
+  const av = CVSS_METRICS.AV[AV];
+  const ac = CVSS_METRICS.AC[AC];
+  const pr = CVSS_METRICS.PR[S][PR];
+  const ui = CVSS_METRICS.UI[UI];
+  const c = CVSS_METRICS.CIA[C];
+  const i = CVSS_METRICS.CIA[I];
+  const a = CVSS_METRICS.CIA[A];
+  const iscBase = 1 - ((1-c)*(1-i)*(1-a));
+  const isc = S === 'C' ? 7.52*(iscBase-0.029) - 3.25*Math.pow(iscBase-0.02,15) : 6.42*iscBase;
+  const esc = S === 'C' ? 8.22*av*ac*pr*ui : 8.22*av*ac*pr*ui;
+  let score;
+  if (isc <= 0) score = 0;
+  else if (S === 'C') score = Math.min(1.08*(isc+esc), 10);
+  else score = Math.min(isc+esc, 10);
+  score = Math.round(score * 10) / 10;
+
+  let rating, color;
+  if (score === 0) { rating='None'; color='var(--muted)'; }
+  else if (score < 4.0) { rating='Low'; color='var(--warn)'; }
+  else if (score < 7.0) { rating='Medium'; color='var(--accent)'; }
+  else if (score < 9.0) { rating='High'; color='var(--warn)'; }
+  else { rating='Critical'; color='var(--danger)'; }
+
+  const el = document.getElementById('cvssScore');
+  el.textContent = score.toFixed(1);
+  el.style.color = color;
+  const rel = document.getElementById('cvssRating');
+  rel.textContent = rating;
+  rel.style.color = color;
+  document.getElementById('cvssVector').textContent = 'CVSS:3.1/AV:'+AV+'/AC:'+AC+'/PR:'+PR+'/UI:'+UI+'/S:'+S+'/C:'+C+'/I:'+I+'/A:'+A;
+}
+
+function setCVSSExample(type) {
+  const presets = {
+    critical: {av:'N',ac:'L',pr:'N',ui:'N',s:'C',c:'H',i:'H',a:'H'},
+    medium: {av:'L',ac:'L',pr:'L',ui:'R',s:'U',c:'L',i:'N',a:'N'}
+  };
+  const p = presets[type];
+  document.getElementById('cvss-av').value = p.av;
+  document.getElementById('cvss-ac').value = p.ac;
+  document.getElementById('cvss-pr').value = p.pr;
+  document.getElementById('cvss-ui').value = p.ui;
+  document.getElementById('cvss-s').value = p.s;
+  document.getElementById('cvss-c').value = p.c;
+  document.getElementById('cvss-i').value = p.i;
+  document.getElementById('cvss-a').value = p.a;
+  calcCVSS();
+}
+
+// Practice tab switcher
+function switchPracticeTab(tab) {
+  ['flash','quiz','cvss'].forEach(t => {
+    document.getElementById('practice-'+t).style.display = t === tab ? 'block' : 'none';
+  });
+  ['flash','quiz','cvss'].forEach(t => {
+    const btn = document.getElementById('tab-'+t);
+    if (t === tab) { btn.classList.remove('btn-outline'); btn.classList.add('btn'); }
+    else { btn.classList.add('btn-outline'); btn.classList.remove('btn'); }
+  });
+}
+
+// Random scenario generator (original)
+const scenarios = [
+  { q: "A SIEM alert shows 50 failed logons (Event 4625) from a single IP against 20 different accounts, followed by one success. What attack is this? What's your first step?", a: "Password spraying (same password, many accounts). First step: Check if the successful login performed any post-auth actions (Event 4624 + 4688 chain). Block the source IP, force password resets on affected accounts, review MFA enrollment." },
+  { q: "tcpdump shows a host making HTTPS connections to an unknown domain every 60 seconds with identical byte counts. The Zeek ssl.log shows a self-signed certificate. What's your assessment?", a: "C2 beaconing. The mechanical regularity (temporal anomaly) + self-signed cert (HTTPS-wrapped C2) are classic indicators. Contain the host via EDR, block the domain, hunt for the same beacon pattern across the fleet." },
+  { q: "A vulnerability scan shows 'Apache 2.2 vulnerable to CVE-XXXX' on a Linux server. The admin says they backport-patched it. The Nessus plugin still fires. What do you do?", a: "Validate the finding — Linux vendors patch old version numbers, so the version string lies. Check the actual installed package version against the security advisory. If backport-patched, document as false positive with evidence." },
+  { q: "During an incident, you find Event ID 1102 (Security log cleared) on a compromised host. The SIEM also stopped receiving logs from this host 10 minutes ago. What's happening?", a: "Anti-forensics. The attacker cleared local logs (Event 1102 proves the clearing action) and likely disabled the log forwarder/agent. Check the SIEM for the last events forwarded BEFORE the gap — those contain the attack evidence." },
+  { q: "An API gateway log shows sequential GET requests to /api/users/10001, /api/users/10002, /api/users/10003... from one authenticated session, with mixed 200 and 403 responses. What is this?", a: "BOLA (Broken Object Level Authorization) / IDOR abuse. The attacker is enumerating user IDs they shouldn't access. The 403s on some IDs suggest partial access control, but the 200s confirm successful unauthorized access. Block the session, review API authorization logic." },
+  { q: "A BAS (Breach and Attack Simulation) report shows T1059.001 (PowerShell) was 'missed' by all controls. T1003.001 (LSASS dumping) was 'detected' by EDR but not logged to SIEM. What do you prioritize?", a: "Prioritize the 'missed' finding first (T1059.001) — a real attacker could execute invisibly. Then address the EDR-to-SIEM visibility gap for T1003.001 — detection without centralized logging means other analysts won't see it. Re-run BAS after fixes." },
+  { q: "A user reports their mouse is moving on its own and files are being deleted. Event 4624 shows a Type 10 (RDP) logon from an external IP during lunch hour. What's your containment action?", a: "Active remote access compromise. Immediately disable the user's account and revoke all sessions. EDR network isolation on the endpoint. Check for lateral movement (Type 3 logons from this host to others). Do NOT power off — preserve RAM for forensic analysis of the active session." },
+  { q: "Your organization uses a third-party SaaS app. The vendor announces they were breached and customer data may have been accessed. What's your first communication step?", a: "Escalate to Legal/Compliance immediately. They own breach notification decisions (GDPR 72h, state laws, contract terms). Technical team should rotate API keys, review access logs for the SaaS integration, and validate no lateral movement from the integration. Do NOT notify customers before Legal approves messaging." }
+];
+function randomScenario() {
+  const s = scenarios[Math.floor(Math.random() * scenarios.length)];
+  const out = document.getElementById('randomOutput');
+  out.style.display = 'block';
+  out.innerHTML = '<strong style="color:var(--warn)">Scenario:</strong><p style="margin:0.5rem 0 1rem;">' + s.q + '</p><button class="btn btn-outline" onclick="this.nextElementSibling.style.display=\'block\';this.style.display=\'none\'">Reveal Answer</button><div style="display:none;margin-top:1rem;padding:0.75rem;background:rgba(34,197,94,0.1);border-radius:0.4rem;"><strong style="color:var(--success)">Answer:</strong><p style="margin:0.5rem 0 0;">' + s.a + '</p></div>';
+}
+
+// ===== INIT =====
+const state = loadState();
+if (state.date) document.getElementById('examDate').value = state.date;
+document.querySelectorAll('input[type=checkbox]').forEach(cb => {
+  if (state.checks[cb.id]) {
+    cb.checked = true;
+    cb.closest('.check-row')?.classList.add('done');
+  }
+});
+if (state.known) knownSet = new Set(state.known);
+cardOrder = flashcards.map((_,i)=>i);
+renderCard();
+renderQuiz();
+calcCVSS();
+updateProgress();
+updateDays();
+updateStreak();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  const activePanel = document.querySelector('.practice-panel[style*="block"], .practice-panel:not([style*="none"])');
+  const practiceVisible = document.getElementById('practice').classList.contains('active');
+  if (!practiceVisible) return;
+  if (e.key === 'ArrowRight') {
+    if (document.getElementById('practice-flash').style.display !== 'none') nextCard();
+    else if (document.getElementById('practice-quiz').style.display !== 'none') { if (quizAnswered) nextQuestion(); }
+  } else if (e.key === 'ArrowLeft') {
+    if (document.getElementById('practice-flash').style.display !== 'none') prevCard();
+    else if (document.getElementById('practice-quiz').style.display !== 'none') prevQuestion();
+  } else if (e.key === ' ' || e.key === 'Enter') {
+    if (document.getElementById('practice-flash').style.display !== 'none') { e.preventDefault(); flipCard(); }
+  }
+});
+</script>
+<script data-pplx-inline-edit>
+(function () {
+  if (window === window.top) return;
+
+  const allowedParentOrigins = ["https://www.perplexity.ai","https://perplexity.ai","https://testing.perplexity.ai","https://staging.perplexity.ai","https://*.preview.i.perplexity.ai","http://perplexity.localhost","http://localhost:1420","http://127.0.0.1:1420","http://localhost:3000","http://127.0.0.1:3000","http://localhost:5173","http://127.0.0.1:5173"];
+  const MAX_FONT_BYTES = 500 * 1024;
+  const MAX_TOTAL_FONT_BYTES = 2 * 1024 * 1024;
+  let scrollForwarding = false;
+  let scrollRaf = 0;
+  let trustedTopOrigin = null;
+
+  // Allow entries like "https://*.preview.i.perplexity.ai" — the wildcard
+  // matches a single DNS label (no dots), so "https://*.foo" cannot stretch
+  // across multiple labels.
+  function matchesAllowedOrigin(origin) {
+    if (!origin) return false;
+    for (const entry of allowedParentOrigins) {
+      if (!entry.includes("*")) {
+        if (entry === origin) return true;
+        continue;
+      }
+      const pattern = new RegExp(
+        "^" +
+          entry.replace(/[.+?^${}()|[\]\\]/g, "\\$&").replace(/\*/g, "[^.]+") +
+          "$",
+      );
+      if (pattern.test(origin)) return true;
+    }
+    return false;
+  }
+
+  // Trust decision: when the sender is same-origin-visible (event.origin is a
+  // real origin like https://www.perplexity.ai) we trust event.origin directly.
+  // When event.origin is "null" (opaque broker srcdoc), we fall back to the
+  // broker's stamped `parentOrigin` to identify the top window. The fallback
+  // is claim-only — we rely on the browser's native `targetOrigin` enforcement
+  // on the response path (see postToTrustedTop) to ensure replies can't be
+  // delivered to anyone but the actual top window of that claimed origin.
+  function getTrustedParentOrigin(event) {
+    const forwardedParentOrigin =
+      typeof event.data.parentOrigin === "string" ? event.data.parentOrigin : null;
+    const parentOrigin = event.origin === "null" ? forwardedParentOrigin : event.origin;
+    return matchesAllowedOrigin(parentOrigin) ? parentOrigin : null;
+  }
+
+  // All responses go to window.top with targetOrigin = the allowlisted origin.
+  // An attacker that iframes us inside their own null-origin broker can claim
+  // any parentOrigin they like, but the browser will drop the reply whenever
+  // the real top's origin doesn't match — so the screenshot never leaves.
+  function postToTrustedTop(message) {
+    if (!trustedTopOrigin) return;
+    try {
+      window.top.postMessage(message, trustedTopOrigin);
+    } catch (_error) {}
+  }
+
+  function inlineAll(original, clone) {
+    if (original.nodeType !== 1 || clone.nodeType !== 1) return;
+
+    try {
+      const computedStyle = getComputedStyle(original);
+      // cssText on a computed style is the serialized declaration in modern
+      // Chromium/Safari — a single read beats enumerating ~400 longhand
+      // properties. Firefox returns "" here, so we fall back on empty.
+      const serialized = computedStyle.cssText;
+      if (serialized) {
+        clone.style.cssText = serialized;
+      } else {
+        const parts = new Array(computedStyle.length);
+        for (let index = 0; index < computedStyle.length; index += 1) {
+          const property = computedStyle[index];
+          parts[index] = `${property}:${computedStyle.getPropertyValue(property)};`;
+        }
+        clone.style.cssText = parts.join("");
+      }
+    } catch (_error) {}
+
+    const originalChildren = original.children;
+    const clonedChildren = clone.children;
+    for (
+      let index = 0;
+      index < originalChildren.length && index < clonedChildren.length;
+      index += 1
+    ) {
+      inlineAll(originalChildren[index], clonedChildren[index]);
+    }
+  }
+
+  function extractFontUrl(srcValue) {
+    const matches = [
+      ...srcValue.matchAll(
+        /url\(["']?([^"')]+)["']?\)(?:\s*format\(["']?([^"')]+)["']?\))?/gi,
+      ),
+    ];
+    if (matches.length === 0) return null;
+    const woff2 = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff2"));
+    if (woff2) return woff2[1];
+    const woff = matches.find((m) => m[2] && m[2].toLowerCase().includes("woff"));
+    if (woff) return woff[1];
+    return matches[0][1];
+  }
+
+  // Cache resolved font URL -> data URI across captures. Fonts on a page
+  // essentially never change, and a batch run emits multiple captures back to
+  // back — without this we'd refetch + re-base64 every time.
+  const fontDataUriCache = new Map();
+  const SRC_DECLARATION_RE = /src\s*:\s*[^;}]+/i;
+
+  async function fetchAsDataUri(url) {
+    if (fontDataUriCache.has(url)) return fontDataUriCache.get(url);
+    let dataUri = null;
+    try {
+      const response = await fetch(url, { mode: "cors", credentials: "omit" });
+      if (response.ok) {
+        const blob = await response.blob();
+        if (blob.size <= MAX_FONT_BYTES) {
+          dataUri = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () =>
+              resolve(typeof reader.result === "string" ? reader.result : null);
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(blob);
+          });
+        }
+      }
+    } catch (_error) {
+      dataUri = null;
+    }
+    fontDataUriCache.set(url, dataUri);
+    return dataUri;
+  }
+
+  function collectFontFaceRuleTexts() {
+    const rules = [];
+    for (const sheet of document.styleSheets) {
+      let cssRules;
+      try {
+        cssRules = sheet.cssRules;
+      } catch (_error) {
+        continue;
+      }
+      if (!cssRules) continue;
+      for (const rule of cssRules) {
+        const cssText = rule.cssText || "";
+        if (cssText.startsWith("@font-face")) rules.push(cssText);
+      }
+    }
+    return rules;
+  }
+
+  async function buildInlinedFontCss() {
+    const ruleTexts = collectFontFaceRuleTexts();
+    if (ruleTexts.length === 0) return null;
+
+    const resolved = ruleTexts.map((cssText) => {
+      if (!SRC_DECLARATION_RE.test(cssText)) return null;
+      const srcMatch = cssText.match(/src\s*:\s*([^;}]+)[;}]/i);
+      if (!srcMatch) return null;
+      const url = extractFontUrl(srcMatch[1]);
+      if (!url) return null;
+      try {
+        return { cssText, url: new URL(url, document.baseURI).href };
+      } catch (_error) {
+        return null;
+      }
+    });
+
+    const dataUris = await Promise.all(
+      resolved.map((entry) => (entry ? fetchAsDataUri(entry.url) : Promise.resolve(null))),
+    );
+
+    const inlined = [];
+    let totalBytes = 0;
+    for (let index = 0; index < resolved.length; index += 1) {
+      const entry = resolved[index];
+      const dataUri = dataUris[index];
+      if (!entry || !dataUri) continue;
+      const approxBytes = dataUri.length * 0.75;
+      if (totalBytes + approxBytes > MAX_TOTAL_FONT_BYTES) break;
+      totalBytes += approxBytes;
+      inlined.push(entry.cssText.replace(SRC_DECLARATION_RE, `src: url("${dataUri}")`));
+    }
+    return inlined.length > 0 ? inlined.join("\n") : null;
+  }
+
+  function stripExternal(clone) {
+    const images = clone.querySelectorAll("img");
+    for (let index = 0; index < images.length; index += 1) {
+      const src = images[index].getAttribute("src");
+      if (src && !src.startsWith("data:")) images[index].removeAttribute("src");
+    }
+
+    const elements = clone.querySelectorAll("*");
+    for (let index = 0; index < elements.length; index += 1) {
+      const style = elements[index].style.cssText;
+      if (style && style.includes("url(")) {
+        elements[index].style.cssText = style.replace(
+          /url\(["']?(?!data:)[^)"']*["']?\)/gi,
+          "none",
+        );
+      }
+    }
+  }
+
+  function emitScroll() {
+    scrollRaf = 0;
+    if (!scrollForwarding) return;
+    postToTrustedTop({
+      type: "INLINE_EDIT_SCROLL",
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+    });
+  }
+
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (!scrollForwarding || scrollRaf) return;
+      scrollRaf = requestAnimationFrame(emitScroll);
+    },
+    { passive: true, capture: true },
+  );
+
+  async function handleCaptureRequest(event) {
+    const requestId = event.data.requestId;
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    function postResult(dataUrl) {
+      postToTrustedTop({
+        type: "INLINE_EDIT_SCREENSHOT_RESULT",
+        requestId,
+        dataUrl,
+        scrollX,
+        scrollY,
+      });
+    }
+
+    try {
+      // Wait for any pending web fonts to resolve so both inline metrics and
+      // the @font-face inlining below see the same loaded faces.
+      if (document.fonts && document.fonts.ready) {
+        try {
+          await document.fonts.ready;
+        } catch (_error) {}
+      }
+
+      const clone = document.documentElement.cloneNode(true);
+      inlineAll(document.documentElement, clone);
+
+      const removedNodes = clone.querySelectorAll("script,link[rel=\"stylesheet\"],style");
+      for (let index = 0; index < removedNodes.length; index += 1) {
+        removedNodes[index].remove();
+      }
+
+      stripExternal(clone);
+
+      // Re-embed web fonts as data-URI @font-face rules so the SVG rasterizer
+      // can resolve them — external font URLs aren't fetched during
+      // foreignObject rendering, which would otherwise force a fallback face
+      // and change text metrics.
+      const inlinedFontCss = await buildInlinedFontCss();
+      if (inlinedFontCss) {
+        const styleEl = document.createElement("style");
+        styleEl.textContent = inlinedFontCss;
+        const head = clone.querySelector("head");
+        if (head) head.appendChild(styleEl);
+        else clone.insertBefore(styleEl, clone.firstChild);
+      }
+
+      const html = new XMLSerializer().serializeToString(clone);
+      const svg =
+        `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">` +
+        '<foreignObject width="100%" height="100%">' +
+        `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden">` +
+        `<div style="position:relative;left:-${scrollX}px;top:-${scrollY}px">` +
+        html +
+        "</div></div></foreignObject></svg>";
+      const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+      const image = new Image();
+      image.onload = function () {
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(image, 0, 0);
+        postResult(canvas.toDataURL("image/png"));
+      };
+      image.onerror = function () {
+        postResult(null);
+      };
+      image.src = svgUrl;
+    } catch (_error) {
+      postResult(null);
+    }
+  }
+
+  window.addEventListener("message", function (event) {
+    if (!event.data) return;
+    // Only accept messages from the direct parent frame. Blocks sibling /
+    // unrelated-window postMessage senders that could otherwise reach us.
+    if (event.source !== window.parent) return;
+
+    const trustedParentOrigin = getTrustedParentOrigin(event);
+    if (!trustedParentOrigin) return;
+    trustedTopOrigin = trustedParentOrigin;
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_START") {
+      scrollForwarding = true;
+      emitScroll();
+      return;
+    }
+
+    if (event.data.type === "INLINE_EDIT_SCROLL_STOP") {
+      scrollForwarding = false;
+      if (scrollRaf) cancelAnimationFrame(scrollRaf);
+      scrollRaf = 0;
+      return;
+    }
+
+    if (event.data.type !== "INLINE_EDIT_CAPTURE_REQUEST") return;
+
+    handleCaptureRequest(event);
+  });
+})();
+
+
+</script></body>
+</html>

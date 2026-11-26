@@ -1,4 +1,7 @@
 import { getCollection } from "astro:content";
+import { apps } from "./apps";
+
+const appPages = apps.map((a) => a.slug);
 
 export interface SitemapOptions {
   /** Include the blog posts in this sitemap. */
@@ -24,7 +27,9 @@ export async function buildUrlSet(site: URL | undefined, options: SitemapOptions
     { loc: "/", priority: "1.0" },
     { loc: "/about/", priority: "0.9" },
     { loc: "/resume/", priority: "0.9" },
+    { loc: "/apps/", priority: "0.8" },
     ...(includeBlog ? [{ loc: "/blog/", priority: "0.8" }] : []),
+    ...(includeBlog ? appPages.map((a) => ({ loc: `/apps/${a}/`, priority: "0.7" })) : []),
     ...posts.map((p) => ({
       loc: `/blog/${p.id}/`,
       priority: "0.7",

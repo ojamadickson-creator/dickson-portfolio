@@ -1,0 +1,80 @@
+---
+import Base from "../../layouts/Base.astro";
+import Icon from "../../components/Icon.astro";
+import { apps } from "../../lib/apps";
+
+const listLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Practice apps",
+  itemListElement: apps.map((app, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: app.name,
+    url: new URL(`/apps/${app.slug}/`, Astro.site ?? "https://ojamadickson.xyz").toString(),
+  })),
+};
+---
+
+<Base
+  title="Practice apps · CompTIA and AWS exam simulators · Dickson Ojama"
+  description="Free practice apps that run in the browser: CompTIA A+ and CySA+ exam simulators, a CySA+ study tracker and an AWS Cloud Practitioner practice test. No signup, no data collected."
+  path="/apps/"
+  jsonLd={listLd}
+>
+  <section class="apps-hero">
+    <div class="wrap apps-hero__inner">
+      <p class="eyebrow">Apps</p>
+      <h1>Practice apps, straight from the browser.</h1>
+      <p class="apps-hero__lede">
+        Exam simulators and study tools I built while preparing for CompTIA and AWS certifications.
+        They run entirely on your device — no account, nothing uploaded, and your progress stays in this browser.
+      </p>
+    </div>
+  </section>
+
+  <section class="apps-list">
+    <div class="wrap">
+      <ul class="apps" role="list">
+        {apps.map((app) => (
+          <li class="app">
+            <div class="app__head">
+              <span class="app__exam mono">{app.exam}</span>
+              <h2 class="app__title">{app.name}</h2>
+            </div>
+            <p class="app__desc">{app.description}</p>
+            <p class="app__features mono">{app.features.join(" · ")}</p>
+            <div class="app__actions">
+              <a class="btn btn--primary" href={`/apps/${app.slug}/`}>Open app <Icon name="arrow" /></a>
+              <a class="app__repo" href={app.repo} target="_blank" rel="noopener">Source on GitHub</a>
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p class="apps-note">
+        Built as plain HTML, CSS and JavaScript. Progress is stored with localStorage on your own device;
+        nothing is sent to a server.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .apps-hero { padding: clamp(40px, 6vw, 84px) 0 clamp(18px, 3vw, 28px); border-bottom: 1px solid var(--color-border); }
+  .apps-hero__inner { display: grid; gap: 12px; max-width: 780px; }
+  .apps-hero h1 { font-family: var(--font-display); font-size: clamp(30px, 4.6vw, 52px); line-height: 1.05; letter-spacing: -0.02em; }
+  .apps-hero__lede { color: var(--color-text-muted); font-size: 17px; max-width: 62ch; }
+
+  .apps-list { padding: clamp(28px, 4vw, 48px) 0 clamp(56px, 8vw, 96px); }
+  .apps { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
+  .app { max-width: none; border: 1px solid var(--color-border); border-radius: var(--radius-lg); background: var(--color-surface-2); padding: clamp(18px, 2.4vw, 26px); display: grid; gap: 10px; }
+  .app__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; }
+  .app__exam { font-size: 11.5px; letter-spacing: .06em; color: var(--color-primary); border: 1px solid var(--color-border); border-radius: 999px; padding: 3px 9px; }
+  .app__title { font-family: var(--font-display); font-size: clamp(19px, 2.1vw, 24px); line-height: 1.2; }
+  .app__desc { color: var(--color-text-muted); font-size: 15px; max-width: 74ch; }
+  .app__features { font-size: 11.5px; letter-spacing: .04em; color: var(--color-text-muted); }
+  .app__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 4px; }
+  .app__actions :global(svg) { width: 1em; height: 1em; }
+  .app__repo { font-size: 13.5px; color: var(--color-text-muted); text-decoration: underline; text-underline-offset: 2px; }
+  .apps-note { margin-top: 22px; font-size: 13px; color: var(--color-text-muted); max-width: 70ch; }
+</style>

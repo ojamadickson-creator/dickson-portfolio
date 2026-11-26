@@ -9,7 +9,11 @@ const pages = [];
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
     const p = path.join(dir, e.name);
     if (e.isDirectory()) walk(p);
-    else if (e.name.endsWith(".html")) pages.push(p);
+    else if (e.name.endsWith(".html")) {
+      // vendored single-page apps are served inside an iframe, not as site pages
+      if (/[\\/]apps[\\/][^\\/]+[\\/]app\.html$/.test(p)) continue;
+      pages.push(p);
+    }
   }
 })(root);
 

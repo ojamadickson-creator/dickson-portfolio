@@ -91,6 +91,8 @@ const personLd = {
     />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
     <link rel="alternate" type="application/rss+xml" title={`Blog — ${profile.name}`} href="/rss.xml" />
     <meta property="og:type" content={ogType} />
@@ -127,7 +129,7 @@ const personLd = {
     <header class="site-header">
       <div class="wrap">
         <a class="brand" href="/" aria-label={`${profile.name}, home`}>
-          <span class="brand__mark" aria-hidden="true">DO</span>
+          <img class="brand__logo" src="/brand/emblem-88.png" alt="" width="40" height="40" decoding="async" />
           <span class="brand__text"><span class="brand__name">{profile.name}</span><span class="brand__role">{profile.role}</span></span>
         </a>
         <nav class="nav" aria-label="Main">

@@ -67,6 +67,19 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   </section>
 
   <!-- Home lab -->
+    <section class="section brandband" id="brand">
+    <div class="wrap brandband__inner">
+      <img class="brandband__mark" src="/brand/emblem-512.png" alt="Dickson Ojama emblem: a gold D inside a blue ring on a hexagon badge"
+           width="512" height="512" loading="lazy" decoding="async" />
+      <div class="brandband__copy">
+        <p class="eyebrow">The mark</p>
+        <h2>Technology, support, security — people first, always.</h2>
+        <p>Three years of technical support, seven of customer support, and a home lab built to the same standard
+           as the job: documented, repeatable, and checked before I call it done.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="section section--ink" id="lab">
     <div class="wrap lab">
       <div class="section-head">
@@ -253,6 +266,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   </section>
 
   <!-- Contact -->
+
   <section class="section section--ink" id="contact">
     <div class="wrap contact">
       <div class="section-head">
@@ -448,4 +462,12 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     .training img, .training .cert__tile { width: 40px; height: 40px; }
     .stats li { padding: var(--space-4); }
   }
+
+  .brandband { border-top: 1px solid var(--color-divider); }
+  .brandband__inner { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: clamp(16px, 3vw, 32px); align-items: center; }
+  .brandband__mark { width: 96px; height: 96px; max-width: 100%; border-radius: 18px; display: block; }
+  .brandband__copy h2 { font-family: var(--font-display); font-size: clamp(22px, 2.8vw, 34px); line-height: 1.15; letter-spacing: -0.01em; }
+  .brandband__copy p { color: var(--color-text-muted); margin-top: 10px; max-width: 58ch; }
+  @media (max-width: 720px) { .brandband__inner { grid-template-columns: 72px minmax(0, 1fr); } .brandband__mark { width: 72px; height: 72px; } }
+  .brandband { padding-block: clamp(20px, 3vw, 32px); }
 </style>

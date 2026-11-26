@@ -83,6 +83,15 @@
         }
       ],
       "source": "/og/(.*)"
+    },
+    {
+      "source": "/apps/:slug/app.html",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
     }
   ],
   "trailingSlash": true

@@ -18,7 +18,7 @@ Every code-level finding is fixed and verified. Two items cannot be finished fro
 | 3 | CSP allowed `'unsafe-inline'` scripts (and `'unsafe-eval'` on /apps) | Astro `security.csp` now emits a hashed `<meta>` policy; the Vercel header is reduced to `frame-ancestors 'self'`; the `/apps` policy drops both CDNs and `'unsafe-eval'` | Hash-coverage script: 0 problems across 21 pages; all pages render |
 | 4 | Error path pointed at a missing email link | Added `.form__fallback` with a mailto link | Present in built HTML |
 | 5 | Duplicate email when storage failed | The background email now fires only after a successful save; the failure branch sends one | Code review |
-| 6 | No privacy notice | Added under the form: what is stored, where, how to have it deleted | Rendered |
+| 6 | No privacy notice | Added under the form: what is kept, why, and how to have it deleted (no vendor names in the copy) | Rendered |
 | 7 | OG images cached immutably; blog media uncached | `/og` → 86400s; `/blog/**.webp` and `/blog/**.mp4` → 7 days; HTML not matched | Live headers: `/og/blog.jpg` 86400, a post webp 604800, `/blog/` 0 |
 | 8 | `sharp` used but undeclared | Added to `devDependencies` | `npm run og` regenerates 16 cards |
 | 9 | Two asset scripts hardcoded an old absolute path | Deleted (`prepare-home-assets.mjs`, `build-watermark-assets.mjs`) | `npm run build` clean |

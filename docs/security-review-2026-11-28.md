@@ -34,7 +34,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 
 ## Open decisions (need your accounts or a choice)
 
-1. **The question is live (Production and Preview).** `CHALLENGE_SECRET` is set in Vercel; `/api/challenge/` issues a signed question and `/api/contact/` checks the answer. Turnstile was removed: its managed mode can pass a trusted browser without any interaction, which was not the behaviour wanted here. The old `PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` variables are now unused and can be deleted. Trade-off to keep in mind: arithmetic is a speed bump, not bot detection — a script can fetch and solve it. The rate limit and honeypot are what bound abuse; if real spam appears, move to hCaptcha or reCAPTCHA v2, where a checkbox and image challenge are mandatory.
+1. **hCaptcha is live (Production).** The widget requires a click ("I am human") and escalates to an image challenge when hCaptcha is unsure. `PUBLIC_HCAPTCHA_SITE_KEY` is set for Production and Preview; `HCAPTCHA_SECRET` is set for Production only, so Preview deployments render the widget but skip verification (they sit behind Vercel Authentication). The old Turnstile variables (`PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`) and `CHALLENGE_SECRET` are now unused and can be deleted.
 2. **Run the SQL** in `docs/supabase-contact-constraints.sql` so the database enforces the same limits the endpoint does.
 3. **`'unsafe-inline'` on `/apps/*`** stays: the vendored apps use inline scripts and inline event handlers. It is scoped to `/apps`, and no third-party scripts remain there.
 
@@ -70,7 +70,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - `src/pages/api/contact.ts` is the only on-demand route (`prerender = false`); everything else is prerendered by `@astrojs/vercel`.
 - Supabase URL and publishable key must come from the same project. The Vercel/Supabase integration exports `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` for its own database, which does not contain `contact_messages`; mixing one integration value with the default URL fails as 401 and surfaces as `502 storage`. The route reads `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_PUBLISHABLE_KEY` first.
 - `scripts/e2e-contact.mjs <url>` drives a real browser over CDP, fills the form and asserts the status text; `scripts/mock-supabase.py` is the local stand-in for Supabase used by that test.
-- Local API tests: `CONTACT_NOTIFY=off PUBLIC_SUPABASE_URL=http://127.0.0.1:4399 TURNSTILE_SECRET_KEY=1x0000…AA npx astro dev`.
+- Local API tests: `CONTACT_NOTIFY=off PUBLIC_SUPABASE_URL=http://127.0.0.1:4399 HCAPTCHA_SECRET=0x0000… npx astro dev` (hCaptcha test keys: sitekey `10000000-ffff-ffff-ffff-000000000001`, secret `0x0000000000000000000000000000000000000000`).
 
 ## Production run after the change
 
@@ -78,9 +78,9 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - `/api/contact/`: 403 for a foreign origin, 400 for an invalid email, 400 for a missing token when a secret is configured, 429 after five requests, 200 for a valid submission (one row stored, one notification attempted).
 - Browser E2E on the live site: form filled and submitted, success status shown, fallback hidden.
 - Two rows labelled "E2E Production Test" (`e2e@example.com`) were created by these tests and can be deleted from the Supabase table.
-## Question challenge verification (28 Nov 2026)
+## hCaptcha verification (28 Nov 2026)
 
-- `GET /api/challenge/` → `{"ok":true,"id":"…","question":"What is 3 × 5?"}`; the id is an HMAC-signed payload with a 10-minute expiry.
-- Wrong answer, missing answer, and a tampered signature each return `400 {"ok":false,"error":"captcha"}`; the correct answer stores one row.
-- Browser E2E on production: question loaded, answered, success message shown, fallback hidden.
-- The answer is never trusted from the browser: the server re-derives the operands from the signed id.
+- `/about/` ships the `h-captcha` widget, its script and the sitekey; the arithmetic question and `/api/challenge/` are gone.
+- Tokenless POST and a garbage token both return `400 {"ok":false,"error":"captcha"}` — the server is calling hCaptcha siteverify, so the secret is present and correct.
+- Browser run on production: widget renders with the real sitekey (no test banner), and submitting without ticking is refused client-side with "Tick the verification box above before sending."
+- A successful tick cannot be automated without solving the CAPTCHA, which is the point; the human success path is left for the owner to confirm.

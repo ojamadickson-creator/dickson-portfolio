@@ -65,38 +65,43 @@ try {
     return res.result.value;
   };
 
-  // Fill and submit the form the way a person would.
   const result = await evaluate(`(async () => {
     const form = document.getElementById("contact-form");
     if (!form) return { error: "no form on this page" };
     form.scrollIntoView({ block: "center" });
     await new Promise(r => setTimeout(r, 800));
 
-    const set = (name, value) => {
-      const el = form.elements.namedItem(name);
+    const set = (el, value) => {
       const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), "value").set;
       setter.call(el, value);
       el.dispatchEvent(new Event("input", { bubbles: true }));
     };
-    set("name", "E2E Test");
-    set("email", "e2e@example.com");
-    set("company", "Review");
-    set("message", "This is an automated check of the contact form. Please ignore.");
+    const field = (name) => form.elements.namedItem(name);
 
-    // Give Turnstile a moment to issue a token (test site key passes automatically).
-    for (let i = 0; i < 30; i++) {
-      const token = window.turnstile && window.turnstile.getResponse ? window.turnstile.getResponse() : "";
-      if (token) break;
+    set(field("name"), "E2E Test");
+    set(field("email"), "e2e@example.com");
+    set(field("company"), "Review");
+    set(field("message"), "This is an automated check of the contact form. Please ignore.");
+
+    // The signed question arrives from /api/challenge/; solve it like a visitor would.
+    const questionEl = form.querySelector("[data-question]");
+    let question = "";
+    for (let i = 0; i < 40; i++) {
+      question = (questionEl.textContent || "").trim();
+      if (/What is \\d+ [+×] \\d+\\?/.test(question)) break;
       await new Promise(r => setTimeout(r, 200));
     }
-    const token = window.turnstile && window.turnstile.getResponse ? window.turnstile.getResponse() : "";
+    const m = question.match(/What is (\\d+) ([+×]) (\\d+)\\?/);
+    const answer = m ? (m[2] === "+" ? Number(m[1]) + Number(m[3]) : Number(m[1]) * Number(m[3])) : "";
+    if (answer !== "") set(field("answer"), String(answer));
 
     form.requestSubmit();
     await new Promise(r => setTimeout(r, 2500));
     const status = form.querySelector(".form__status");
     return {
-      tokenPresent: Boolean(token),
-      widget: Boolean(document.querySelector(".cf-turnstile")),
+      question,
+      answered: answer !== "",
+      challengeVisible: !form.querySelector(".form__challenge")?.hidden,
       status: status ? status.textContent.trim() : null,
       kind: status ? status.dataset.kind : null,
       fallbackHidden: form.querySelector(".form__fallback")?.hidden ?? null,

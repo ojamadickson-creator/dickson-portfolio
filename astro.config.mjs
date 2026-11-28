@@ -25,10 +25,6 @@ export default defineConfig({
           { resource: "'unsafe-inline'", kind: "attribute" },
         ],
       },
-      scriptDirective: {
-        // Cloudflare Turnstile, only loaded when PUBLIC_TURNSTILE_SITE_KEY is set.
-        resources: ["https://challenges.cloudflare.com"],
-      },
       directives: [
         "default-src 'self'",
         "font-src 'self' data: https://cdn.fontshare.com https://fonts.gstatic.com",
@@ -38,7 +34,7 @@ export default defineConfig({
         // email relay are reached by the server, so neither is named in the page.
         "connect-src 'self' https://api.github.com https://vitals.vercel-insights.com",
         "form-action 'self'",
-        "frame-src 'self' https://challenges.cloudflare.com",
+        "frame-src 'self'",
         "object-src 'none'",
         "base-uri 'self'",
       ],

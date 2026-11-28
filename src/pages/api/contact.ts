@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { verifyChallenge } from "../../lib/challenge";
 
 // Runs on demand on Vercel (the one route that is not prerendered).
 export const prerender = false;
@@ -25,24 +26,6 @@ function overLimit(ip: string): boolean {
   seen.set(ip, recent);
   if (seen.size > 5000) seen.clear();
   return recent.length > MAX_PER_WINDOW;
-}
-
-async function verifyTurnstile(token: string, ip: string, secret: string): Promise<boolean> {
-  const form = new FormData();
-  form.set("secret", secret);
-  form.set("response", token);
-  if (ip && ip !== "unknown") form.set("remoteip", ip);
-  try {
-    const res = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-      method: "POST",
-      body: form,
-    });
-    if (!res.ok) return false;
-    const data = (await res.json()) as { success?: boolean };
-    return data.success === true;
-  } catch {
-    return false;
-  }
 }
 
 async function notifyByEmail(payload: { name: string; email: string; company: string | null; message: string }) {
@@ -96,7 +79,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const email = String(body.email ?? "").trim();
   const company = String(body.company ?? "").trim();
   const message = String(body.message ?? "").trim();
-  const token = String(body.token ?? "");
+  const challenge = String(body.challenge ?? "");
+  const answer = String(body.answer ?? "");
 
   if (name.length < 1 || name.length > LIMITS.name) return json(400, { ok: false, error: "name" });
   if (email.length > LIMITS.email || !isEmail(email)) return json(400, { ok: false, error: "email" });
@@ -109,13 +93,8 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const ip = clientAddress || (request.headers.get("x-forwarded-for") ?? "").split(",")[0]?.trim() || "unknown";
   if (overLimit(ip)) return json(429, { ok: false, error: "rate" });
 
-  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
-  if (turnstileSecret) {
-    if (!token) return json(400, { ok: false, error: "captcha" });
-    if (!(await verifyTurnstile(token, ip, turnstileSecret))) {
-      return json(403, { ok: false, error: "captcha" });
-    }
-  }
+  // The question is signed by /api/challenge; the answer is checked here, not in the browser.
+  if (!(await verifyChallenge(challenge, answer))) return json(400, { ok: false, error: "captcha" });
 
   const payload = { name, email, company: company || null, message };
 

@@ -1,11 +1,6 @@
 ---
 import Icon from "./Icon.astro";
 import { profile } from "../lib/profile";
-
-// Set PUBLIC_TURNSTILE_SITE_KEY (and TURNSTILE_SECRET_KEY on the server) to switch the
-// Cloudflare Turnstile challenge on. Without the site key the widget is not rendered and the
-// endpoint skips verification, so the form keeps working before the keys exist.
-const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 ---
 
 <form class="form" id="contact-form" novalidate>
@@ -16,12 +11,23 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
   <label>Company <span class="muted">(optional)</span><input name="company" autocomplete="organization" maxlength="160" /></label>
   <label>Message<textarea name="message" rows="5" required minlength="10" maxlength="4000"></textarea></label>
   <label class="hp" aria-hidden="true">Leave this empty<input name="_honey" tabindex="-1" autocomplete="off" /></label>
-  {TURNSTILE_SITE_KEY && (
-    <div class="form__turnstile">
-      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-      <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="dark"></div>
-    </div>
-  )}
+
+  <div class="form__challenge" hidden>
+    <label class="form__question">
+      <span data-question>Checking that you are human…</span>
+      <input
+        name="answer"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="4"
+        required
+        aria-describedby="challenge-help"
+      />
+    </label>
+    <button type="button" class="form__refresh" data-challenge-refresh>New question</button>
+    <p class="form__hint" id="challenge-help">Type the answer, numbers only. It is checked on the server.</p>
+  </div>
+
   <div class="form__foot">
     <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
     <p class="form__status" role="status" aria-live="polite"></p>
@@ -42,8 +48,13 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
   const form = document.getElementById("contact-form") as HTMLFormElement | null;
   if (form) {
     const status = form.querySelector(".form__status") as HTMLElement;
-    const btn = form.querySelector("button") as HTMLButtonElement;
+    const btn = form.querySelector("button[type=submit]") as HTMLButtonElement;
     const fallback = form.querySelector(".form__fallback") as HTMLElement | null;
+    const box = form.querySelector(".form__challenge") as HTMLElement;
+    const question = form.querySelector("[data-question]") as HTMLElement;
+    const answer = form.querySelector("input[name=answer]") as HTMLInputElement;
+    const refresh = form.querySelector("[data-challenge-refresh]") as HTMLButtonElement;
+
     const setStatus = (msg: string, kind: "ok" | "err" | "") => {
       status.textContent = msg;
       status.dataset.kind = kind;
@@ -52,10 +63,28 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
       if (fallback) fallback.hidden = !show;
     };
 
-    const turnstileToken = () => {
-      const api = (window as unknown as { turnstile?: { getResponse?: () => string } }).turnstile;
-      return api?.getResponse?.() ?? "";
+    let challengeId = "";
+
+    const loadChallenge = async () => {
+      question.textContent = "Loading the question…";
+      try {
+        const res = await fetch("/api/challenge/", { cache: "no-store" });
+        const data = (await res.json()) as { ok?: boolean; id?: string; question?: string };
+        if (!res.ok || !data.ok || !data.id || !data.question) throw new Error("unavailable");
+        challengeId = data.id;
+        question.textContent = data.question;
+        answer.value = "";
+        box.hidden = false;
+        answer.focus({ preventScroll: true });
+      } catch {
+        challengeId = "";
+        box.hidden = true;
+        setStatus("The verification question could not load. Reload the page, or email me directly.", "err");
+        showFallback(true);
+      }
     };
+    loadChallenge();
+    refresh.addEventListener("click", loadChallenge);
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -66,7 +95,8 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
         company: String(data.get("company") || "").trim(),
         message: String(data.get("message") || "").trim(),
         website: String(data.get("_honey") || ""),
-        token: turnstileToken(),
+        challenge: challengeId,
+        answer: String(data.get("answer") || "").trim(),
       };
 
       if (payload.website) {
@@ -77,6 +107,16 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
       if (!payload.name) return setStatus("Please add your name.", "err");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
+      if (!payload.challenge) {
+        setStatus("The verification question is missing. Reload the page, or use the email link below.", "err");
+        showFallback(true);
+        return;
+      }
+      if (!payload.answer) {
+        setStatus("Answer the question to confirm you are human.", "err");
+        answer.focus();
+        return;
+      }
 
       btn.disabled = true;
       showFallback(false);
@@ -97,6 +137,7 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
         if (res.ok && body.ok) {
           form.reset();
           setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");
+          loadChallenge();
           return;
         }
         if (res.status === 429) {
@@ -105,7 +146,8 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
           return;
         }
         if (body.error === "captcha") {
-          setStatus("Please complete the verification above, then send again.", "err");
+          setStatus("That answer did not match. Here is a new question — try again.", "err");
+          loadChallenge();
           return;
         }
         setStatus("That did not go through. Send it as an email instead:", "err");
@@ -155,7 +197,30 @@ const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
     border-color: var(--color-ink-accent, #8fb4ff);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ink-accent, #8fb4ff) 25%, transparent);
   }
-  .form__turnstile { min-height: 65px; }
+  .form__challenge {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    border: 1px dashed var(--color-ink-border, #22334c);
+    border-radius: var(--radius-md, 12px);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  .form__challenge[hidden] { display: none; }
+  .form__question { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+  .form__question > span { font-size: 15px; color: var(--color-ink-text, #e6ebf2); }
+  .form__question input { width: 110px; min-height: 40px; text-align: center; }
+  .form__refresh {
+    justify-self: start;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--color-ink-accent, #8fb4ff);
+    background: none;
+    border: 0;
+    padding: 0;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .form__hint { margin: 0; font-size: 12px; color: var(--color-ink-muted, #9aa8bb); }
   .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4, 1rem); }
   .form__foot .btn--primary { background: var(--color-ink-accent, #8fb4ff); color: var(--color-ink, #0b1626); }
   .form__foot .btn--primary:hover { background: #b5ceff; }

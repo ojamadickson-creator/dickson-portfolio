@@ -119,9 +119,11 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
   const payload = { name, email, company: company || null, message };
 
+  // Keep URL and key as a pair. The Vercel/Supabase integration also exports SUPABASE_URL and
+  // SUPABASE_PUBLISHABLE_KEY, but those point at the integration's own database, where this
+  // table does not exist — mixing one of each silently fails with 401.
   const supabaseUrl = process.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
   const supabaseKey =
-    process.env.SUPABASE_PUBLISHABLE_KEY ??
     process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
     "sb_publishable_PWZ56gXJZkvteEYxwKJsDQ_PeCDGZMc";
 

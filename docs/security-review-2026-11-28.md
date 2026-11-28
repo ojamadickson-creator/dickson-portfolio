@@ -34,7 +34,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 
 ## Open decisions (need your accounts or a choice)
 
-1. **Turn the captcha on.** The form posts to `src/pages/api/contact.ts` and the Turnstile widget is wired; both wait for two Vercel variables: `PUBLIC_TURNSTILE_SITE_KEY` (all environments) and `TURNSTILE_SECRET_KEY` (production + preview, sensitive). Create the Turnstile widget for `ojamadickson.xyz` in the Cloudflare dashboard, add the pair, redeploy. Until then the endpoint skips verification and the form works normally. Tested end to end with Cloudflare's test keys: widget rendered, token issued, submission accepted, one insert, no duplicate.
+1. **Captcha is live (Production).** Cloudflare Turnstile widget created for `ojamadickson.xyz`; `PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` set for Production and the site redeployed. Verified: widget renders on `/about/`, a tokenless POST to `/api/contact/` returns `400 captcha`, and a submit without solving shows the "complete the verification" message. The secret exists only in Production, so Preview deployments stay captcha-free by design.
 2. **Run the SQL** in `docs/supabase-contact-constraints.sql` so the database enforces the same limits the endpoint does.
 3. **`'unsafe-inline'` on `/apps/*`** stays: the vendored apps use inline scripts and inline event handlers. It is scoped to `/apps`, and no third-party scripts remain there.
 
@@ -78,3 +78,9 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - `/api/contact/`: 403 for a foreign origin, 400 for an invalid email, 400 for a missing token when a secret is configured, 429 after five requests, 200 for a valid submission (one row stored, one notification attempted).
 - Browser E2E on the live site: form filled and submitted, success status shown, fallback hidden.
 - Two rows labelled "E2E Production Test" (`e2e@example.com`) were created by these tests and can be deleted from the Supabase table.
+## Captcha verification (28 Nov 2026, after the keys were added)
+
+- `/about/` HTML contains `cf-turnstile`, the Turnstile `api.js` script and the sitekey.
+- `POST /api/contact/` with a valid body and no token → `400 {"ok":false,"error":"captcha"}` (the gate is enforcing, so the secret is present and working).
+- Browser run: the widget renders as "Verify you are human"; submitting without solving shows "Please complete the verification above, then send again." and stores nothing.
+- The automated browser cannot finish a managed challenge — that is the intended behaviour. A human visitor ticks the box once, or passes without interaction.

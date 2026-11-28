@@ -34,7 +34,7 @@ export const GET: APIRoute = async ({ site }) => {
     `    <title>${esc(`Blog — ${profile.name}`)}</title>`,
     `    <link>${base}/blog/</link>`,
     `    <atom:link href="${base}/rss.xml" rel="self" type="application/rss+xml" />`,
-    `    <description>${esc("Practical notes on IT support, Windows, macOS, Microsoft 365, Entra ID and Intune.")}</description>`,
+    `    <description>${esc("An IT support specialist moving into defensive cybersecurity: lab walkthroughs, incident response notes and lessons from the pivot.")}</description>`,
     "    <language>en-gb</language>",
     `    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>`,
     items,

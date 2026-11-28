@@ -12,8 +12,9 @@ const projects = defineCollection({
     summary: z.string().max(220),
     brief: z.string(),
     stack: z.array(z.string()).min(1),
-    repo: z.url(),
-    video: z.url().optional(),
+    // Only https: a stray javascript: URL in frontmatter must never become a link.
+    repo: z.url().refine((u) => u.startsWith("https://"), "repo must be an https URL"),
+    video: z.url().refine((u) => u.startsWith("https://"), "video must be an https URL").optional(),
     evidence: z.object({ src: z.string(), alt: z.string(), caption: z.string() }),
     jobFit: z.array(z.string()).min(1),
     // One line a hiring manager can skim: the outcome, then the technique.

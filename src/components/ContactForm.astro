@@ -32,6 +32,13 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
     <p class="form__status" role="status" aria-live="polite"></p>
   </div>
+  <p class="form__fallback" hidden>
+    Or email <a href={`mailto:${profile.email}`}>{profile.email}</a>.
+  </p>
+  <p class="form__privacy">
+    Your name, email and message are kept so I can reply, and nothing else. They are stored in Supabase and
+    emailed to me through formsubmit.co. Ask me to delete them at any time: <a href={`mailto:${profile.email}`}>{profile.email}</a>.
+  </p>
 </form>
 
 <script>
@@ -49,7 +56,9 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     };
 
     const params = new URLSearchParams(location.search);
-    if (params.get("sent") === "1") {
+    // Only trust ?sent=1 when this browser actually submitted the native fallback.
+    if (params.get("sent") === "1" && sessionStorage.getItem("contact-sent") === "1") {
+      sessionStorage.removeItem("contact-sent");
       setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
       history.replaceState(null, "", location.pathname + "#contact");
     }
@@ -82,6 +91,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     const submitNatively = () => {
       (form.elements.namedItem("_next") as HTMLInputElement).value = `${location.origin}${location.pathname}?sent=1#contact`;
       (form.elements.namedItem("_subject") as HTMLInputElement).value = `Portfolio contact from ${String(new FormData(form).get("name") || "").trim()}`;
+      try { sessionStorage.setItem("contact-sent", "1"); } catch {}
       if (window.self !== window.top) form.target = "_blank";
       HTMLFormElement.prototype.submit.call(form);
     };
@@ -125,17 +135,16 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
         stored = false;
       }
 
-      // 2. Ask for the email copy in the background, whether or not storage worked.
-      notifyByEmail(payload);
-
       if (stored) {
         form.reset();
         setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");
         btn.disabled = false;
+        // One email copy, in the background: the message is already saved.
+        notifyByEmail(payload);
         return;
       }
 
-      // 3. Storage failed: wait for the relay so the message still leaves the browser.
+      // 2. Storage failed: wait for the relay so the message still leaves the browser.
       setStatus("Saving failed — sending by email instead, this can take up to 20 seconds…", "");
       try {
         const controller = new AbortController();
@@ -221,6 +230,8 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   .form__fallback { margin: 0; font-size: 13.5px; color: var(--color-ink-muted, #9aa8bb); }
   .form__fallback a { color: var(--color-ink-accent, #8fb4ff); text-decoration: underline; }
   .form__fallback[hidden] { display: none; }
+  .form__privacy { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--color-ink-muted, #9aa8bb); }
+  .form__privacy a { color: var(--color-ink-accent, #8fb4ff); }
   .muted { font-weight: 400; color: var(--color-ink-muted, #9aa8bb); }
   @media (max-width: 700px) {
     .form__row { grid-template-columns: 1fr; }

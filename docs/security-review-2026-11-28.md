@@ -34,7 +34,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 
 ## Open decisions (need your accounts or a choice)
 
-1. **Turn the captcha on.** The form now posts to a server route (`src/pages/api/contact.ts`) and the Turnstile widget is wired, but both wait for two Vercel environment variables: `PUBLIC_TURNSTILE_SITE_KEY` (build time) and `TURNSTILE_SECRET_KEY` (runtime). Create a Turnstile widget for `ojamadickson.xyz` in the Cloudflare dashboard, add the pair in Vercel, and redeploy. Until then the endpoint skips verification and the form still works.
+1. **Turn the captcha on.** The form posts to `src/pages/api/contact.ts` and the Turnstile widget is wired; both wait for two Vercel variables: `PUBLIC_TURNSTILE_SITE_KEY` (all environments) and `TURNSTILE_SECRET_KEY` (production + preview, sensitive). Create the Turnstile widget for `ojamadickson.xyz` in the Cloudflare dashboard, add the pair, redeploy. Until then the endpoint skips verification and the form works normally. Tested end to end with Cloudflare's test keys: widget rendered, token issued, submission accepted, one insert, no duplicate.
 2. **Run the SQL** in `docs/supabase-contact-constraints.sql` so the database enforces the same limits the endpoint does.
 3. **`'unsafe-inline'` on `/apps/*`** stays: the vendored apps use inline scripts and inline event handlers. It is scoped to `/apps`, and no third-party scripts remain there.
 
@@ -64,3 +64,17 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - Live `<meta>` CSP present on every page; every inline script and style on four sampled live pages is hashed (0 uncovered).
 - Live headers: general CSP is `frame-ancestors 'self'`; `/apps/*` keeps the scoped policy; OG cache 86400, blog media 604800, blog HTML `max-age=0`.
 - Visual: home, about, blog post, app wrapper, CySA+ simulator and the study tracker all render with styles, fonts and icons after the CSP change.
+
+## Contact route notes (for the next person)
+
+- `src/pages/api/contact.ts` is the only on-demand route (`prerender = false`); everything else is prerendered by `@astrojs/vercel`.
+- Supabase URL and publishable key must come from the same project. The Vercel/Supabase integration exports `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` for its own database, which does not contain `contact_messages`; mixing one integration value with the default URL fails as 401 and surfaces as `502 storage`. The route reads `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_PUBLISHABLE_KEY` first.
+- `scripts/e2e-contact.mjs <url>` drives a real browser over CDP, fills the form and asserts the status text; `scripts/mock-supabase.py` is the local stand-in for Supabase used by that test.
+- Local API tests: `CONTACT_NOTIFY=off PUBLIC_SUPABASE_URL=http://127.0.0.1:4399 TURNSTILE_SECRET_KEY=1x0000…AA npx astro dev`.
+
+## Production run after the change
+
+- Pages: 200, one H1, canonical correct; `scripts/sitemap_health.py` 20/20, 0 problems; live CSP hashes cover every inline script/style.
+- `/api/contact/`: 403 for a foreign origin, 400 for an invalid email, 400 for a missing token when a secret is configured, 429 after five requests, 200 for a valid submission (one row stored, one notification attempted).
+- Browser E2E on the live site: form filled and submitted, success status shown, fallback hidden.
+- Two rows labelled "E2E Production Test" (`e2e@example.com`) were created by these tests and can be deleted from the Supabase table.

@@ -8,7 +8,7 @@ import { profile } from "../lib/profile";
 const HCAPTCHA_SITE_KEY = import.meta.env.PUBLIC_HCAPTCHA_SITE_KEY ?? "";
 ---
 
-<form class="form" id="contact-form" novalidate>
+<form class="form" id="contact-form" novalidate data-notify={`https://formsubmit.co/ajax/${profile.email}`}>
   <div class="form__row">
     <label>Name<input name="name" autocomplete="name" required maxlength="120" /></label>
     <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
@@ -85,7 +85,8 @@ const HCAPTCHA_SITE_KEY = import.meta.env.PUBLIC_HCAPTCHA_SITE_KEY ?? "";
       if (!payload.name) return setStatus("Please add your name.", "err");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
-      if (!payload.token) {
+      // Only enforce a token when a widget is actually rendered (the keys may be absent).
+      if (form.querySelector(".h-captcha") && !payload.token) {
         setStatus("Tick the verification box above before sending.", "err");
         return;
       }
@@ -107,6 +108,30 @@ const HCAPTCHA_SITE_KEY = import.meta.env.PUBLIC_HCAPTCHA_SITE_KEY ?? "";
         const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
 
         if (res.ok && body.ok) {
+          // Email copy from the visitor's IP: the relay challenges datacenter traffic, so the
+          // server cannot send it. The message is already stored, so this is best-effort.
+          const notifyUrl = form.dataset.notify;
+          if (notifyUrl) {
+            try {
+              void fetch(notifyUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Accept: "application/json" },
+                body: JSON.stringify({
+                  name: payload.name,
+                  email: payload.email,
+                  company: payload.company || "—",
+                  message: payload.message,
+                  _subject: `Portfolio contact from ${payload.name}`,
+                  _replyto: payload.email,
+                  _template: "table",
+                  _captcha: "false",
+                }),
+                keepalive: true,
+              }).catch(() => {});
+            } catch {
+              /* the record is stored either way */
+            }
+          }
           form.reset();
           resetCaptcha();
           setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");

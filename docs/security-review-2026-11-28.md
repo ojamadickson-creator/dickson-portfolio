@@ -70,7 +70,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - `src/pages/api/contact.ts` is the only on-demand route (`prerender = false`); everything else is prerendered by `@astrojs/vercel`.
 - Supabase URL and publishable key must come from the same project. The Vercel/Supabase integration exports `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` for its own database, which does not contain `contact_messages`; mixing one integration value with the default URL fails as 401 and surfaces as `502 storage`. The route reads `PUBLIC_SUPABASE_URL` / `PUBLIC_SUPABASE_PUBLISHABLE_KEY` first.
 - `scripts/e2e-contact.mjs <url>` drives a real browser over CDP, fills the form and asserts the status text; `scripts/mock-supabase.py` is the local stand-in for Supabase used by that test.
-- Local API tests: `CONTACT_NOTIFY=off PUBLIC_SUPABASE_URL=http://127.0.0.1:4399 HCAPTCHA_SECRET=0x0000… npx astro dev` (hCaptcha test keys: sitekey `10000000-ffff-ffff-ffff-000000000001`, secret `0x0000000000000000000000000000000000000000`).
+- Local API tests: `PUBLIC_SUPABASE_URL=http://127.0.0.1:4399 npx astro dev`. The email copy is sent by the browser (`data-notify` on the form), not the server.
 
 ## Production run after the change
 
@@ -84,3 +84,8 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - Tokenless POST and a garbage token both return `400 {"ok":false,"error":"captcha"}` — the server is calling hCaptcha siteverify, so the secret is present and correct.
 - Browser run on production: widget renders with the real sitekey (no test banner), and submitting without ticking is refused client-side with "Tick the verification box above before sending."
 - A successful tick cannot be automated without solving the CAPTCHA, which is the point; the human success path is left for the owner to confirm.
+## Email copy (28 Nov 2026)
+
+- formsubmit answers the Vercel function with `403` and a Cloudflare "Just a moment…" page: it filters datacenter IPs, so a server-side relay never delivers. Proven with a temporary diagnostic route (since removed).
+- The message is stored by the API; after the API returns success, the browser posts the copy to formsubmit from the visitor's IP. That path answers `{"success":"true"}` from the live page under the current CSP, which now allows `connect-src https://formsubmit.co`.
+- Consequence: the email is best-effort and depends on the visitor's browser; the record in Supabase is the source of truth. If server-side mail is wanted later, a transactional provider (Resend/Postmark) with a verified domain is the route — the free relay will not accept cloud traffic.

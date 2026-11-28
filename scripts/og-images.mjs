@@ -17,7 +17,7 @@ const emblem = await sharp(path.join(root, "public", "brand", "emblem-512.png"))
 
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-function wrap(text, maxChars) {
+function wrap(text, maxChars, maxLines = 3) {
   const words = String(text).split(/\s+/);
   const lines = [];
   let line = "";
@@ -29,7 +29,11 @@ function wrap(text, maxChars) {
     }
   }
   if (line) lines.push(line);
-  return lines.slice(0, 3);
+  if (lines.length <= maxLines) return lines;
+  // Never cut a long title mid-thought without saying so.
+  const kept = lines.slice(0, maxLines);
+  kept[maxLines - 1] = kept[maxLines - 1].replace(/\s+\S*$/, "") + "…";
+  return kept;
 }
 
 const card = (file, { eyebrow, title, subtitle, meta }) => {
@@ -104,9 +108,9 @@ jobs.push(card("resume.jpg", {
 }));
 jobs.push(card("blog.jpg", {
   eyebrow: "Blog",
-  title: "Notes from the desk",
-  subtitle: "Practical write-ups from real support work",
-  meta: "Tickets, triage and the fixes that stick",
+  title: "You can’t defend a network you don’t understand",
+  subtitle: "IT support · labs · defensive security",
+  meta: "Walkthroughs, incident notes and lessons",
 }));
 jobs.push(card("apps.jpg", {
   eyebrow: "Apps",

@@ -68,13 +68,12 @@ const breadcrumbLd = {
         <time datetime={d.date.toISOString()}>{fmt(d.date)}</time>
         <span aria-hidden="true">·</span>
         <span>{minutes} min read</span>
-        {d.tags.length > 0 && (
-          <>
-            <span aria-hidden="true">·</span>
-            <span>{d.tags.join(" · ")}</span>
-          </>
-        )}
       </p>
+      {d.tags.length > 0 && (
+        <ul class="post__tags mono" role="list">
+          {d.tags.map((tag) => <li>{tag}</li>)}
+        </ul>
+      )}
       <h1>{d.title}</h1>
       <p class="post__lede">{d.description}</p>
     </header>
@@ -94,7 +93,8 @@ const breadcrumbLd = {
   .post__head { padding: clamp(32px, 5vw, 64px) 0 24px; }
   .post__back { display: inline-block; margin-bottom: 18px; font-size: 13px; color: var(--color-text-muted); text-decoration: none; }
   .post__back:hover { color: var(--color-primary); }
-  .post__meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 12px; }
+  .post__meta { display: flex; flex-wrap: wrap; gap: 8px; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 6px; }
+  .post__tags { display: flex; flex-wrap: wrap; gap: 15px; list-style: none; padding: 0; margin: 0 0 12px; font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-text-muted); }
   .post__head h1 { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 50px); line-height: 1.06; letter-spacing: -0.02em; }
   .post__lede { margin-top: 14px; font-size: 18px; color: var(--color-text-muted); max-width: 62ch; }
 

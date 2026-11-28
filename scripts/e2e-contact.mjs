@@ -1,11 +1,12 @@
 // End-to-end browser test for the contact form, driven over the Chrome DevTools Protocol.
-// Usage: node scripts/e2e-contact.mjs http://localhost:3102/about/
+// Waits for the hCaptcha widget to issue a token before submitting.
+// Usage: node scripts/e2e-contact.mjs http://localhost:3104/about/
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const url = process.argv[2] ?? "http://localhost:3102/about/";
+const url = process.argv[2] ?? "http://localhost:3104/about/";
 const shotPath = process.argv[3] ?? path.join(os.tmpdir(), "contact-e2e.png");
 const port = 9223;
 const chrome = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
@@ -83,25 +84,21 @@ try {
     set(field("company"), "Review");
     set(field("message"), "This is an automated check of the contact form. Please ignore.");
 
-    // The signed question arrives from /api/challenge/; solve it like a visitor would.
-    const questionEl = form.querySelector("[data-question]");
-    let question = "";
-    for (let i = 0; i < 40; i++) {
-      question = (questionEl.textContent || "").trim();
-      if (/What is \\d+ [+×] \\d+\\?/.test(question)) break;
-      await new Promise(r => setTimeout(r, 200));
+    const widget = Boolean(document.querySelector(".h-captcha"));
+    // Give the widget time to issue a token (test keys solve without a challenge).
+    let token = "";
+    for (let i = 0; i < 100; i++) {
+      token = (window.hcaptcha && window.hcaptcha.getResponse) ? window.hcaptcha.getResponse() : "";
+      if (token) break;
+      await new Promise(r => setTimeout(r, 300));
     }
-    const m = question.match(/What is (\\d+) ([+×]) (\\d+)\\?/);
-    const answer = m ? (m[2] === "+" ? Number(m[1]) + Number(m[3]) : Number(m[1]) * Number(m[3])) : "";
-    if (answer !== "") set(field("answer"), String(answer));
 
     form.requestSubmit();
     await new Promise(r => setTimeout(r, 2500));
     const status = form.querySelector(".form__status");
     return {
-      question,
-      answered: answer !== "",
-      challengeVisible: !form.querySelector(".form__challenge")?.hidden,
+      widget,
+      tokenPresent: Boolean(token),
       status: status ? status.textContent.trim() : null,
       kind: status ? status.dataset.kind : null,
       fallbackHidden: form.querySelector(".form__fallback")?.hidden ?? null,

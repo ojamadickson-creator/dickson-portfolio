@@ -22,19 +22,25 @@ export default defineConfig({
           "'self'",
           "https://api.fontshare.com",
           "https://fonts.googleapis.com",
+          "https://hcaptcha.com",
+          "https://*.hcaptcha.com",
           { resource: "'unsafe-inline'", kind: "attribute" },
         ],
+      },
+      scriptDirective: {
+        // hCaptcha widget, only loaded when PUBLIC_HCAPTCHA_SITE_KEY is set.
+        resources: ["https://hcaptcha.com", "https://*.hcaptcha.com"],
       },
       directives: [
         "default-src 'self'",
         "font-src 'self' data: https://cdn.fontshare.com https://fonts.gstatic.com",
-        "img-src 'self' data:",
+        "img-src 'self' data: https://*.hcaptcha.com",
         "media-src 'self'",
         // The browser only talks to the contact endpoint on this origin; Supabase and the
         // email relay are reached by the server, so neither is named in the page.
-        "connect-src 'self' https://api.github.com https://vitals.vercel-insights.com",
+        "connect-src 'self' https://api.github.com https://vitals.vercel-insights.com https://hcaptcha.com https://*.hcaptcha.com",
         "form-action 'self'",
-        "frame-src 'self'",
+        "frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com",
         "object-src 'none'",
         "base-uri 'self'",
       ],

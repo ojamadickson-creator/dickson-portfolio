@@ -49,15 +49,33 @@ async function verifyCaptcha(token: string, ip: string): Promise<boolean> {
   }
 }
 
+const CONTACT_EMAIL = "dickson@ojamadickson.xyz";
+const SITE_ORIGIN = process.env.SITE_URL ?? "https://ojamadickson.xyz";
+
+/**
+ * Email copy of a stored message.
+ *
+ * formsubmit only accepts server-side calls that carry an Origin/Referer (otherwise it
+ * answers success:false with "open this page through a web server"). The endpoint is
+ * configurable for tests, but defaults to the real relay so a missing env var can never
+ * silently disable notifications again.
+ */
 async function notifyByEmail(payload: { name: string; email: string; company: string | null; message: string }) {
-  const endpoint = process.env.CONTACT_NOTIFY_URL;
-  if (process.env.CONTACT_NOTIFY === "off" || !endpoint) return;
+  if (process.env.CONTACT_NOTIFY === "off") return;
+  const endpoint = process.env.CONTACT_NOTIFY_URL ?? `https://formsubmit.co/ajax/${CONTACT_EMAIL}`;
+
   try {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 8000);
-    await fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "User-Agent": "Mozilla/5.0 (compatible; dickson-portfolio)",
+        Origin: SITE_ORIGIN,
+        Referer: `${SITE_ORIGIN}/`,
+      },
       body: JSON.stringify({
         name: payload.name,
         email: payload.email,
@@ -71,8 +89,14 @@ async function notifyByEmail(payload: { name: string; email: string; company: st
       signal: controller.signal,
     });
     clearTimeout(timer);
-  } catch {
-    /* the email copy is a notification, never the record */
+    const body = (await res.json().catch(() => ({}))) as { success?: string | boolean; message?: string };
+    const ok = res.ok && String(body.success) === "true";
+    if (!ok) {
+      // Visible in Vercel runtime logs; the message is already stored either way.
+      console.error("[contact] email notification failed", res.status, (body.message ?? "").slice(0, 200));
+    }
+  } catch (error) {
+    console.error("[contact] email notification threw", String(error).slice(0, 200));
   }
 }
 

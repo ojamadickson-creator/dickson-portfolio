@@ -3,7 +3,13 @@ import os
 import re
 import glob
 
-ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "dist")
+REPO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+CANDIDATES = [
+    os.path.join(REPO, ".vercel", "output", "static"),
+    os.path.join(REPO, "dist", "client"),
+    os.path.join(REPO, "dist"),
+]
+ROOT = next((d for d in CANDIDATES if os.path.exists(os.path.join(d, "index.html"))), CANDIDATES[-1])
 
 pages = {}
 for f in glob.glob(os.path.join(ROOT, "**", "*.html"), recursive=True):

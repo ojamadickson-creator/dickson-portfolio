@@ -14,6 +14,7 @@
     "node": "26.x"
   },
   "dependencies": {
+    "@astrojs/vercel": "^11.0.22",
     "@vercel/speed-insights": "^2.1.0",
     "astro": "^7.4.12"
   },
@@ -22,5 +23,8 @@
     "@types/node": "^26.6.11",
     "sharp": "^0.35.5",
     "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "path-to-regexp": "6.3.0"
   }
 }

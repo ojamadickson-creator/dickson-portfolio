@@ -2,25 +2,13 @@
 import Icon from "./Icon.astro";
 import { profile } from "../lib/profile";
 
-const SUPABASE_URL = import.meta.env.PUBLIC_SUPABASE_URL ?? "https://mxszpcxuucrmgoqsobpf.supabase.co";
-// Publishable key: safe in client code, the table is insert-only behind RLS.
-const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publishable_PWZ56gXJZkvteEYxwKJsDQ_PeCDGZMc";
+// Set PUBLIC_TURNSTILE_SITE_KEY (and TURNSTILE_SECRET_KEY on the server) to switch the
+// Cloudflare Turnstile challenge on. Without the site key the widget is not rendered and the
+// endpoint skips verification, so the form keeps working before the keys exist.
+const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? "";
 ---
 
-<form
-  class="form"
-  id="contact-form"
-  novalidate
-  method="POST"
-  action={`https://formsubmit.co/${profile.email}`}
-  data-url={SUPABASE_URL}
-  data-key={SUPABASE_KEY}
-  data-email={profile.email}
->
-  <input type="hidden" name="_subject" value="Portfolio contact" />
-  <input type="hidden" name="_template" value="table" />
-  <input type="hidden" name="_captcha" value="false" />
-  <input type="hidden" name="_next" value="" />
+<form class="form" id="contact-form" novalidate>
   <div class="form__row">
     <label>Name<input name="name" autocomplete="name" required maxlength="120" /></label>
     <label>Email<input name="email" type="email" autocomplete="email" required maxlength="254" /></label>
@@ -28,6 +16,12 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   <label>Company <span class="muted">(optional)</span><input name="company" autocomplete="organization" maxlength="160" /></label>
   <label>Message<textarea name="message" rows="5" required minlength="10" maxlength="4000"></textarea></label>
   <label class="hp" aria-hidden="true">Leave this empty<input name="_honey" tabindex="-1" autocomplete="off" /></label>
+  {TURNSTILE_SITE_KEY && (
+    <div class="form__turnstile">
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+      <div class="cf-turnstile" data-sitekey={TURNSTILE_SITE_KEY} data-theme="dark"></div>
+    </div>
+  )}
   <div class="form__foot">
     <button class="btn btn--primary" type="submit"><Icon name="mail" /> Send message</button>
     <p class="form__status" role="status" aria-live="polite"></p>
@@ -35,6 +29,9 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
   <p class="form__fallback" hidden>
     Or email <a href={`mailto:${profile.email}`}>{profile.email}</a>.
   </p>
+  <noscript>
+    <p class="form__fallback">This form needs JavaScript. Email <a href={`mailto:${profile.email}`}>{profile.email}</a> instead.</p>
+  </noscript>
   <p class="form__privacy">
     Your name, email and message are kept only so I can reply — nothing else. They are held privately,
     sent to my inbox, and deleted whenever you ask: <a href={`mailto:${profile.email}`}>{profile.email}</a>.
@@ -55,61 +52,28 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       if (fallback) fallback.hidden = !show;
     };
 
-    const params = new URLSearchParams(location.search);
-    // Only trust ?sent=1 when this browser actually submitted the native fallback.
-    if (params.get("sent") === "1" && sessionStorage.getItem("contact-sent") === "1") {
-      sessionStorage.removeItem("contact-sent");
-      setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
-      history.replaceState(null, "", location.pathname + "#contact");
-    }
-
-    // Email is a notification, not the save mechanism. It is slow and occasionally
-    // refused by Cloudflare, so it must never block the visitor.
-    const notifyByEmail = (payload: { name: string; email: string; company: string | null; message: string }) => {
-      try {
-        void fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            name: payload.name,
-            email: payload.email,
-            company: payload.company ?? "—",
-            message: payload.message,
-            _subject: `Portfolio contact from ${payload.name}`,
-            _replyto: payload.email,
-            _template: "table",
-            _captcha: "false",
-          }),
-          keepalive: true,
-        }).catch(() => {});
-      } catch {
-        /* notification is best-effort */
-      }
-    };
-
-    // Last resort when storage is unreachable: a plain form POST survives Cloudflare.
-    const submitNatively = () => {
-      (form.elements.namedItem("_next") as HTMLInputElement).value = `${location.origin}${location.pathname}?sent=1#contact`;
-      (form.elements.namedItem("_subject") as HTMLInputElement).value = `Portfolio contact from ${String(new FormData(form).get("name") || "").trim()}`;
-      try { sessionStorage.setItem("contact-sent", "1"); } catch {}
-      if (window.self !== window.top) form.target = "_blank";
-      HTMLFormElement.prototype.submit.call(form);
+    const turnstileToken = () => {
+      const api = (window as unknown as { turnstile?: { getResponse?: () => string } }).turnstile;
+      return api?.getResponse?.() ?? "";
     };
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      if (String(fd.get("_honey") || "")) {
+      const data = new FormData(form);
+      const payload = {
+        name: String(data.get("name") || "").trim(),
+        email: String(data.get("email") || "").trim(),
+        company: String(data.get("company") || "").trim(),
+        message: String(data.get("message") || "").trim(),
+        website: String(data.get("_honey") || ""),
+        token: turnstileToken(),
+      };
+
+      if (payload.website) {
         setStatus("Thanks, your message was sent.", "ok");
         form.reset();
         return;
       }
-      const payload = {
-        name: String(fd.get("name") || "").trim(),
-        email: String(fd.get("email") || "").trim(),
-        company: String(fd.get("company") || "").trim() || null,
-        message: String(fd.get("message") || "").trim(),
-      };
       if (!payload.name) return setStatus("Please add your name.", "err");
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(payload.email)) return setStatus("Please enter a valid email address.", "err");
       if (payload.message.length < 10) return setStatus("Your message needs at least 10 characters.", "err");
@@ -118,69 +82,41 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
       showFallback(false);
       setStatus("Sending…", "");
 
-      // 1. Save it. This is fast (~1s) and is what decides success.
-      let stored = false;
       try {
         const controller = new AbortController();
-        const timer = window.setTimeout(() => controller.abort(), 10000);
-        const res = await fetch(`${form.dataset.url}/rest/v1/contact_messages`, {
+        const timer = window.setTimeout(() => controller.abort(), 15000);
+        const res = await fetch("/api/contact/", {
           method: "POST",
-          headers: { apikey: form.dataset.key!, "Content-Type": "application/json", Prefer: "return=minimal" },
+          headers: { "content-type": "application/json" },
           body: JSON.stringify(payload),
           signal: controller.signal,
         });
         window.clearTimeout(timer);
-        stored = res.ok;
-      } catch {
-        stored = false;
-      }
+        const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
 
-      if (stored) {
-        form.reset();
-        setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");
-        btn.disabled = false;
-        // One email copy, in the background: the message is already saved.
-        notifyByEmail(payload);
-        return;
-      }
-
-      // 2. Storage failed: wait for the relay so the message still leaves the browser.
-      setStatus("Saving failed — sending by email instead, this can take up to 20 seconds…", "");
-      try {
-        const controller = new AbortController();
-        const timer = window.setTimeout(() => controller.abort(), 20000);
-        const res = await fetch(`https://formsubmit.co/ajax/${form.dataset.email}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({
-            name: payload.name,
-            email: payload.email,
-            company: payload.company ?? "—",
-            message: payload.message,
-            _subject: `Portfolio contact from ${payload.name}`,
-            _replyto: payload.email,
-            _template: "table",
-            _captcha: "false",
-          }),
-          signal: controller.signal,
-        });
-        window.clearTimeout(timer);
-        const data = await res.json().catch(() => ({}));
-        if (res.ok && String(data.success) === "true") {
+        if (res.ok && body.ok) {
           form.reset();
-          setStatus("Thanks, your message was sent. I'll reply by email.", "ok");
-        } else if (res.status === 403 || res.status === 429) {
-          submitNatively();
+          setStatus("Thanks — your message is saved. I usually reply within one working day.", "ok");
+          return;
+        }
+        if (res.status === 429) {
+          setStatus("That is a lot of messages in a short time. Try again in ten minutes, or use the email link below.", "err");
+          showFallback(true);
+          return;
+        }
+        if (body.error === "captcha") {
+          setStatus("Please complete the verification above, then send again.", "err");
+          return;
+        }
+        setStatus("That did not go through. Send it as an email instead:", "err");
+        showFallback(true);
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          setStatus("The server did not answer in time. Use the email link below — nothing was sent.", "err");
+          showFallback(true);
         } else {
           setStatus("That did not go through. Send it as an email instead:", "err");
           showFallback(true);
-        }
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          setStatus("The email relay did not answer in time. Use the email link below — nothing was sent.", "err");
-          showFallback(true);
-        } else {
-          submitNatively();
         }
       } finally {
         btn.disabled = false;
@@ -219,6 +155,7 @@ const SUPABASE_KEY = import.meta.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? "sb_publ
     border-color: var(--color-ink-accent, #8fb4ff);
     box-shadow: 0 0 0 3px color-mix(in oklab, var(--color-ink-accent, #8fb4ff) 25%, transparent);
   }
+  .form__turnstile { min-height: 65px; }
   .form__foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-4, 1rem); }
   .form__foot .btn--primary { background: var(--color-ink-accent, #8fb4ff); color: var(--color-ink, #0b1626); }
   .form__foot .btn--primary:hover { background: #b5ceff; }

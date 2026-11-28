@@ -3,7 +3,15 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "dist");
+const repo = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+// The Vercel adapter writes static pages to .vercel/output/static; plain `astro build` uses dist.
+const root = [path.join(repo, ".vercel", "output", "static"), path.join(repo, "dist", "client"), path.join(repo, "dist")].find(
+  (dir) => fs.existsSync(path.join(dir, "index.html")),
+);
+if (!root) {
+  console.error("No build output found. Run `npm run build` first.");
+  process.exit(1);
+}
 const pages = [];
 (function walk(dir) {
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

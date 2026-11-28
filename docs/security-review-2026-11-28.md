@@ -19,7 +19,7 @@ Every code-level finding is fixed and verified. Two items cannot be finished fro
 | 4 | Error path pointed at a missing email link | Added `.form__fallback` with a mailto link | Present in built HTML |
 | 5 | Duplicate email when storage failed | The background email now fires only after a successful save; the failure branch sends one | Code review |
 | 6 | No privacy notice | Added under the form: what is stored, where, how to have it deleted | Rendered |
-| 7 | OG images cached immutably; blog media uncached | `/og` → 86400s; `/blog/**.webp` and `/blog/**.mp4` → 7 days; HTML not matched | Rules inspected; live headers to be confirmed after deploy |
+| 7 | OG images cached immutably; blog media uncached | `/og` → 86400s; `/blog/**.webp` and `/blog/**.mp4` → 7 days; HTML not matched | Live headers: `/og/blog.jpg` 86400, a post webp 604800, `/blog/` 0 |
 | 8 | `sharp` used but undeclared | Added to `devDependencies` | `npm run og` regenerates 16 cards |
 | 9 | Two asset scripts hardcoded an old absolute path | Deleted (`prepare-home-assets.mjs`, `build-watermark-assets.mjs`) | `npm run build` clean |
 | 10 | Iframe `allow-scripts allow-same-origin` | Left as is: the apps need same-origin storage for progress. Residual risk documented below | Apps load |
@@ -55,3 +55,10 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - **Spam**: without a server-side gate, a bot that ignores the page can still POST to the Supabase REST endpoint. The table is insert-only, the schema limits sizes once the SQL is applied, and the email copy is best-effort — but volume is unbounded.
 - **Apps in a same-origin iframe**: acceptable while every app is your own static file; hosting them on a subdomain would remove the parent-page exposure.
 - **Email address is public** in the footer and in the form action; it can be harvested regardless of the form.
+
+## Production verification (after deploy, commit 5e938f2)
+
+- Home, about, blog index, blog post and all five app pages: 200, one H1, canonical correct (`scripts/sitemap_health.py`: 20/20 URLs, 0 problems).
+- Live `<meta>` CSP present on every page; every inline script and style on four sampled live pages is hashed (0 uncovered).
+- Live headers: general CSP is `frame-ancestors 'self'`; `/apps/*` keeps the scoped policy; OG cache 86400, blog media 604800, blog HTML `max-age=0`.
+- Visual: home, about, blog post, app wrapper, CySA+ simulator and the study tracker all render with styles, fonts and icons after the CSP change.

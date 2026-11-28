@@ -34,7 +34,9 @@ export default defineConfig({
         "font-src 'self' data: https://cdn.fontshare.com https://fonts.gstatic.com",
         "img-src 'self' data:",
         "media-src 'self'",
-        "connect-src 'self' https://*.supabase.co https://formsubmit.co https://api.github.com https://vitals.vercel-insights.com",
+        // The browser only talks to the contact endpoint on this origin; Supabase and the
+        // email relay are reached by the server, so neither is named in the page.
+        "connect-src 'self' https://api.github.com https://vitals.vercel-insights.com",
         "form-action 'self'",
         "frame-src 'self' https://challenges.cloudflare.com",
         "object-src 'none'",

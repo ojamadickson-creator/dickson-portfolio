@@ -14,7 +14,7 @@ Every code-level finding is fixed and verified. Two items cannot be finished fro
 |---|---|---|---|
 | 1 | Tailwind Play CDN executed third-party JS on your origin (`cysa-practice`) | Compiled the CSS with the Tailwind 3.4.17 CLI into `assets/tailwind.css`; the app's classes are covered, including the results-screen classes the old inline snapshot missed | Pixel diff against the CDN version: 0 changed pixels; dynamic classes present in the compiled file |
 | 1b | Font Awesome loaded from cdnjs | Vendored `all.min.css` + 3 woff2 files under `assets/fontawesome/` | Icons render; no external URLs left in `public/apps` except Google Fonts (a stylesheet) |
-| 2 | Contact form spam surface | Server-side route (`src/pages/api/contact.ts`) with origin check, schema/length validation, honeypot, per-IP rate limit and optional Cloudflare Turnstile verification; client no longer talks to Supabase or formsubmit; DB constraints provided in `docs/supabase-contact-constraints.sql` | API tested local: 403 origin, 415 type, 400 validation, 400 missing token, 200 valid, 429 on the 6th; full browser E2E with Turnstile test keys passed |
+| 2 | Contact form spam surface | Server-side route (`src/pages/api/contact.ts`) with origin check, schema/length validation, honeypot, per-IP rate limit and a server-signed arithmetic question (`src/lib/challenge.ts`, `src/pages/api/challenge.ts`) that every visitor must answer; client no longer talks to Supabase or formsubmit; DB constraints provided in `docs/supabase-contact-constraints.sql` | API: 403 origin, 415 type, 400 validation, 400 wrong/missing/tampered answer, 200 valid, 429 on the 6th; full browser E2E passed locally and on production |
 | 3 | CSP allowed `'unsafe-inline'` scripts (and `'unsafe-eval'` on /apps) | Astro `security.csp` now emits a hashed `<meta>` policy; the Vercel header is reduced to `frame-ancestors 'self'`; the `/apps` policy drops both CDNs and `'unsafe-eval'` | Hash-coverage script: 0 problems across 21 pages; all pages render |
 | 4 | Error path pointed at a missing email link | Added `.form__fallback` with a mailto link | Present in built HTML |
 | 5 | Duplicate email when storage failed | The background email now fires only after a successful save; the failure branch sends one | Code review |
@@ -34,7 +34,7 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 
 ## Open decisions (need your accounts or a choice)
 
-1. **Captcha is live (Production).** Cloudflare Turnstile widget created for `ojamadickson.xyz`; `PUBLIC_TURNSTILE_SITE_KEY` and `TURNSTILE_SECRET_KEY` set for Production and the site redeployed. Verified: widget renders on `/about/`, a tokenless POST to `/api/contact/` returns `400 captcha`, and a submit without solving shows the "complete the verification" message. The secret exists only in Production, so Preview deployments stay captcha-free by design.
+1. **The question is live (Production and Preview).** `CHALLENGE_SECRET` is set in Vercel; `/api/challenge/` issues a signed question and `/api/contact/` checks the answer. Turnstile was removed: its managed mode can pass a trusted browser without any interaction, which was not the behaviour wanted here. The old `PUBLIC_TURNSTILE_SITE_KEY` / `TURNSTILE_SECRET_KEY` variables are now unused and can be deleted. Trade-off to keep in mind: arithmetic is a speed bump, not bot detection — a script can fetch and solve it. The rate limit and honeypot are what bound abuse; if real spam appears, move to hCaptcha or reCAPTCHA v2, where a checkbox and image challenge are mandatory.
 2. **Run the SQL** in `docs/supabase-contact-constraints.sql` so the database enforces the same limits the endpoint does.
 3. **`'unsafe-inline'` on `/apps/*`** stays: the vendored apps use inline scripts and inline event handlers. It is scoped to `/apps`, and no third-party scripts remain there.
 
@@ -78,9 +78,9 @@ Also fixed during the review: `scripts/og-images.mjs` still generated the blog c
 - `/api/contact/`: 403 for a foreign origin, 400 for an invalid email, 400 for a missing token when a secret is configured, 429 after five requests, 200 for a valid submission (one row stored, one notification attempted).
 - Browser E2E on the live site: form filled and submitted, success status shown, fallback hidden.
 - Two rows labelled "E2E Production Test" (`e2e@example.com`) were created by these tests and can be deleted from the Supabase table.
-## Captcha verification (28 Nov 2026, after the keys were added)
+## Question challenge verification (28 Nov 2026)
 
-- `/about/` HTML contains `cf-turnstile`, the Turnstile `api.js` script and the sitekey.
-- `POST /api/contact/` with a valid body and no token → `400 {"ok":false,"error":"captcha"}` (the gate is enforcing, so the secret is present and working).
-- Browser run: the widget renders as "Verify you are human"; submitting without solving shows "Please complete the verification above, then send again." and stores nothing.
-- The automated browser cannot finish a managed challenge — that is the intended behaviour. A human visitor ticks the box once, or passes without interaction.
+- `GET /api/challenge/` → `{"ok":true,"id":"…","question":"What is 3 × 5?"}`; the id is an HMAC-signed payload with a 10-minute expiry.
+- Wrong answer, missing answer, and a tampered signature each return `400 {"ok":false,"error":"captcha"}`; the correct answer stores one row.
+- Browser E2E on production: question loaded, answered, success message shown, fallback hidden.
+- The answer is never trusted from the browser: the server re-derives the operands from the signed id.

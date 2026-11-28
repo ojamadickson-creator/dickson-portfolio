@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 import { profile } from "../../lib/profile";
+import { readingTime } from "../../lib/reading";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog", ({ data }) => !data.draft || import.meta.env.DEV);
@@ -13,7 +14,7 @@ const { Content } = await render(post);
 const d = post.data;
 const site = Astro.site ?? new URL("https://ojamadickson.xyz");
 
-const readingTime = Math.max(1, Math.round((post.body ?? "").split(/\s+/).length / 200));
+const minutes = readingTime(post.body);
 const fmt = (date: Date) =>
   date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 const url = new URL(`/blog/${post.id}/`, site).toString();
@@ -66,7 +67,7 @@ const breadcrumbLd = {
       <p class="post__meta mono">
         <time datetime={d.date.toISOString()}>{fmt(d.date)}</time>
         <span aria-hidden="true">·</span>
-        <span>{readingTime} min read</span>
+        <span>{minutes} min read</span>
         {d.tags.length > 0 && (
           <>
             <span aria-hidden="true">·</span>
@@ -111,6 +112,31 @@ const breadcrumbLd = {
   .post__body :global(pre code) { background: none; padding: 0; color: inherit; }
   .post__body :global(hr) { margin: 32px 0; border: 0; border-top: 1px solid var(--color-border); }
   .post__body :global(img) { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+
+  /* Figures break out of the reading column so screenshots stay legible. */
+  .post__body :global(figure) {
+    margin: 30px 0 32px;
+    width: min(1040px, calc(100vw - 2.5rem));
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .post__body :global(figure a) { display: block; text-decoration: none; cursor: zoom-in; }
+  .post__body :global(figure img) { width: 100%; border: 1px solid var(--color-border); background: var(--color-surface-2); }
+  .post__body :global(video) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    display: block;
+    background: var(--color-ink);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+  }
+  .post__body :global(figcaption) { margin-top: 10px; font-size: 13.5px; line-height: 1.55; color: var(--color-text-muted); }
+  .post__body :global(.table-wrap) { overflow-x: auto; margin: 0 0 22px; }
+  .post__body :global(table) { width: 100%; border-collapse: collapse; font-size: 15px; min-width: 520px; }
+  .post__body :global(th), .post__body :global(td) { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--color-border); vertical-align: top; }
+  .post__body :global(th) { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--color-text-muted); font-weight: 500; }
 
   .post__foot { margin: clamp(32px, 5vw, 56px) auto clamp(56px, 8vw, 96px); padding-top: 22px; border-top: 1px solid var(--color-border); display: grid; gap: 10px; }
   .post__foot p { color: var(--color-text-muted); font-size: 14px; }

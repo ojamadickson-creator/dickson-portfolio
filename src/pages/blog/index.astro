@@ -2,11 +2,11 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import { profile } from "../../lib/profile";
+import { readingTime } from "../../lib/reading";
 
 const all = await getCollection("blog", ({ data }) => !data.draft || import.meta.env.DEV);
 const posts = all.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const readingTime = (body?: string) => Math.max(1, Math.round((body ?? "").split(/\s+/).length / 200));
 const fmt = (d: Date) =>
   d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 

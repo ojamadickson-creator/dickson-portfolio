@@ -26,50 +26,24 @@ const itemListLd = {
 
 <Base
     ogImage="/og/blog.jpg"
-  title={`Blog · Intune, Entra ID and Microsoft 365 · ${profile.name}`}
-  description="Practical guides and field notes from a home lab and a service desk: Intune, Entra ID, Microsoft 365, and the tickets in between — with screenshots and what the results actually looked like."
+  title={`Blog · IT support to defensive security · ${profile.name}`}
+  description="An IT support specialist moving into defensive cybersecurity: step-by-step lab walkthroughs, incident response notes, and lessons from the pivot into InfoSec."
   path="/blog/"
   jsonLd={itemListLd}
 >
   <section class="blog-hero">
     <div class="wrap blog-hero__inner">
       <p class="eyebrow">Blog</p>
-      <h1>Notes from the desk.</h1>
+      <h1>You can’t defend a network you don’t understand.</h1>
       <p class="blog-hero__lede">
-        Guides from a home lab and notes from the tickets — Intune, Entra ID and the service desk, with the
-        settings, the screenshots, and what the results actually looked like. Written from the work, not
-        from a slide deck.
+        Welcome! I’m an IT support specialist making the leap into defensive cybersecurity. Great security
+        starts with rock-solid infrastructure fundamentals — Active Directory, networking and endpoint
+        administration.
       </p>
-    </div>
-  </section>
-
-  <section class="blog-welcome" aria-labelledby="welcome-heading">
-    <div class="wrap">
-      <div class="welcome">
-        <p class="eyebrow" id="welcome-heading">Welcome</p>
-        <div class="welcome__body">
-          <p>Hello, and thank you for stopping by.</p>
-          <p>
-            I am Dickson Ojama, an IT support technician in Lisbon. I work the service desk — Windows and
-            Mac endpoints, Microsoft 365, Entra ID and Intune — the tickets where someone cannot sign in,
-            cannot open their email, or cannot get back to work. Seven years of customer support sit behind
-            that, three of them technical: first remote for US companies, now on a desk in Lisbon, on the
-            south bank of the Tagus in Almada. My Portuguese is A2, and less shy every month.
-          </p>
-          <p class="welcome__pull">What I like is the moment a ticket turns from panic into a plan.</p>
-          <p>
-            I keep a home lab — two domain controllers, Entra Connect, Intune and a lot of PowerShell —
-            because I would rather break my own tenant than a client's. The walkthroughs here come from it.
-          </p>
-          <p>
-            Where I am going: security operations. Security+, Network+ and A+ are done, <span class="nowrap">MD-102</span> is next, and I want to read a log as comfortably as I read a ticket.
-          </p>
-          <p>
-            If you are hiring, curious, or stuck on something, <a href="/#contact">write to me</a>. I answer.
-          </p>
-          <p class="welcome__sign mono">— Dickson</p>
-        </div>
-      </div>
+      <p class="blog-hero__lede">
+        Stick around for step-by-step lab walkthroughs, incident response notes, and honest lessons from the
+        pivot into InfoSec.
+      </p>
     </div>
   </section>
 
@@ -111,25 +85,6 @@ const itemListLd = {
   .blog-hero__inner { display: grid; gap: 12px; }
   .blog-hero h1 { font-family: var(--font-display); font-size: clamp(32px, 5vw, 56px); line-height: 1.04; letter-spacing: -0.02em; }
   .blog-hero__lede { color: var(--color-text-muted); font-size: 17px; max-width: 58ch; }
-
-  .blog-welcome { padding: clamp(28px, 4.5vw, 52px) 0 clamp(4px, 1.5vw, 12px); }
-  .blog-welcome :global(.wrap) { max-width: 820px; }
-  .welcome { display: grid; gap: 14px; }
-  .welcome__body { display: grid; gap: 15px; max-width: 58ch; }
-  .welcome__body p { font-size: 17px; line-height: 1.75; color: var(--color-text-muted); }
-  .welcome__body p:first-child { color: var(--color-text); }
-  .welcome__body a { color: var(--color-primary); text-decoration: underline; text-underline-offset: 2px; }
-  .welcome__body .nowrap { white-space: nowrap; }
-  .welcome__body p.welcome__pull {
-    font-family: var(--font-display);
-    font-size: clamp(19px, 2.2vw, 23px);
-    line-height: 1.4;
-    letter-spacing: -0.01em;
-    color: var(--color-text);
-    padding-left: 16px;
-    border-left: 3px solid var(--color-primary);
-  }
-  .welcome__sign { font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-faint); }
 
   .blog-list { padding: clamp(32px, 5vw, 56px) 0 clamp(56px, 8vw, 96px); }
   .blog-list :global(.wrap) { max-width: 820px; }
